@@ -1,0 +1,73 @@
+/* Dark theme (default) */
+:root {
+  /* Brand Colors */
+  --brand-primary: #1D2BFF;
+  --brand-bg: #0B1020;
+  --brand-surface: #0E1220;
+  --brand-text: #F8FAFF;
+  --brand-positive: #2ECC71;
+  
+  /* Secondary Colors */
+  --brand-secondary: #4A5FFF;
+  --brand-accent: #7B8CFF;
+  --brand-muted: #A0ABFF;
+  
+  /* Gradient Presets */
+  --gradient-start: #1D2BFF;
+  --gradient-mid: #4A5FFF;
+  --gradient-end: #7B8CFF;
+  
+  /* Semantic Colors */
+  --color-error: #FF4757;
+  --color-warning: #FFA502;
+  --color-success: var(--brand-positive);
+  --color-info: #54A0FF;
+  
+  /* Surface Variants */
+  --surface-card: rgba(30, 35, 50, 0.8);
+  --surface-overlay: rgba(14, 18, 32, 0.95);
+  --surface-border: rgba(248, 250, 255, 0.1);
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(29, 43, 255, 0.3);
+}
+
+/* Light theme */
+.light {
+  /* Brand Colors */
+  --brand-primary: #1D2BFF;
+  --brand-bg: #F8FAFF;
+  --brand-surface: #FFFFFF;
+  --brand-text: #0B1020;
+  --brand-positive: #2ECC71;
+  
+  /* Secondary Colors */
+  --brand-secondary: #4A5FFF;
+  --brand-accent: #7B8CFF;
+  --brand-muted: #6B7280;
+  
+  /* Gradient Presets */
+  --gradient-start: #4A5FFF;
+  --gradient-mid: #7B8CFF;
+  --gradient-end: #A0ABFF;
+  
+  /* Semantic Colors */
+  --color-error: #DC2626;
+  --color-warning: #F59E0B;
+  --color-success: var(--brand-positive);
+  --color-info: #3B82F6;
+  
+  /* Surface Variants */
+  --surface-card: rgba(255, 255, 255, 0.9);
+  --surface-overlay: rgba(255, 255, 255, 0.95);
+  --surface-border: rgba(0, 0, 0, 0.1);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(29, 43, 255, 0.2);
+}

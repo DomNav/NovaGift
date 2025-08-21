@@ -1,0 +1,198 @@
+@import '@fontsource/antonio/700.css';
+@import '@fontsource-variable/inter';
+@import './styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-brand-text antialiased;
+    font-family: 'Inter Variable', sans-serif;
+  }
+  
+  h1, h2, h3 {
+    font-family: 'Antonio', sans-serif;
+    font-weight: 700;
+  }
+  
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-primary ring-offset-2 ring-offset-brand-bg;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-lg rounded-xl;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .light .glass-card {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-brand-primary text-white rounded-lg font-medium 
+           hover:bg-brand-secondary transition-colors duration-200
+           active:scale-95 transform;
+  }
+  
+  .btn-granite-primary {
+    @apply px-6 py-3 text-white rounded-lg font-medium 
+           transition-all duration-300 active:scale-95 transform
+           relative overflow-hidden;
+    background: linear-gradient(135deg, 
+      #1D2BFF 0%,     /* Original blue */
+      #4A5FFF 15%,    /* Lighter blue */
+      #6366f1 25%,    /* Indigo */
+      #8b5cf6 35%,    /* Purple */
+      #64748b 45%,    /* Slate gray */
+      #475569 55%,    /* Dark slate */
+      #7c3aed 65%,    /* Violet */
+      #3b82f6 75%,    /* Blue */
+      #1e40af 85%,    /* Dark blue */
+      #1D2BFF 100%    /* Back to original blue */
+    );
+    background-size: 200% 200%;
+    animation: granite-shift 4s ease-in-out infinite;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 4px 12px rgba(29, 43, 255, 0.3),
+      0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .btn-granite-primary:hover {
+    background-size: 180% 180%;
+    animation-duration: 2s;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 6px 16px rgba(29, 43, 255, 0.4),
+      0 3px 6px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+  }
+  
+  .btn-granite-primary:active {
+    transform: translateY(0) scale(0.98);
+  }
+  
+  .btn-granite-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    animation: none;
+    background-size: 100% 100%;
+    transform: none;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-granite-primary:disabled:hover {
+    transform: none;
+    background-size: 100% 100%;
+    animation: none;
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  @keyframes granite-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    25% {
+      background-position: 100% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+    75% {
+      background-position: 0% 100%;
+    }
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-brand-surface text-brand-text rounded-lg font-medium 
+           transition-colors duration-200 active:scale-95 transform;
+    border: 1px solid rgba(248, 250, 255, 0.2);
+  }
+  
+  .btn-secondary:hover {
+    background-color: rgba(248, 250, 255, 0.1);
+  }
+  
+  .light .btn-secondary {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  
+  .light .btn-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .input-base {
+    @apply w-full px-4 py-3 bg-brand-surface rounded-lg text-brand-text
+           focus:border-brand-primary focus:outline-none focus:ring-1 
+           transition-all duration-200;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    --tw-placeholder-opacity: 0.5;
+  }
+  
+  .input-base::placeholder {
+    color: rgba(248, 250, 255, 0.5);
+  }
+  
+  .input-base:focus {
+    --tw-ring-color: rgba(29, 43, 255, 0.5);
+  }
+  
+  .light .input-base {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .light .input-base::placeholder {
+    color: rgba(11, 16, 32, 0.5);
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-primary to-brand-accent 
+           bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes waxPop {
+  0% { transform: translateY(-6px) scale(0.8); opacity: .0; }
+  30% { transform: translateY(0) scale(1.08); opacity: 1; }
+  60% { transform: translateY(2px) scale(0.96); }
+  80% { transform: translateY(0) scale(1.00); }
+  100% { transform: translateY(16px) scale(0.9); opacity: 0; }
+}
+@keyframes holoSweep {
+  0% { transform: translateX(-120%); opacity: 0; }
+  10% { opacity: .85; }
+  90% { opacity: .85; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-none, .fx-wax, .fx-sweep { animation: none !important; transition: none !important; }
+}
+.fx-wax { animation: waxPop 550ms cubic-bezier(.2,.8,.2,1) forwards; }
+.fx-sweep { animation: holoSweep 700ms ease-in-out forwards; }
+.text-glow { text-shadow: 0 2px 12px rgba(0,0,0,.35); }

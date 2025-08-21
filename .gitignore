@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Production
+dist/
+build/
+
+# Misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+*~
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS Files
+Thumbs.db
+nul
+
+# Temporary
+*.tmp
+*.temp
+.cache/
+
+# Old/backup directories
+*.old
+soroseal/
