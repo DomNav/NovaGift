@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import confetti from 'canvas-confetti'
 import { EnvelopeCard } from '@/components/ui/EnvelopeCard'
 import { useToast } from '@/hooks/useToast'
+import { useSkins } from '@/store/skins'
 
 export const Open = () => {
   const { addToast } = useToast()
+  const { selectedSealedId, selectedOpenedId, getById, hydrate } = useSkins()
   const [envelopeId, setEnvelopeId] = useState('')
   const [isOpening, setIsOpening] = useState(false)
   const [isOpened, setIsOpened] = useState(false)
@@ -15,6 +17,13 @@ export const Open = () => {
   })
   
   const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  
+  const sealedSkin = getById(selectedSealedId)
+  const openedSkin = getById(selectedOpenedId)
+  
+  useEffect(() => {
+    hydrate()
+  }, [])
 
   const handleOpen = () => {
     if (!envelopeId) {
@@ -88,6 +97,7 @@ export const Open = () => {
           <div className="flex flex-col items-center">
             <EnvelopeCard
               variant="sealed"
+              skin={sealedSkin}
               usdCents={envelopeId ? undefined : 0}
               amount={envelopeId ? '???' : '0'}
               toLabel="GDEMO...WALLET"
@@ -114,6 +124,7 @@ export const Open = () => {
           <div className="flex flex-col items-center animate-fade-in">
             <EnvelopeCard
               variant="opened"
+              skin={openedSkin}
               usdCents={parseInt(envelopeData.amount) * 100}
               fromLabel={envelopeData.sender}
               toLabel={envelopeData.recipient}

@@ -25,7 +25,7 @@ export const SkinCard = ({
         'transform transition-all duration-300 hover:scale-105',
         'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2',
         'focus:ring-offset-brand-bg',
-        isActive && 'ring-2 ring-brand-primary shadow-glow',
+        isActive && 'shadow-glow',
       )}
     >
       {/* Gradient background */}

@@ -111,8 +111,8 @@ export default function SkinStore() {
                       key={skin.id}
                       className={`relative rounded-xl cursor-pointer border-2 transition-all ${
                         isSelected 
-                          ? 'border-primary ring-2 ring-primary/20' 
-                          : 'border-transparent hover:border-primary/50'
+                          ? 'border-white/20' 
+                          : 'border-transparent hover:border-white/10'
                       }`}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}

@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import clsx from 'clsx'
+import { ThemeLogo } from '@/components/ui/ThemeLogo'
 
 const navigation = [
   { name: 'Create', href: '/', icon: '✉' },
@@ -14,8 +15,13 @@ export const Sidebar = () => {
   return (
     <aside className="w-64 h-screen bg-brand-surface border-r border-brand-text/10 dark:border-white/10 flex flex-col">
       <div className="p-6 border-b border-brand-text/10 dark:border-white/10">
-        <h1 className="text-2xl font-antonio gradient-text">SoroSeal</h1>
-        <p className="text-xs text-brand-text/60 mt-1">Seal now, open true.</p>
+        <div className="logo-banner relative overflow-hidden rounded-xl p-4 mb-2 text-center">
+          <div className="relative z-10 space-y-3">
+            <ThemeLogo size="md" />
+          </div>
+          <div className="banner-glow absolute inset-0 opacity-60"></div>
+          <div className="banner-shine absolute inset-0 opacity-30"></div>
+        </div>
       </div>
       
       <nav className="flex-1 p-4">
@@ -29,7 +35,7 @@ export const Sidebar = () => {
                     'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
                     'hover:bg-white/5 group',
                     isActive
-                      ? 'bg-brand-primary/20 text-brand-text border-l-2 border-brand-primary'
+                      ? 'bg-brand-primary/20 text-brand-text'
                       : 'text-brand-text/70',
                   )
                 }
@@ -45,12 +51,7 @@ export const Sidebar = () => {
       </nav>
       
       <div className="p-4 border-t border-brand-text/10 dark:border-white/10">
-        <div className="glass-card p-3 text-center space-y-3">
-          <img 
-            src="/logo.png" 
-            alt="SoroSeal Logo" 
-            className="w-16 h-16 mx-auto opacity-70 hover:opacity-100 transition-opacity duration-200"
-          />
+        <div className="text-center">
           <p className="text-xs text-brand-text/60">Version 0.1.0</p>
         </div>
       </div>

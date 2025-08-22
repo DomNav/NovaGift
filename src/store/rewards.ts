@@ -1,9 +1,17 @@
 import { create } from "zustand";
+import type { SkinId, PRESET_SKINS } from "./skins";
+import { progressForRule } from "@/utils/rewards";
 
 type RewardsState = {
   sendCount: number;
   totalUsdCents: number;
-  recordSend: (usdCents: number) => { isNewSend: boolean; newTotal: number };
+  recordSend: (usdCents: number) => { 
+    isNewSend: boolean; 
+    newTotal: number;
+    newlyUnlocked: SkinId[];
+    kmGained: number;
+    totalKM: number;
+  };
   hydrate: () => void;
 };
 
@@ -13,8 +21,23 @@ export const useRewards = create<RewardsState>((set, get) => ({
   
   recordSend: (usdCents: number) => {
     const state = get();
+    const oldSendCount = state.sendCount;
+    const oldTotalUsdCents = state.totalUsdCents;
     const newSendCount = state.sendCount + 1;
     const newTotalUsdCents = state.totalUsdCents + Math.round(usdCents || 0);
+    
+    // Check which skins become newly unlocked
+    const oldRewards = { sendCount: oldSendCount, totalUsdCents: oldTotalUsdCents };
+    const newRewards = { sendCount: newSendCount, totalUsdCents: newTotalUsdCents };
+    
+    const newlyUnlocked: SkinId[] = [];
+    PRESET_SKINS.forEach(skin => {
+      const wasEligible = progressForRule(skin.requires, oldRewards).eligible;
+      const nowEligible = progressForRule(skin.requires, newRewards).eligible;
+      if (!wasEligible && nowEligible) {
+        newlyUnlocked.push(skin.id);
+      }
+    });
     
     set({
       sendCount: newSendCount,
@@ -28,6 +51,9 @@ export const useRewards = create<RewardsState>((set, get) => ({
     return {
       isNewSend: true,
       newTotal: newTotalUsdCents,
+      newlyUnlocked,
+      kmGained: 1, // Each send gives 1 KM point
+      totalKM: newSendCount,
     };
   },
   
@@ -47,3 +73,6 @@ export const getProgress = () => {
   const { sendCount, totalUsdCents } = useRewards.getState();
   return { sendCount, totalUsdCents };
 };
+
+// Alias for backward compatibility and user preference
+export const useKaleometers = useRewards;

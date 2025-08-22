@@ -36,9 +36,18 @@ export const connect = async (): Promise<{ publicKey: string } | null> => {
   }
 }
 
-export const disconnect = (): void => {
-  // Placeholder for disconnect logic
-  console.log('Wallet disconnected')
+export const disconnect = async (): Promise<boolean> => {
+  try {
+    // For Freighter wallet, there's no explicit disconnect API
+    // We'll handle disconnection at the app level by clearing local state
+    // In a real app, you might want to clear any cached permissions or tokens
+    
+    console.log('Wallet disconnected')
+    return true
+  } catch (error) {
+    console.error('Failed to disconnect wallet:', error)
+    return false
+  }
 }
 
 export const formatAddress = (address: string): string => {

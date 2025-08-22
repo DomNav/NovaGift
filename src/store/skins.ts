@@ -139,24 +139,66 @@ export const PRESET_SKINS: Skin[] = [
 
 export const DEFAULT_SKIN: SkinId = "holoBlue";
 
+export type SkinSide = "sealed" | "opened";
+
 type SkinState = {
   presets: Skin[];
-  selectedId: SkinId;
+  selectedSealedId: SkinId;
+  selectedOpenedId: SkinId;
+  linked: boolean;
   unlocked: SkinId[];
-  setSelected: (id: SkinId) => void;
+  setSelectedFor: (side: SkinSide, id: SkinId) => void;
+  setLinked: (v: boolean) => void;
+  getById: (id: SkinId) => Skin | undefined;
   unlock: (id: SkinId) => void;
   unlockMany: (ids: SkinId[]) => void;
   hydrate: () => void;
+  // Legacy support
+  selectedId: SkinId;
+  setSelected: (id: SkinId) => void;
 };
 
-export const useSkins = create<SkinState>((set) => ({
+export const useSkins = create<SkinState>((set, get) => ({
   presets: PRESET_SKINS,
-  selectedId: "holoBlue",
+  selectedSealedId: "holoBlue",
+  selectedOpenedId: "holoBlue", 
+  linked: true,
   unlocked: ["silver", "amethyst", "vaporwave", "coral", "iceglass", "pixelMint"],
-  setSelected: (id) => {
-    set({ selectedId: id });
-    localStorage.setItem("soro.selectedSkin", id);
+  
+  setSelectedFor: (side, id) => {
+    const { linked } = get();
+    if (linked) {
+      // Update both sides when linked
+      set({ selectedSealedId: id, selectedOpenedId: id });
+      localStorage.setItem("soro.skin.sealed", id);
+      localStorage.setItem("soro.skin.opened", id);
+    } else {
+      // Update only the requested side
+      if (side === "sealed") {
+        set({ selectedSealedId: id });
+        localStorage.setItem("soro.skin.sealed", id);
+      } else {
+        set({ selectedOpenedId: id });
+        localStorage.setItem("soro.skin.opened", id);
+      }
+    }
   },
+  
+  setLinked: (v) => {
+    set({ linked: v });
+    localStorage.setItem("soro.skin.linked", JSON.stringify(v));
+    // If linking, sync opened to sealed
+    if (v) {
+      const { selectedSealedId } = get();
+      set({ selectedOpenedId: selectedSealedId });
+      localStorage.setItem("soro.skin.opened", selectedSealedId);
+    }
+  },
+  
+  getById: (id) => {
+    return PRESET_SKINS.find(skin => skin.id === id);
+  },
+  
   unlock: (id) => {
     set((state) => {
       if (!state.unlocked.includes(id)) {
@@ -167,6 +209,7 @@ export const useSkins = create<SkinState>((set) => ({
       return state;
     });
   },
+  
   unlockMany: (ids) => {
     set((state) => {
       const newIds = ids.filter(id => !state.unlocked.includes(id));
@@ -178,15 +221,57 @@ export const useSkins = create<SkinState>((set) => ({
       return state;
     });
   },
+  
   hydrate: () => {
-    const sel = localStorage.getItem("soro.selectedSkin") as SkinId | null;
+    // Migration: check for legacy selectedSkin
+    const legacySkin = localStorage.getItem("soro.selectedSkin") as SkinId | null;
+    
+    const sealedSkin = localStorage.getItem("soro.skin.sealed") as SkinId | null;
+    const openedSkin = localStorage.getItem("soro.skin.opened") as SkinId | null;
+    const linkedStr = localStorage.getItem("soro.skin.linked");
+    const linked = linkedStr ? JSON.parse(linkedStr) : true;
+    
     const unlocked = JSON.parse(localStorage.getItem("soro.unlockedSkins") || '[]') as SkinId[];
     // Ensure free skins are always unlocked
     const freeSkinsAlwaysUnlocked = ["silver", "amethyst", "vaporwave", "coral", "iceglass", "pixelMint"];
     const mergedUnlocked = [...new Set([...freeSkinsAlwaysUnlocked, ...unlocked])];
+    
+    // Determine final skin selections
+    let finalSealed: SkinId, finalOpened: SkinId;
+    
+    if (legacySkin && !sealedSkin && !openedSkin) {
+      // Migration: use legacy skin for both sides
+      finalSealed = finalOpened = legacySkin;
+      localStorage.removeItem("soro.selectedSkin"); // Clean up
+      localStorage.setItem("soro.skin.sealed", legacySkin);
+      localStorage.setItem("soro.skin.opened", legacySkin);
+    } else {
+      // Use stored or default values
+      finalSealed = sealedSkin ?? "holoBlue";
+      finalOpened = openedSkin ?? "holoBlue";
+    }
+    
     set({ 
-      selectedId: sel ?? "holoBlue",
+      selectedSealedId: finalSealed,
+      selectedOpenedId: finalOpened,
+      linked,
       unlocked: mergedUnlocked as SkinId[]
     });
+  },
+  
+  // Legacy support for backward compatibility
+  get selectedId() { return get().selectedSealedId; },
+  setSelected: (id) => {
+    get().setSelectedFor("sealed", id);
+    get().setSelectedFor("opened", id);
   }
 }));
+
+// Helper hook for current skins
+export const useCurrentSkins = () => {
+  const { selectedSealedId, selectedOpenedId, getById } = useSkins.getState?.() ?? {};
+  return {
+    sealed: getById?.(selectedSealedId),
+    opened: getById?.(selectedOpenedId),
+  };
+};

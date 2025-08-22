@@ -45,7 +45,7 @@ export const Studio = () => {
                   onClick={() => handleSkinSelect(skin.id)}
                   className={`
                     relative cursor-pointer transition-all duration-300
-                    ${isActive ? 'scale-105 ring-2 ring-brand-accent' : 'hover:scale-102'}
+                    ${isActive ? 'scale-105' : 'hover:scale-102'}
                   `}
                 >
                   <EnvelopeCard

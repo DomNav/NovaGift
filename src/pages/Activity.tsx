@@ -206,7 +206,7 @@ export const Activity = () => {
               </button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
                 <EnvelopeCard
                   isSealed={selectedItem.status === 'pending'}
@@ -216,7 +216,7 @@ export const Activity = () => {
                 />
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-4 pl-4">
                 <div>
                   <label className="text-xs text-brand-text/60">Transaction ID</label>
                   <p className="font-mono text-sm">#{selectedItem.id}</p>
