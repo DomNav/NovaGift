@@ -54,7 +54,7 @@ export const Studio = () => {
   
   const top4 = useMemo(() => {
     const four = [...sorted]
-    let slice = four.slice(0, 4)
+    const slice = four.slice(0, 4)
     // ensure selected is visible in collapsed view
     const selected = sorted.find(s => s.id === currentSelectedId)
     if (selected && !slice.find(s => s.id === currentSelectedId)) {

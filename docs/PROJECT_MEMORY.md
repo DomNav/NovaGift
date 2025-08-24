@@ -71,7 +71,7 @@ NovaGift/
 4. **OpenReveal** - Envelope opening/reveal animation
 5. **KaleSkins** - Skin customization gallery
 
-### Advanced Features (soroseal/web)
+### Advanced Features (novagift/web)
 1. **Theme System** - Dark/light mode with ThemeContext
 2. **Toast Notifications** - Custom toast system
 3. **Reward System** - Points and achievements (rewards.ts store)
@@ -94,7 +94,7 @@ Complete implementation of 50+ UI components including:
 
 ### Completed
 - ✅ Full UI component library setup
-- ✅ Two parallel implementations (main and soroseal/web)
+- ✅ Two parallel implementations (main and novagift/web)
 - ✅ Figma design integration
 - ✅ Basic routing structure
 - ✅ Theme system implementation

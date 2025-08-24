@@ -17,7 +17,7 @@ export const Settings = () => {
   
   const handleSave = () => {
     // Save settings (mock)
-    localStorage.setItem('soroseal_settings', JSON.stringify(settings))
+    localStorage.setItem('novagift_settings', JSON.stringify(settings))
     addToast('Settings saved successfully!', 'success')
   }
   
