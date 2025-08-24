@@ -1,273 +1,184 @@
-# SoroSeal - Seal now, open true.
+# SoroSeal - Blockchain Gift Envelopes
 
-A modern React application for creating and managing USDC gift envelopes on the Stellar blockchain.
+SoroSeal is a decentralized platform for sending cryptocurrency gifts through digital envelopes on the Stellar/Soroban network. Recipients see the USD value of their gift at the moment it was funded, regardless of market fluctuations.
+
+## Architecture
+
+### Smart Contracts (Soroban)
+- **Envelope Contract**: Core logic for creating and opening gift envelopes
+- **Reflector Integration**: Oracle access for USD price feeds
+- **Token Support**: SAC-compliant tokens (USDC, wXLM)
+
+### Backend (Node.js/TypeScript)
+- **KM/Rewards API**: Track user karma and rewards
+- **Email Notifications**: Resend integration for envelope claims
+- **SQLite Database**: Persistent storage for user profiles
+
+### Frontend (React/TypeScript)
+- **Wallet Integration**: Freighter wallet support
+- **Interactive UI**: Animated envelope reveals
+- **Studio Mode**: Custom skins and personalization
+
+## Prerequisites
+
+- Node.js 18+ and npm/pnpm
+- Rust 1.70+ with wasm32-unknown-unknown target
+- Soroban CLI
+- Stellar Freighter wallet extension
 
 ## Quick Start
 
+### 1. Install Dependencies
+
 ```bash
-# Install dependencies
+# Install Rust target
+rustup target add wasm32-unknown-unknown
+
+# Install Soroban CLI
+cargo install --locked soroban-cli
+
+# Install Node dependencies
 npm install
 
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Run tests
-npm run test
+# Install server dependencies
+cd server && npm install && cd ..
 ```
 
-## Scripts
+### 2. Deploy Smart Contracts
 
-- `npm run dev` - Start development server on port 5173
-- `npm run build` - Build production bundle
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint checks
-- `npm run format` - Format code with Prettier
-- `npm run test` - Run tests with Vitest
+```bash
+# Set environment variable for Reflector oracle
+export REFLECTOR_FX_CONTRACT=CBWH7BWBMWGGWWVPC7K5P4H3PXVQS2EZAGTQYJJW4IDDQGOAJVDMVUVN
+
+# Deploy envelope contract
+./scripts/deploy_envelope.sh
+
+# Fund test accounts
+./scripts/fund_testnet.sh
+
+# Create test envelope (replace with actual values)
+./scripts/create_envelope.sh CONTRACT_ID RECIPIENT ASSET_ID 1000000 0
+```
+
+### 3. Configure Environment
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env and set:
+# - VITE_ENVELOPE_CONTRACT (from deployment)
+# - VITE_SOROBAN_RPC_URL
+# - VITE_NETWORK_PASSPHRASE
+# - VITE_USDC and VITE_WXLM token contracts
+# - RESEND_API_KEY (optional)
+```
+
+### 4. Start Services
+
+```bash
+# Terminal 1: Start backend server
+cd server
+cp .env.example .env
+npm run migrate
+npm run dev
+
+# Terminal 2: Start frontend
+npm run dev
+```
+
+Visit http://localhost:5173
+
+## Testing
+
+### Contract Tests
+```bash
+cargo test -p envelope
+```
+
+### Frontend Tests
+```bash
+npm test
+```
+
+## API Endpoints
+
+### Studio/Rewards
+- `GET /api/studio/me?wallet=G...` - Get user profile and KM
+- `POST /api/km/award` - Award karma points
+
+### Webhooks
+- `POST /hooks/reflector` - Reflector oracle callbacks
+- `POST /notify/envelope-funded` - Email notification trigger
+
+## Contract Methods
+
+### Envelope Contract
+
+#### `init(reflector_fx: Address)`
+Initialize contract with oracle address.
+
+#### `create_envelope(...) -> u64`
+Create and fund an envelope:
+- `creator`: Funding wallet address
+- `recipient`: Recipient wallet address  
+- `asset`: Token contract address
+- `amount_in`: Amount in token units
+- `denom`: Currency denomination (USD)
+- `expiry_secs`: Expiration time (0 = never)
+
+#### `open_envelope(recipient: Address, id: u64) -> i128`
+Open envelope and receive USD value.
+
+#### `refund_after_expiry(creator: Address, id: u64)`
+Refund expired envelope to creator.
 
 ## Project Structure
 
 ```
-soroseal/
-├── src/
-│   ├── components/
-│   │   ├── Button/             # Button components with effects
-│   │   ├── effects/            # Animation and effect components
-│   │   ├── layout/
-│   │   │   ├── AppLayout.tsx    # Main app layout wrapper
-│   │   │   ├── Sidebar.tsx      # Navigation sidebar
-│   │   │   └── Header.tsx       # Top header with wallet
-│   │   ├── skins/              # Envelope skin components
-│   │   └── ui/
-│   │       ├── EnvelopeCard.tsx # Gift envelope component
-│   │       ├── QRCard.tsx       # QR code display
-│   │       ├── PriceBox.tsx     # Payment calculator
-│   │       ├── SendButton.tsx   # Animated send button
-│   │       ├── SkinCard.tsx     # Gradient skin selector
-│   │       └── Toast.tsx        # Notification toasts
-│   ├── contexts/               # React contexts
-│   ├── pages/
-│   │   ├── Create.tsx           # Create new envelope
-│   │   ├── Fund.tsx             # Fund envelope with QR
-│   │   ├── Open.tsx             # Open/reveal envelope
-│   │   ├── Activity.tsx        # Transaction history
-│   │   ├── KaleSkins.tsx       # Envelope skin customization
-│   │   ├── SkinStore.tsx       # Skin marketplace
-│   │   ├── Studio.tsx          # Skin editor
-│   │   └── Settings.tsx        # App preferences
-│   ├── hooks/
-│   │   └── useToast.tsx        # Toast notification hook
-│   ├── lib/
-│   │   ├── wallet.ts           # Freighter wallet integration
-│   │   └── notify.ts           # Notification utilities
-│   ├── store/                  # Zustand stores
-│   ├── styles/
-│   │   └── tokens.css          # CSS design tokens
-│   ├── test/                   # Test utilities
-│   ├── utils/                  # Helper functions
-│   ├── App.tsx                 # Main app component
-│   ├── main.tsx                # App entry point
-│   ├── config.ts               # App configuration
-│   └── index.css               # Global styles
-├── server/                     # Backend server
-│   ├── index.ts               # Server entry point
-│   └── templates/             # Email templates
-├── public/                     # Static assets
-│   └── assets/
-│       └── images/            # Image assets
-├── docs/                       # Documentation
-├── dist/                       # Build output
-├── package.json
-├── tsconfig.json
-├── tailwind.config.js
-├── vite.config.ts
-└── README.md
+SoroSeal/
+├── contracts/
+│   └── envelope/           # Soroban smart contract
+│       ├── src/
+│       │   ├── lib.rs     # Main contract logic
+│       │   ├── reflector.rs # Oracle integration
+│       │   └── tests.rs   # Contract tests
+│       └── Cargo.toml
+├── server/                 # Node.js backend
+│   ├── src/
+│   │   ├── index.ts       # Express API
+│   │   ├── db.ts          # Database layer
+│   │   └── migrate.ts     # Schema setup
+│   └── package.json
+├── src/                    # React frontend
+│   ├── pages/             # Application pages
+│   ├── components/        # UI components
+│   ├── lib/               # Utilities
+│   │   ├── wallet.ts      # Freighter integration
+│   │   └── soroban.ts     # Contract calls
+│   └── hooks/             # React hooks
+├── scripts/               # Deployment scripts
+└── .env.example          # Environment template
 ```
 
-## Features
+## Deployment Checklist
 
-### Core Pages
-- **Create**: Design and create gift envelopes with custom amounts and expiry dates
-- **Fund**: Add funds to envelopes via QR code or direct transfer
-- **Open**: Reveal and claim gift envelopes with animations
-- **Activity**: View transaction history with detailed modal views
-- **Kale Skins**: Customize envelope appearance with gradient themes
-- **Settings**: Configure app preferences and network settings
+- [ ] Set REFLECTOR_FX_CONTRACT environment variable
+- [ ] Deploy envelope contract to testnet
+- [ ] Fund creator/recipient accounts
+- [ ] Configure frontend environment variables
+- [ ] Start backend server with database
+- [ ] Test create → fund → open flow
+- [ ] Verify KM rewards accumulation
+- [ ] Test email notifications (if configured)
 
-### Key Components
-- **EnvelopeCard**: Displays sealed/revealed envelope states with animations
-- **QRCard**: Generates QR codes for easy funding
-- **PriceBox**: Real-time price calculation with USDC/XLM conversion
-- **SendButton**: Animated button with loading and success states
-- **Toast**: Non-intrusive notifications for user feedback
+## Security Considerations
 
-## Theming
-
-### Brand Colors
-The app uses CSS variables for theming. Update colors in `src/styles/tokens.css`:
-
-```css
-:root {
-  --brand-primary: #1D2BFF;    /* Main brand blue */
-  --brand-bg: #0B1020;          /* Dark background */
-  --brand-surface: #0E1220;     /* Card backgrounds */
-  --brand-text: #F8FAFF;        /* Text color */
-  --brand-positive: #2ECC71;    /* Success green */
-}
-```
-
-### Replacing Brand Colors
-1. Extract colors from your logo/brand assets
-2. Update CSS variables in `src/styles/tokens.css`
-3. Restart dev server to see changes
-
-### Gradient Skins
-Customize envelope gradients in `src/config.ts`:
-
-```typescript
-skins: {
-  presets: [
-    { id: 'custom', name: 'Custom', start: '#FF0000', mid: '#00FF00', end: '#0000FF' }
-  ]
-}
-```
-
-## Technology Stack
-
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: TailwindCSS with custom design tokens
-- **Routing**: React Router v6
-- **Fonts**: Antonio (headings), Inter (UI)
-- **Testing**: Vitest + React Testing Library
-- **Code Quality**: ESLint + Prettier
-
-## Environment Variables
-
-Create a `.env` file based on `.env.example`:
-
-```env
-VITE_API_BASE=http://localhost:4000
-
-# Email Notification Service
-VITE_NOTIFY_URL=http://localhost:4000
-VITE_WEBHOOK_SECRET=soro_dev_secret
-
-# Notification Server (for server/index.ts)
-RESEND_API_KEY=your_resend_key
-MAIL_FROM=Soroseal <no-reply@soroseal.app>
-APP_BASE_URL=http://localhost:5174
-WEBHOOK_SECRET=soro_dev_secret
-PORT=4000
-```
-
-## Email Notify (Optional)
-
-SoroSeal includes an optional email notification feature that sends recipients a claim link when their envelope is funded.
-
-### Setup
-
-1. **Install dependencies** (already included if you ran `npm install`):
-   ```bash
-   npm install
-   ```
-
-2. **Configure Resend** (or alternative email provider):
-   - Sign up for a free [Resend](https://resend.com) account
-   - Get your API key from the dashboard
-   - Update `RESEND_API_KEY` in your `.env` file
-
-3. **Start the notification server**:
-   ```bash
-   npm run notify:dev
-   ```
-   This runs the Express server on port 4000 (configurable via `PORT` env var)
-
-4. **Start the main app** (in a separate terminal):
-   ```bash
-   npm run dev
-   ```
-
-### How it works
-
-1. When creating an envelope, users can optionally enter a recipient email
-2. After the envelope is funded, the server sends a one-time claim link
-3. Recipients click the link to open their envelope in the app
-4. The system uses HMAC signatures for secure webhook calls
-5. Emails are sent only once per envelope (idempotency check)
-
-### Security Notes
-
-- No PII is stored on-chain
-- Server uses HMAC verification for all webhook calls
-- Email addresses are not stored persistently (only in-memory for hackathon)
-- For production, implement proper data storage and rate limiting
-
-## Backend Integration TODOs
-
-The app is currently running with mock data. To connect to real services:
-
-### 1. Reflector Oracle Integration
-- [ ] Connect to Reflector price feed for real-time USDC/XLM rates
-- [ ] Update `PriceBox` component with live prices
-- [ ] Add price refresh mechanism
-
-### 2. Soroswap Protocol
-- [ ] Integrate Soroswap SDK for token swaps
-- [ ] Implement best route calculation
-- [ ] Add slippage protection
-
-### 3. GiftEscrow Smart Contract
-- [ ] Deploy and connect escrow contract
-- [ ] Implement envelope creation transaction
-- [ ] Add fund/claim/refund operations
-- [ ] Handle expiry and auto-return logic
-
-### 4. Wallet Integration
-- [ ] Complete Freighter wallet integration
-- [ ] Add transaction signing
-- [ ] Implement balance checking
-- [ ] Add network switching (testnet/mainnet)
-
-### 5. Backend API
-- [ ] Create API endpoints for envelope CRUD
-- [ ] Implement activity tracking
-- [ ] Add notification webhooks
-- [ ] Store skin preferences
-
-## Development Notes
-
-### Font Installation
-Fonts are included via @fontsource packages and imported in `index.css`.
-
-### Confetti Effect
-The send button triggers a confetti animation on successful transactions using `canvas-confetti`.
-
-### Gradient Shader Card
-The Kale Skins page uses dynamic gradient backgrounds that can be applied to envelopes.
-
-## Deployment
-
-```bash
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Deploy to hosting service
-# Upload contents of dist/ folder
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
+- Price staleness checks (60 second threshold)
+- Single-open guard prevents double spending
+- Expiry mechanism for unclaimed envelopes
+- Fixed-point arithmetic for overflow protection
+- Token approval required before envelope creation
 
 ## License
 
@@ -275,4 +186,10 @@ MIT
 
 ## Support
 
-For issues or questions, please open an issue on GitHub.
+For issues and questions:
+- GitHub: https://github.com/yourusername/soroseal
+- Discord: [Join our community]
+
+---
+
+Built with ❤️ for the Soroban hackathon
