@@ -13,7 +13,7 @@ interface ThemeLogoProps {
 
 export const ThemeLogo = ({ 
   className = '', 
-  alt = 'SoroSeal Logo',
+  alt = 'NovaGift Logo',
   size = 'md',
   lightModeLogo,
   darkModeLogo,
@@ -41,7 +41,7 @@ export const ThemeLogo = ({
     }
     
     // Default: use the transparent version for better cross-theme visibility
-    return '/assets/images/soroseal-high-resolution-logo-transparent.png'
+    return '/assets/images/novagift-high-resolution-logo-transparent.png'
   }
   
   return (

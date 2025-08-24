@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react'
 import App from './App'
 
 describe('App', () => {
-  it('renders header with SoroSeal title', () => {
+  it('renders header with NovaGift title', () => {
     render(<App />)
-    const title = screen.getByText(/SoroSeal/i)
+    const title = screen.getByText(/NovaGift/i)
     expect(title).toBeDefined()
   })
   

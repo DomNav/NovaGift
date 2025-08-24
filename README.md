@@ -1,6 +1,6 @@
-# SoroSeal - Blockchain Gift Envelopes
+# NovaGift - Blockchain Gift Envelopes
 
-SoroSeal is a decentralized platform for sending cryptocurrency gifts through digital envelopes on the Stellar/Soroban network. Recipients see the USD value of their gift at the moment it was funded, regardless of market fluctuations.
+NovaGift is a decentralized platform for sending cryptocurrency gifts through digital envelopes on the Stellar/Soroban network. Recipients see the USD value of their gift at the moment it was funded, regardless of market fluctuations.
 
 ## Architecture
 
@@ -136,7 +136,7 @@ Refund expired envelope to creator.
 ## Project Structure
 
 ```
-SoroSeal/
+NovaGift/
 ├── contracts/
 │   └── envelope/           # Soroban smart contract
 │       ├── src/
@@ -187,7 +187,7 @@ MIT
 ## Support
 
 For issues and questions:
-- GitHub: https://github.com/yourusername/soroseal
+- GitHub: https://github.com/DomNav/NovaGift
 - Discord: [Join our community]
 
 ---

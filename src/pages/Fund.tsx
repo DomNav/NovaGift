@@ -66,7 +66,7 @@ export const Fund = () => {
           <QRCard
             address={envelopeAddress}
             amount={amount}
-            memo="SoroSeal Gift #001"
+            memo="NovaGift Gift #001"
           />
           
           <div className="mt-6 glass-card p-4 max-w-sm w-full">

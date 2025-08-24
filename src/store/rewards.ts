@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SkinId, PRESET_SKINS } from "./skins";
+import { PRESET_SKINS, type SkinId } from "./skins";
 import { progressForRule } from "@/utils/rewards";
 
 type RewardsState = {

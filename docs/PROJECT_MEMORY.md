@@ -1,7 +1,7 @@
-# SoroSeal Project Memory
+# NovaGift Project Memory
 
 ## Project Overview
-SoroSeal is a crypto gifting application that allows users to create, send, and receive digital envelopes containing cryptocurrency. The application features gamified elements, customizable skins, and a reward system.
+NovaGift is a crypto gifting application that allows users to create, send, and receive digital envelopes containing cryptocurrency. The application features gamified elements, customizable skins, and a reward system.
 
 ## Technical Stack
 
@@ -10,8 +10,8 @@ SoroSeal is a crypto gifting application that allows users to create, send, and 
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **UI Components**: Radix UI (comprehensive component library)
-- **Routing**: React Router DOM (in soroseal/web)
-- **State Management**: Zustand (in soroseal/web)
+- **Routing**: React Router DOM (in novagift/web)
+- **State Management**: Zustand (in novagift/web)
 - **Animations**: Motion library, Canvas Confetti
 - **Icons**: Lucide React
 - **Forms**: React Hook Form
@@ -30,7 +30,7 @@ SoroSeal is a crypto gifting application that allows users to create, send, and 
 ## Project Structure
 
 ```
-SoroSeal/
+NovaGift/
 ├── src/                     # Main application source
 │   ├── components/          # Reusable components
 │   │   ├── ui/             # Radix UI components (50+ components)
@@ -39,7 +39,7 @@ SoroSeal/
 │   ├── views/              # Page views
 │   ├── guidelines/         # Development guidelines
 │   └── styles/             # Global styles
-└── soroseal/web/           # Alternative web implementation
+└── novagift/web/           # Alternative web implementation
     ├── src/
     │   ├── components/     # Component library
     │   ├── pages/          # Page components
@@ -220,7 +220,7 @@ npm run notify:dev
 4. Build warnings in console need addressing
 
 ## Resources
-- [Figma Design](https://www.figma.com/design/vm9pQuoHVwQ8VM0HRUtwle/Soroseal-Crypto-Gifting-App)
+- [Figma Design](https://www.figma.com/design/vm9pQuoHVwQ8VM0HRUtwle/NovaGift-Crypto-Gifting-App)
 - Radix UI Documentation
 - Tailwind CSS Documentation
 - Vite Documentation

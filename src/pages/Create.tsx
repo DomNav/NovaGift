@@ -11,14 +11,13 @@ export const Create = () => {
   const [expiry, setExpiry] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   
-  const { presets, selectedSealedId, unlocked, hydrate, getById } = useSkins()
+  const { selectedSealedId, hydrate, getById } = useSkins()
   
   useEffect(() => {
     hydrate()
   }, [])
   
   const sealedSkin = getById(selectedSealedId)
-  const isLockedSealed = sealedSkin?.requires && !unlocked.includes(sealedSkin.id)
   
   const handleCreate = async () => {
     if (!recipient) {
@@ -155,7 +154,6 @@ export const Create = () => {
           <EnvelopeCard
             variant="sealed"
             skin={sealedSkin}
-            locked={isLockedSealed}
             usdCents={parseFloat(amount || '0') * 100}
             toLabel={recipient || 'GDEMO...RECIPIENT'}
             fromLabel="You"

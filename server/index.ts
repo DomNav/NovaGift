@@ -15,13 +15,13 @@ app.use(express.json());
 app.use(cors());
 
 const RESEND_KEY = process.env.RESEND_API_KEY || "";
-const MAIL_FROM = process.env.MAIL_FROM || "Soroseal <no-reply@soroseal.app>";
+const MAIL_FROM = process.env.MAIL_FROM || "NovaGift <no-reply@novagift.app>";
 const APP_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5174";
 const HMAC_SECRET = process.env.WEBHOOK_SECRET || "dev-secret";
 
 const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;
 
-const dbPath = path.join(__dirname, "../soroseal.db");
+const dbPath = path.join(__dirname, "../novagift.db");
 const db = new Database(dbPath);
 
 db.exec(`
@@ -223,7 +223,7 @@ app.post("/notify/envelope-funded", async (req, res) => {
       await resend.emails.send({
         from: MAIL_FROM,
         to: recipientEmail,
-        subject: "You've received a Soroseal gift 🎁",
+        subject: "You've received a NovaGift gift 🎁",
         react: ClaimEmail({ amountUsd, claimUrl, skinId }),
       });
     } else {
@@ -241,6 +241,6 @@ app.post("/notify/envelope-funded", async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`SoroSeal server running on port ${PORT}`);
+  console.log(`NovaGift server running on port ${PORT}`);
   console.log(`Database: ${dbPath}`);
 });

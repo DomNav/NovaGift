@@ -6,7 +6,6 @@ import { Check, Link, Unlink } from 'lucide-react'
 import { useRewards } from '@/store/rewards'
 import { progressForRule, ruleLabel } from '@/utils/rewards'
 import ProgressPills from '@/components/ui/ProgressPills'
-import { useKaleometers } from '@/store/rewards'
 import StudioInsightsCard from '@/components/studio/StudioInsightsCard'
 
 export const Studio = () => {

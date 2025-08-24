@@ -3,7 +3,7 @@ export const config = {
     baseUrl: import.meta.env.VITE_API_BASE || 'http://localhost:4000',
   },
   app: {
-    name: 'SoroSeal',
+    name: 'NovaGift',
     tagline: 'Seal now, open true.',
     version: '0.1.0',
   },

@@ -5,17 +5,18 @@ import {
   Networks,
   nativeToScVal,
   scValToNative,
-  SorobanRpc,
   TransactionBuilder,
   TimeoutInfinite,
-} from "soroban-client";
+  Transaction,
+} from "@stellar/stellar-sdk";
+import { Server } from "@stellar/stellar-sdk/rpc";
 import { signXDR } from "./wallet";
 
-const RPC_URL = import.meta.env.VITE_SOROBAN_RPC_URL as string;
+const RPC_URL = import.meta.env.VITE_SOROBAN_RPC_URL || "https://soroban-testnet.stellar.org";
 const NETWORK_PASSPHRASE = (import.meta.env.VITE_NETWORK_PASSPHRASE ||
   Networks.TESTNET) as string;
 
-const server = new SorobanRpc.Server(RPC_URL, { allowHttp: RPC_URL.startsWith("http:") });
+const server = new Server(RPC_URL, { allowHttp: RPC_URL.startsWith("http:") });
 
 export async function callContract({
   source,
@@ -53,15 +54,27 @@ export async function callContract({
     .build();
 
   tx = await server.prepareTransaction(tx);
-  const signed = await signXDR(tx.toXDR(), NETWORK_PASSPHRASE);
-  const send = await server.sendTransaction(SorobanRpc.TransactionBuilder.fromXDR(signed));
-  if (send.status !== "PENDING" && send.status !== "SUCCESS") throw new Error(send.errorResultXdr ?? "send failed");
+  const signedResult = await signXDR(tx.toXDR(), NETWORK_PASSPHRASE);
+  const signedTx = TransactionBuilder.fromXDR(signedResult.signedTxXdr, NETWORK_PASSPHRASE) as Transaction;
+  const send = await server.sendTransaction(signedTx);
+  
+  if (send.status === "ERROR") {
+    throw new Error(send.errorResult?.toString() ?? "send failed");
+  }
 
-  const res = await server.getTransaction(send.hash);
-  if (res.status !== SorobanRpc.GetTransactionStatus.SUCCESS) {
+  // Wait for transaction to complete
+  let res = await server.getTransaction(send.hash);
+  while (res.status === "NOT_FOUND") {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    res = await server.getTransaction(send.hash);
+  }
+  
+  if (res.status === "FAILED") {
     throw new Error(`tx failed: ${res.status}`);
   }
-  return res.result;
+  
+  // Return the transaction result
+  return res;
 }
 
 export function toNative(xdr: string) {

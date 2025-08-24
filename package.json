@@ -1,15 +1,15 @@
 {
-  "name": "soroseal",
-  "displayName": "SoroSeal - Crypto Gifting Platform",
+  "name": "novagift",
+  "displayName": "NovaGift - Crypto Gifting Platform",
   "description": "A modern platform for sending cryptocurrency gifts through digital envelopes",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "author": "SoroSeal Team",
+  "author": "NovaGift Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/soroseal"
+    "url": "https://github.com/DomNav/NovaGift"
   },
   "scripts": {
     "dev": "vite",

@@ -38,7 +38,7 @@ export const Settings = () => {
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-antonio gradient-text mb-2">Settings</h1>
-        <p className="text-brand-text/60">Configure your SoroSeal preferences</p>
+        <p className="text-brand-text/60">Configure your NovaGift preferences</p>
       </div>
       
       <div className="space-y-6">
@@ -235,7 +235,7 @@ export const Settings = () => {
         {/* About */}
         <div className="glass-card p-4 text-center">
           <p className="text-xs text-brand-text/60">
-            SoroSeal v0.1.0 • Built on Stellar • Powered by Soroswap
+            NovaGift v0.1.0 • Built on Stellar • Powered by Soroswap
           </p>
           <div className="flex justify-center gap-4 mt-2">
             <a href="#" className="text-xs text-brand-primary hover:text-brand-secondary">
