@@ -259,3 +259,16 @@ For questions or issues, refer to the project repository or contact the developm
   - `DIRECT_URL` - Direct PostgreSQL connection for migrations
   - `CORS_ORIGIN` - Frontend URL for CORS configuration
   - Vercel-specific build command: `npm install && npx prisma generate`
+
+### Soroban HTLC Contract Refactoring
+- **What changed**: Refactored NovaGift's Soroban HTLC-like contract for improved clarity, safety, and maintainability
+- **Files touched**:
+  - `contracts/envelope/src/lib.rs` - Refactored main contract with proper HTLC logic, Status enum, and event emissions
+  - `contracts/envelope/src/oracle.rs` - New oracle module with ReflectorClient trait following Bachini pattern
+  - `contracts/envelope/src/error.rs` - New error module with comprehensive contract error definitions
+  - `contracts/envelope/src/tests.rs` - New comprehensive test suite covering happy path, wrong preimage, timeout refund, and security scenarios
+- **New env/flags**:
+  - HTLC-style operations: create, fund, open (with preimage), cancel (after timeout)
+  - Oracle integration for price feeds with staleness checks
+  - Comprehensive error handling with `#[contracterror]` attribute
+  - Test coverage using `soroban-sdk::testutils`
