@@ -246,3 +246,16 @@ For questions or issues, refer to the project repository or contact the developm
   - Header `x-wallet` used to identify users for consent checks
   - Consent enforcement on profile-accessing routes
   - `npm run retention` command for data retention job execution
+
+### Vercel Deployment Configuration
+- **What changed**: Configured NovaGift for Vercel serverless deployment with PostgreSQL
+- **Files touched**:
+  - `vercel.json` - New Vercel configuration with API routing and build settings
+  - `api/serverless.ts` - New serverless handler wrapping Express app for Vercel
+  - `prisma/schema.prisma` - Updated to PostgreSQL with Vercel adapter support
+  - `DEPLOY.md` - New comprehensive deployment documentation
+- **New env/flags**:
+  - `DATABASE_URL` - Pooled PostgreSQL connection with `?pgbouncer=true`
+  - `DIRECT_URL` - Direct PostgreSQL connection for migrations
+  - `CORS_ORIGIN` - Frontend URL for CORS configuration
+  - Vercel-specific build command: `npm install && npx prisma generate`

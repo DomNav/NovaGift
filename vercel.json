@@ -1,0 +1,30 @@
+{
+  "buildCommand": "npm run build:all",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/serverless"
+    }
+  ],
+  "functions": {
+    "api/serverless.ts": {
+      "runtime": "@vercel/node@3",
+      "maxDuration": 30,
+      "environment": {
+        "DATABASE_URL": "@database-url",
+        "DIRECT_URL": "@direct-url",
+        "JWT_SECRET": "@jwt-secret",
+        "STELLAR_NETWORK": "@stellar-network",
+        "STELLAR_RPC_URL": "@stellar-rpc-url",
+        "CORS_ORIGIN": "@cors-origin"
+      }
+    }
+  },
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "DIRECT_URL": "@direct-url"
+  },
+  "installCommand": "npm install && npx prisma generate"
+}
