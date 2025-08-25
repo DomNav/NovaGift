@@ -7,7 +7,10 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "migrate": "ts-node src/migrate.ts"
+    "migrate": "ts-node src/migrate.ts",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "vitest run --config ../vitest.config.server.ts",
+    "retention": "tsx src/jobs/retention.ts"
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",

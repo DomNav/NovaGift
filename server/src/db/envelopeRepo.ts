@@ -74,7 +74,8 @@ export async function markOpened(
   id: string,
   openedTxId: string,
   amountDelivered?: string | number | Prisma.Decimal,
-  assetDelivered?: Asset
+  assetDelivered?: Asset,
+  recipient?: string
 ) {
   const validated = MarkOpenedSchema.parse({
     id,
@@ -89,6 +90,7 @@ export async function markOpened(
       status: EnvelopeStatus.OPENED,
       openedTxId: validated.openedTxId,
       openedAt: new Date(),
+      recipient,
       amountDelivered: validated.amountDelivered
         ? new Prisma.Decimal(validated.amountDelivered.toString())
         : undefined,

@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { store } from '../store/memory';
+import * as envelopeRepo from '../db/envelopeRepo';
+import { withTx } from '../db/tx';
+import { prisma } from '../db/client';
 import { config } from '../config';
 import { makeOpenLink, verifyOpenToken, generatePreimage } from '../security/link';
 import {
@@ -95,20 +97,27 @@ router.post('/create', createLimiter, async (req: Request, res: Response) => {
     // Generate open link
     const { url: openUrl, jti, expiresAt } = makeOpenLink(id);
     
-    // Store envelope record
-    await store.create({
-      id,
-      status: 'CREATED',
-      asset: input.asset,
-      amount: input.amount,
-      decimals,
-      sender,
-      hash,
-      expiry_ts: expiryTs,
-      message: input.message,
-      open_jti: jti,
-      open_url: openUrl,
-      created_at: Date.now(),
+    // Store envelope record and JTI
+    await withTx(async (tx) => {
+      await envelopeRepo.createEnvelope({
+        id,
+        status: 'CREATED',
+        asset: input.asset,
+        amount: input.amount,
+        decimals,
+        sender,
+        hash,
+        expiryTs,
+        message: input.message,
+      });
+      
+      // Store JTI for one-time use
+      await prisma.jti.create({
+        data: {
+          jti,
+          envelopeId: id,
+        },
+      });
     });
     
     // Return response
@@ -138,7 +147,7 @@ router.post('/fund', async (req: Request, res: Response) => {
     const input = FundEnvelopeSchema.parse(req.body);
     
     // Get envelope
-    const envelope = await store.get(input.id);
+    const envelope = await envelopeRepo.getEnvelope(input.id);
     if (!envelope) {
       return res.status(404).json({ error: 'Envelope not found' });
     }
@@ -177,7 +186,7 @@ router.post('/fund', async (req: Request, res: Response) => {
     }
     
     // Update status to FUNDED after successful verification
-    await store.markFunded(input.id, input.txId);
+    await envelopeRepo.markFunded(input.id, input.txId);
     
     return res.json({
       id: input.id,
@@ -227,13 +236,26 @@ router.post('/open', openLimiter, async (req: Request, res: Response) => {
     }
     
     // Check JTI one-time use
-    const jtiValid = await store.useJtiOnce(tokenPayload.jti, input.id);
-    if (!jtiValid) {
+    const jtiRecord = await prisma.jti.findUnique({
+      where: { jti: tokenPayload.jti },
+    });
+    
+    if (!jtiRecord || jtiRecord.envelopeId !== input.id) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    if (jtiRecord.usedAt) {
       return res.status(401).json({ error: 'Token already used' });
     }
     
+    // Mark JTI as used
+    await prisma.jti.update({
+      where: { jti: tokenPayload.jti },
+      data: { usedAt: new Date() },
+    });
+    
     // Get envelope
-    const envelope = await store.get(input.id);
+    const envelope = await envelopeRepo.getEnvelope(input.id);
     if (!envelope) {
       return res.status(404).json({ error: 'Envelope not found' });
     }
@@ -250,7 +272,7 @@ router.post('/open', openLimiter, async (req: Request, res: Response) => {
     
     // Check expiry
     const now = Math.floor(Date.now() / 1000);
-    if (now >= envelope.expiry_ts) {
+    if (now >= envelope.expiryTs) {
       return res.status(400).json({ error: 'Envelope expired' });
     }
     
@@ -310,10 +332,13 @@ router.post('/open', openLimiter, async (req: Request, res: Response) => {
     }
     
     // Mark as opened with verified transaction ID
-    await store.markOpened(input.id, verifiedTxId, input.recipient, {
-      asset: assetDelivered,
-      amount: amountDelivered,
-    });
+    await envelopeRepo.markOpened(
+      input.id,
+      verifiedTxId,
+      amountDelivered,
+      assetDelivered as any,
+      input.recipient
+    );
     
     // Return receipt with XDR for client-side submission if no txId provided
     return res.json({
@@ -346,7 +371,7 @@ router.post('/cancel', async (req: Request, res: Response) => {
     const input = CancelEnvelopeSchema.parse(req.body);
     
     // Get envelope
-    const envelope = await store.get(input.id);
+    const envelope = await envelopeRepo.getEnvelope(input.id);
     if (!envelope) {
       return res.status(404).json({ error: 'Envelope not found' });
     }
@@ -358,7 +383,7 @@ router.post('/cancel', async (req: Request, res: Response) => {
     
     // Check expiry
     const now = Math.floor(Date.now() / 1000);
-    if (now < envelope.expiry_ts) {
+    if (now < envelope.expiryTs) {
       return res.status(400).json({ error: 'Envelope not expired yet' });
     }
     
@@ -369,7 +394,7 @@ router.post('/cancel', async (req: Request, res: Response) => {
     });
     
     // Mark as canceled
-    await store.markCanceled(input.id, 'mock-cancel-tx');
+    await envelopeRepo.markCanceled(input.id, 'mock-cancel-tx');
     
     return res.json({
       id: input.id,

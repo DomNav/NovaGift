@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import { config, validateConfig } from './config';
+import { httpLogger } from './lib/log';
+import { errorMiddleware } from './middleware/error';
 import envelopeRoutes from './routes/envelope';
 import stellarRoutes from './routes/stellar';
 import profileRoutes from './routes/profile';
@@ -22,6 +24,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(httpLogger); // request logging
 app.use(apiLimiter); // Global rate limiting
 
 // Routes
@@ -38,14 +41,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({
-    error: 'Internal server error',
-    message: config.nodeEnv === 'development' ? err.message : undefined,
-  });
-});
+// Error handler (must be last)
+app.use(errorMiddleware);
 
 // Start server
 const server = app.listen(config.port, () => {
