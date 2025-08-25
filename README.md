@@ -2,6 +2,15 @@
 
 NovaGift is a decentralized platform for sending cryptocurrency gifts through digital envelopes on the Stellar/Soroban network. Recipients see the USD value of their gift at the moment it was funded, regardless of market fluctuations.
 
+## 🚀 New Backend Features
+
+- **HTLC-based secure envelopes** with preimage/hash claiming
+- **JWT-signed one-time links** with 30-minute expiry
+- **Fee sponsorship** - recipients pay zero fees
+- **Cross-asset delivery** via Reflector integration
+- **Rate limiting** for API protection
+- **In-memory store** for MVP (SQLite ready)
+
 ## Architecture
 
 ### Smart Contracts (Soroban)
@@ -27,6 +36,49 @@ NovaGift is a decentralized platform for sending cryptocurrency gifts through di
 - Stellar Freighter wallet extension
 
 ## Quick Start
+
+### Backend API Quick Demo
+
+```bash
+# 1. Install and start the backend
+npm install
+npm run server:dev
+
+# 2. Create an envelope
+curl -X POST http://localhost:4000/api/envelope/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sender": "GBXGQJWVLWOYHFLVTKWV5FGHA3LNYY2JQKM7OAJAUEQFU6LPCSEFVXON",
+    "asset": "USDC",
+    "amount": "25.00",
+    "message": "Happy Birthday!",
+    "expiresInMinutes": 1440
+  }'
+
+# Save the response: id, unsignedXDR, openUrl, preimage
+
+# 3. Sign and submit unsignedXDR via Stellar Laboratory or wallet
+
+# 4. Confirm funding
+curl -X POST http://localhost:4000/api/envelope/fund \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "<ENVELOPE_ID>",
+    "txId": "<STELLAR_TX_HASH>"
+  }'
+
+# 5. Share openUrl with recipient (keep preimage secret!)
+
+# 6. Recipient opens (extract token from openUrl query param)
+curl -X POST "http://localhost:4000/api/envelope/open?t=<JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "<ENVELOPE_ID>",
+    "recipient": "GCKFBEIYV2U22IO2BJ4KVJOIP7XPWQGQFKKWXR6DOSJBV7STMAQSMTMA",
+    "preimage": "<PREIMAGE_FROM_SENDER>",
+    "wantAsset": "USDC"
+  }'
+```
 
 ### 1. Install Dependencies
 
@@ -103,6 +155,12 @@ npm test
 
 ## API Endpoints
 
+### Envelope Management
+- `POST /api/envelope/create` - Create new envelope with HTLC
+- `POST /api/envelope/fund` - Confirm on-chain funding
+- `POST /api/envelope/open` - Claim with preimage (fee-sponsored)
+- `POST /api/envelope/cancel` - Cancel expired envelope
+
 ### Studio/Rewards
 - `GET /api/studio/me?wallet=G...` - Get user profile and KM
 - `POST /api/km/award` - Award karma points
@@ -110,6 +168,11 @@ npm test
 ### Webhooks
 - `POST /hooks/reflector` - Reflector oracle callbacks
 - `POST /notify/envelope-funded` - Email notification trigger
+
+### Health
+- `GET /api/health` - Service health check
+
+See [API Documentation](docs/api.md) for detailed request/response formats.
 
 ## Contract Methods
 

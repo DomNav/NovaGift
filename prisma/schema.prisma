@@ -1,0 +1,79 @@
+// npx prisma generate && npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+  // provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+enum EnvelopeStatus {
+  CREATED
+  FUNDED
+  OPENED
+  CANCELED
+}
+
+enum Asset {
+  USDC
+  XLM
+}
+
+model Envelope {
+  id               String          @id
+  status           EnvelopeStatus
+  asset            Asset
+  amount           Decimal
+  decimals         Int
+  sender           String
+  hash             String
+  expiryTs         Int
+  message          String?
+  fundedTxId       String?
+  openedTxId       String?
+  recipient        String?
+  assetDelivered   Asset?
+  amountDelivered  Decimal?
+  canceledTxId     String?
+  createdAt        DateTime        @default(now())
+  fundedAt         DateTime?
+  openedAt         DateTime?
+  canceledAt       DateTime?
+
+  @@index([sender])
+}
+
+model Jti {
+  jti        String   @id
+  envelopeId String
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([envelopeId])
+}
+
+model Profile {
+  wallet              String   @id
+  km                  Int      @default(0)
+  usdEarned           Decimal  @default(0)
+  language            String   @default("en")
+  consentGiven        Boolean  @default(false)
+  consentTimestamp    DateTime?
+  dataRetentionUntil  DateTime?
+  createdAt           DateTime @default(now())
+}
+
+model SwapReceipt {
+  id         String   @id @default(cuid())
+  envelopeId String
+  route      String
+  price      Decimal
+  txId       String?
+  createdAt  DateTime @default(now())
+
+  @@index([envelopeId])
+}

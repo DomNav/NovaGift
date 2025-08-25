@@ -52,7 +52,7 @@ export const Header = () => {
   }
 
   return (
-    <header className="h-16 bg-brand-surface/50 backdrop-blur-lg border-b border-brand-text/10 dark:border-white/10 px-6 flex items-center justify-between">
+    <header className="h-16 bg-brand-surface/30 backdrop-blur-lg px-6 flex items-center justify-between border-b border-brand-text/10 dark:border-white/10">
       <div className="flex items-center gap-4">
         <h2 className="text-lg font-medium text-brand-text/80">Dashboard</h2>
       </div>

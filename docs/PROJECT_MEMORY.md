@@ -231,3 +231,18 @@ For questions or issues, refer to the project repository or contact the developm
 ---
 *Last Updated: Current Session*
 *Version: 0.1.0*
+
+## Update Log
+
+### PIPEDA-lite Compliance Implementation
+- **What changed**: Added PIPEDA-lite data privacy controls for consent management and data retention
+- **Files touched**:
+  - `server/src/middlewares/consent.ts` - New consent middleware for profile data access
+  - `server/src/jobs/retention.ts` - New retention job for automated data deletion/anonymization
+  - `server/src/routes/profile.ts` - New profile routes with consent enforcement
+  - `server/src/server.ts` - Updated to import consent middleware and profile routes
+  - `package.json` - Added retention script command
+- **New env/flags**: 
+  - Header `x-wallet` used to identify users for consent checks
+  - Consent enforcement on profile-accessing routes
+  - `npm run retention` command for data retention job execution

@@ -1,9 +1,26 @@
 import * as Freighter from "@stellar/freighter-api";
+import { Networks } from "@stellar/freighter-api";
 
 // Contract addresses (testnet)
 export const ENVELOPE_CONTRACT = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHBCASH';
 export const USDC_CONTRACT = 'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA';
 export const WXLM_CONTRACT = 'CBP7NO6F7FRDHSOFQBT2L2UWYIZ2PU2ZOQOWDGDWX2LECTJGX2GQJRV2';
+
+// Network configuration
+export const NETWORK_PASSPHRASE = Networks.TESTNET;
+export const RPC_URL = 'https://soroban-testnet.stellar.org';
+
+// Types
+export interface WalletConnection {
+  publicKey: string;
+  connected: boolean;
+}
+
+export interface TransactionResult {
+  success: boolean;
+  txId?: string;
+  error?: string;
+}
 
 // Extend window interface for Freighter
 declare global {
@@ -13,36 +30,108 @@ declare global {
 }
 
 // Check if Freighter is installed
-export function isFreighterInstalled(): boolean {
+export function detectFreighter(): boolean {
   return typeof window !== 'undefined' && window.freighter !== undefined;
 }
 
 // Connect to Freighter wallet
-export async function connect(): Promise<{ publicKey: string } | null> {
+export async function connect(): Promise<WalletConnection> {
   try {
-    if (!isFreighterInstalled()) {
-      // Return mock wallet for demo mode
-      return { publicKey: 'GDEMO...WALLET' };
+    if (!detectFreighter()) {
+      // Return disconnected state when no Freighter
+      return { publicKey: '', connected: false };
     }
     
-    const isConnected = await Freighter.isConnected();
-    if (isConnected.isConnected) {
-      const result = await Freighter.requestAccess();
-      if (result.address) {
-        return { publicKey: result.address };
-      }
+    const result = await Freighter.requestAccess();
+    if (result.address) {
+      return { publicKey: result.address, connected: true };
     }
-    return null;
+    
+    return { publicKey: '', connected: false };
   } catch (error) {
     console.error('Failed to connect wallet:', error);
-    return null;
+    return { publicKey: '', connected: false };
+  }
+}
+
+// Sign and submit transaction with toast notifications
+export async function signAndSubmit(
+  xdr: string,
+  networkPassphrase: string = NETWORK_PASSPHRASE,
+  showToast?: (message: string, type: 'success' | 'error' | 'info') => void
+): Promise<TransactionResult> {
+  try {
+    if (!detectFreighter()) {
+      const error = 'Freighter wallet not installed';
+      showToast?.(error, 'error');
+      return {
+        success: false,
+        error
+      };
+    }
+
+    showToast?.('Signing transaction...', 'info');
+
+    // Sign the transaction
+    const signedXDR = await Freighter.signTransaction(xdr, {
+      networkPassphrase,
+      address: undefined // Let Freighter use the connected account
+    });
+
+    if (!signedXDR || signedXDR.error) {
+      const error = signedXDR?.error || 'Failed to sign transaction';
+      showToast?.(error, 'error');
+      return {
+        success: false,
+        error
+      };
+    }
+
+    showToast?.('Submitting transaction...', 'info');
+
+    // Submit to network via backend
+    const response = await fetch('/api/stellar/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        signedXDR: signedXDR.signedTxXdr,
+        networkPassphrase 
+      })
+    });
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      const error = result.error || 'Failed to submit transaction';
+      showToast?.(error, 'error');
+      return {
+        success: false,
+        error
+      };
+    }
+
+    showToast?.('Transaction submitted successfully!', 'success');
+    return {
+      success: true,
+      txId: result.txId
+    };
+  } catch (error) {
+    console.error('Transaction failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
+    showToast?.(errorMessage, 'error');
+    return {
+      success: false,
+      error: errorMessage
+    };
   }
 }
 
 // Disconnect wallet
 export async function disconnect(): Promise<boolean> {
   try {
-    // In a real app, you would clear session/storage here
+    // Clear stored wallet data
+    localStorage.removeItem('wallet_address');
+    localStorage.removeItem('wallet_connected');
     return true;
   } catch (error) {
     console.error('Failed to disconnect:', error);
@@ -50,14 +139,15 @@ export async function disconnect(): Promise<boolean> {
   }
 }
 
+// Legacy functions for compatibility
 export async function ensureFreighter(): Promise<boolean> {
   const result = await Freighter.isConnected();
   return result.isConnected;
 }
 
 export async function connectWallet(): Promise<string> {
-  const result = await Freighter.requestAccess();
-  return result.address;
+  const connection = await connect();
+  return connection.publicKey;
 }
 
 export async function signXDR(xdr: string, networkPassphrase: string) {
