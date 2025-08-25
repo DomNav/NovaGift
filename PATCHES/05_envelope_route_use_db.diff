@@ -1,0 +1,11 @@
+--- a/server/src/routes/envelope.ts
++++ b/server/src/routes/envelope.ts
+@@ -1,7 +1,8 @@
+ import { Router, Request, Response } from 'express';
+ import { z } from 'zod';
+-import { store } from '../store/memory';
++import * as envelopeRepo from '../db/envelopeRepo';
++import { withTx } from '../db/tx';
+ import { config } from '../config';
+ import { makeOpenLink, verifyOpenToken, generatePreimage } from '../security/link';
+ import {
