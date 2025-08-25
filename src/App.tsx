@@ -11,25 +11,31 @@ import { Studio } from '@/pages/Studio'
 import { Settings } from '@/pages/Settings'
 
 function App() {
-  return (
-    <ThemeProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<AppLayout />}>
-              <Route index element={<Create />} />
-              <Route path="fund" element={<Fund />} />
-              <Route path="open" element={<Open />} />
-              <Route path="activity" element={<Activity />} />
-              <Route path="studio" element={<Studio />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-          </Routes>
-          <Toast />
-        </BrowserRouter>
-      </ToastProvider>
-    </ThemeProvider>
-  )
+  try {
+    console.log('NovaGift App: Initializing...')
+    return (
+      <ThemeProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<AppLayout />}>
+                <Route index element={<Create />} />
+                <Route path="fund" element={<Fund />} />
+                <Route path="open" element={<Open />} />
+                <Route path="activity" element={<Activity />} />
+                <Route path="studio" element={<Studio />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+            </Routes>
+            <Toast />
+          </BrowserRouter>
+        </ToastProvider>
+      </ThemeProvider>
+    )
+  } catch (error) {
+    console.error('NovaGift App: Error during initialization:', error)
+    return <div style={{ padding: '20px', color: 'red' }}>Error loading app: {String(error)}</div>
+  }
 }
 
 export default App

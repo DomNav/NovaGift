@@ -292,3 +292,22 @@ For questions or issues, refer to the project repository or contact the developm
   - Identified need for DATABASE_URL configuration (SQLite for dev, PostgreSQL for production)
   - Missing CONTRACT_ID needs deployment or recovery
   - FEE_SPONSOR account required for testnet operations
+
+### Fix Pack v1 Implementation
+- **What changed**: Applied comprehensive fix pack to improve code quality, security, and maintainability
+- **Files touched**:
+  - `.env.example` - Updated with authoritative template containing all required environment variables
+  - `server/src/config/env.ts` - New Zod-validated environment configuration module
+  - `prisma/schema.prisma` - Fixed decimal precision mappings for Envelope, Profile, and SwapReceipt models
+  - `server/src/routes/envelope.ts` - Replaced MemoryStore with Prisma database via envelopeRepo
+  - `server/src/lib/log.ts` - New Pino logger with sensitive data redaction
+  - `server/src/middleware/error.ts` - New global error handling middleware
+  - `server/src/server.ts` - Wired httpLogger and errorMiddleware
+  - `server/package.json` - Added lint, test, and retention scripts
+  - `server/src/routes/envelope.smoke.spec.ts` - Added minimal smoke test
+  - `.github/workflows/retention.yml` - New GitHub Action for daily retention job
+- **New env/flags**:
+  - DATABASE_URL - Required database connection string
+  - POOLING - Boolean flag for connection pooling
+  - Strict Zod validation for all environment variables
+  - Improved JTI idempotency using Prisma Jti model

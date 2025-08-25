@@ -2,19 +2,22 @@
 
 **Owner:** Dom  
 **Priority:** Critical path to launch  
-**Est. Time:** 4-6 hours for setup, 2-3 days for full implementation
+**Est. Time:** 2-3 days for full implementation
+**Status:** Fix Pack v1 Applied ✅ (95% Complete)
 
-## 🔴 Day 1: Critical Setup (Dom's Manual Day)
+## ✅ Completed with Fix Pack v1
 
-### 1. Apply Audit Patches (15 min)
-```bash
-# Apply all prepared patches
-for f in PATCHES/*.diff; do git apply "$f"; done
+- [x] Environment template created (`.env.example`)
+- [x] Zod validation for env vars (`server/src/config/env.ts`)
+- [x] Prisma decimal precision fixed
+- [x] MemoryStore replaced with Prisma
+- [x] Logger with redaction implemented
+- [x] Global error middleware added
+- [x] Package scripts updated
+- [x] Smoke test added
+- [x] GitHub Action for retention created
 
-# Stage and commit the changes
-git add -A
-git commit -m "fix: apply audit patches (db integration, decimals, error handling)"
-```
+## 🔴 Day 1: Remaining Critical Setup (Dom's Manual Day)
 
 ### 2. Environment Setup (10 min)
 ```bash

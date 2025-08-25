@@ -1,5 +1,5 @@
 import * as Freighter from "@stellar/freighter-api";
-import { Networks } from "@stellar/freighter-api";
+import { Networks } from "@stellar/stellar-sdk";
 
 // Contract addresses (testnet)
 export const ENVELOPE_CONTRACT = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHBCASH';
@@ -33,6 +33,9 @@ declare global {
 export function detectFreighter(): boolean {
   return typeof window !== 'undefined' && window.freighter !== undefined;
 }
+
+// Alias for compatibility
+export const isFreighterInstalled = detectFreighter;
 
 // Connect to Freighter wallet
 export async function connect(): Promise<WalletConnection> {

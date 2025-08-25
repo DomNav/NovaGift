@@ -269,9 +269,9 @@ export const useSkins = create<SkinState>((set, get) => ({
 
 // Helper hook for current skins
 export const useCurrentSkins = () => {
-  const { selectedSealedId, selectedOpenedId, getById } = useSkins.getState?.() ?? {};
+  const { selectedSealedId, selectedOpenedId, getById } = useSkins.getState();
   return {
-    sealed: getById?.(selectedSealedId),
-    opened: getById?.(selectedOpenedId),
+    sealed: getById(selectedSealedId),
+    opened: getById(selectedOpenedId),
   };
 };

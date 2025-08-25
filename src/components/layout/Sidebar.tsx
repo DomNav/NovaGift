@@ -16,8 +16,8 @@ export const Sidebar = () => {
     <aside className="w-64 h-screen bg-brand-surface flex flex-col border-r border-brand-text/10 dark:border-white/10">
       <div className="p-3">
         <div className="p-2 mb-1 text-center">
-          <div className="w-48 h-48 rounded-full bg-brand-surface/80 dark:bg-brand-surface/60 flex items-center justify-center mx-auto">
-            <ThemeLogo size="lg" className="w-40 h-40" />
+          <div className="w-36 h-36 rounded-3xl bg-brand-surface/80 dark:bg-brand-surface/60 flex items-center justify-center mx-auto">
+            <ThemeLogo size="lg" className="w-32 h-32" />
           </div>
         </div>
       </div>
