@@ -19,8 +19,7 @@ export const ThemeLogo = ({
   size = 'md',
   lightModeLogo,
   darkModeLogo,
-  transparentLogo,
-  useJpgLogo = true
+  transparentLogo
 }: ThemeLogoProps) => {
   const { theme } = useTheme()
   

@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import clsx from 'clsx'
 import { ThemeLogo } from '@/components/ui/ThemeLogo'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const navigation = [
   { name: 'Create', href: '/', icon: '🎁' },
@@ -33,9 +34,9 @@ export const Sidebar = () => {
                     'flex items-center gap-2 px-3 py-3 rounded-lg transition-all duration-300',
                     'hover:bg-white/10 dark:hover:bg-gray-800/50 hover:scale-105',
                     'hover:shadow-lg dark:hover:shadow-blue-500/20 transform',
-                    isActive
-                      ? 'bg-brand-primary/20 text-brand-text scale-105 shadow-lg shadow-purple-400/30 dark:bg-brand-primary/30'
-                      : 'text-brand-text/70 dark:text-white',
+                                    isActive
+                  ? 'bg-brand-primary/10 text-brand-text dark:bg-brand-primary/20'
+                  : 'text-brand-text/70 dark:text-white',
                   )
                 }
               >
@@ -48,6 +49,11 @@ export const Sidebar = () => {
           ))}
         </ul>
       </nav>
+      
+      {/* Theme Toggle */}
+      <div className="p-2 flex justify-center">
+        <ThemeToggle />
+      </div>
       
       <div className="p-2">
         <div className="text-center">

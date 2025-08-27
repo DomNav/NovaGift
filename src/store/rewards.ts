@@ -9,8 +9,8 @@ type RewardsState = {
     isNewSend: boolean; 
     newTotal: number;
     newlyUnlocked: SkinId[];
-    kmGained: number;
-    totalKM: number;
+    auraPointsGained: number;
+    totalAuraPoints: number;
   };
   hydrate: () => void;
 };
@@ -52,8 +52,8 @@ export const useRewards = create<RewardsState>((set, get) => ({
       isNewSend: true,
       newTotal: newTotalUsdCents,
       newlyUnlocked,
-      kmGained: 1, // Each send gives 1 KM point
-      totalKM: newSendCount,
+      auraPointsGained: 1, // Each send gives 1 Aurapoint
+      totalAuraPoints: newSendCount,
     };
   },
   
@@ -74,5 +74,5 @@ export const getProgress = () => {
   return { sendCount, totalUsdCents };
 };
 
-// Alias for backward compatibility and user preference
+// Alias for backward compatibility - provides sendCount and totalUsdCents for Aurapoints calculation
 export const useKaleometers = useRewards;

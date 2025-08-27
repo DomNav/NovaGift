@@ -10,7 +10,7 @@ import {
   Address,
   nativeToScVal,
   scValToNative,
-  SorobanRpc,
+  rpc,
 } from '@stellar/stellar-sdk';
 import crypto from 'crypto';
 
@@ -19,7 +19,15 @@ const SOROBAN_RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.
 const NETWORK_PASSPHRASE = process.env.NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015';
 const CONTRACT_ID = process.env.NOVAGIFT_CONTRACT_ID || '';
 
-const sorobanServer = new SorobanRpc.Server(SOROBAN_RPC_URL);
+// Initialize Soroban server when needed
+let sorobanServerInstance: rpc.Server | null = null;
+
+function getSorobanServer(): rpc.Server {
+  if (!sorobanServerInstance) {
+    sorobanServerInstance = new rpc.Server(SOROBAN_RPC_URL);
+  }
+  return sorobanServerInstance;
+}
 
 /**
  * Convert a decimal string amount to i128 for Soroban
@@ -74,7 +82,7 @@ export async function buildCreateXDR(params: {
 }): Promise<string> {
   const { sender, assetContract, amount, decimals = 7, hash, expiryTs, id } = params;
   
-  const account = await sorobanServer.getAccount(sender);
+  const account = await getSorobanServer().getAccount(sender);
   const amountI128 = toI128(amount, decimals);
   
   // Build the contract call
@@ -101,7 +109,7 @@ export async function buildCreateXDR(params: {
     .build();
 
   // Prepare and simulate the transaction
-  const preparedTx = await sorobanServer.prepareTransaction(transaction);
+  const preparedTx = await getSorobanServer().prepareTransaction(transaction);
   
   return preparedTx.toXDR();
 }
@@ -116,7 +124,7 @@ export async function buildClaimTx(params: {
 }): Promise<TransactionBuilder.Transaction> {
   const { id, preimage, recipient } = params;
   
-  const account = await sorobanServer.getAccount(recipient);
+  const account = await getSorobanServer().getAccount(recipient);
   
   const operation = Operation.invokeContractFunction({
     contract: CONTRACT_ID,
@@ -137,7 +145,7 @@ export async function buildClaimTx(params: {
     .build();
 
   // Prepare and simulate
-  const preparedTx = await sorobanServer.prepareTransaction(transaction);
+  const preparedTx = await getSorobanServer().prepareTransaction(transaction);
   
   return preparedTx as TransactionBuilder.Transaction;
 }
@@ -151,7 +159,7 @@ export async function buildCancelXDR(params: {
 }): Promise<string> {
   const { id, sender } = params;
   
-  const account = await sorobanServer.getAccount(sender);
+  const account = await getSorobanServer().getAccount(sender);
   
   const operation = Operation.invokeContractFunction({
     contract: CONTRACT_ID,
@@ -169,7 +177,7 @@ export async function buildCancelXDR(params: {
     .setTimeout(180)
     .build();
 
-  const preparedTx = await sorobanServer.prepareTransaction(transaction);
+  const preparedTx = await getSorobanServer().prepareTransaction(transaction);
   
   return preparedTx.toXDR();
 }
@@ -184,7 +192,7 @@ export async function waitForTx(txId: string, maxAttempts: number = 10): Promise
 }> {
   for (let i = 0; i < maxAttempts; i++) {
     try {
-      const response = await sorobanServer.getTransaction(txId);
+      const response = await getSorobanServer().getTransaction(txId);
       
       if (response.status === 'SUCCESS') {
         return {

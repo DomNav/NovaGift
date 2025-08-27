@@ -16,9 +16,23 @@ const Env = z.object({
   FEE_SPONSOR: z.string().optional().default(''),
 
   DATABASE_URL: z.string(),
+  DIRECT_URL: z.string().optional(),
   POOLING: z.string().optional().default('false'),
 
   RESEND_API_KEY: z.string().optional().default(''),
+  
+  // KALE Token
+  KALE_CONTRACT_ID: z.string().default(''),
+  KALE_FAKE_BALANCE: z.coerce.boolean().default(false),
+  
+  // SEP-10 / Web Auth
+  WEB_AUTH_HOME_DOMAIN: z.string(),
+  WEB_AUTH_DOMAIN: z.string(),
+  WEB_AUTH_SERVER_SECRET: z.string().regex(/^S/), // Stellar secret seed
+  
+  // Sessions
+  JWT_SECRET: z.string(),
+  JWT_EXPIRES_IN: z.string().default('900s'),
 });
 
 export const env = Env.parse(process.env);

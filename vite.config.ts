@@ -14,4 +14,7 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  define: {
+    __API_BASE__: JSON.stringify(process.env.VITE_API_BASE || 'http://localhost:4000'),
+  },
 })

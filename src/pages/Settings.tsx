@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useToast } from '@/hooks/useToast'
 import { useTheme } from '@/contexts/ThemeContext'
+import { PaymentToggle } from '@/components/ui/PaymentToggle'
 import clsx from 'clsx'
 
 export const Settings = () => {
@@ -152,14 +153,10 @@ export const Settings = () => {
               <label className="block text-sm font-medium mb-2">
                 Default Currency
               </label>
-              <select
-                value={settings.currency}
-                onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
-                className="input-base"
-              >
-                <option value="USDC">USDC</option>
-                <option value="XLM">XLM</option>
-              </select>
+              <PaymentToggle
+                value={settings.currency as 'USDC' | 'XLM'}
+                onChange={(currency) => setSettings({ ...settings, currency })}
+              />
             </div>
             
             <div>

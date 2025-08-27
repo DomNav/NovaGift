@@ -8,10 +8,11 @@ export const config = {
   port: parseInt(process.env.PORT || '4000'),
   nodeEnv: process.env.NODE_ENV || 'development',
   
-  // Stellar Network
-  horizonUrl: process.env.HORIZON_URL || 'https://horizon-testnet.stellar.org',
-  sorobanRpcUrl: process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org',
-  networkPassphrase: process.env.NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
+  // Stellar Network - Auto-detect mainnet vs testnet
+  stellarNetwork: process.env.STELLAR_NETWORK || (process.env.NODE_ENV === 'production' ? 'pubnet' : 'testnet'),
+  horizonUrl: process.env.HORIZON_URL || (process.env.STELLAR_NETWORK === 'pubnet' ? 'https://horizon.stellar.org' : 'https://horizon-testnet.stellar.org'),
+  sorobanRpcUrl: process.env.SOROBAN_RPC_URL || (process.env.STELLAR_NETWORK === 'pubnet' ? 'https://soroban.stellar.org' : 'https://soroban-testnet.stellar.org'),
+  networkPassphrase: process.env.NETWORK_PASSPHRASE || (process.env.STELLAR_NETWORK === 'pubnet' ? 'Public Global Stellar Network ; September 2015' : 'Test SDF Network ; September 2015'),
   
   // Contracts
   novaGiftContractId: process.env.NOVAGIFT_CONTRACT_ID || '',
@@ -29,8 +30,8 @@ export const config = {
   appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:5173',
   reflectorApiUrl: process.env.REFLECTOR_API_URL || 'https://api.reflector.testnet.example',
   
-  // Features
-  enableReflector: process.env.ENABLE_REFLECTOR === 'true',
+  // Features - Enable Reflector for both testnet and mainnet
+  enableReflector: process.env.ENABLE_REFLECTOR === 'true' || process.env.NODE_ENV === 'development' || (process.env.NODE_ENV === 'production' && (process.env.STELLAR_NETWORK === 'pubnet' || !process.env.STELLAR_NETWORK)),
   enableFeeSponsorship: !!process.env.FEE_SPONSOR,
 };
 

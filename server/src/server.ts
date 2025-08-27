@@ -6,6 +6,13 @@ import { errorMiddleware } from './middleware/error';
 import envelopeRoutes from './routes/envelope';
 import stellarRoutes from './routes/stellar';
 import profileRoutes from './routes/profile';
+import authRoutes from './routes/auth';
+import kaleRoutes from './routes/kale-gating';
+import kalePublicRoutes from './routes/kale-public';
+import walletRoutes from './routes/wallet';
+import ratesRoutes from './routes/rates';
+import healthRoutes from './routes/health';
+import notificationRoutes from './routes/notifications';
 import { apiLimiter } from './middlewares/rate';
 import { requireConsent, checkConsent } from './middlewares/consent';
 
@@ -28,18 +35,18 @@ app.use(httpLogger); // request logging
 app.use(apiLimiter); // Global rate limiting
 
 // Routes
+app.use('/auth', authRoutes);
+app.use('/api/kale', kaleRoutes);
+app.use('/api/kale-public', kalePublicRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/rates', ratesRoutes);
 app.use('/api/envelope', envelopeRoutes);
 app.use('/api/stellar', stellarRoutes);
 app.use('/api/profile', profileRoutes); // Profile routes include consent middleware
+app.use('/api/notifications', notificationRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({
-    ok: true,
-    env: config.nodeEnv === 'production' ? 'mainnet' : 'testnet',
-    timestamp: new Date().toISOString(),
-  });
-});
+app.use('/api/health', healthRoutes);
 
 // Error handler (must be last)
 app.use(errorMiddleware);

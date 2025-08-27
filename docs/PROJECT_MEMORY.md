@@ -311,3 +311,33 @@ For questions or issues, refer to the project repository or contact the developm
   - POOLING - Boolean flag for connection pooling
   - Strict Zod validation for all environment variables
   - Improved JTI idempotency using Prisma Jti model
+## Recent Feature Additions
+
+### SEP-10 Auth & KALE Token Gating (2025-08-26)
+- **Decision:** Implemented real SEP-10 authentication replacing mock challenges
+- **Rationale:** Production-ready wallet authentication using industry standard
+- **Implementation:**
+  - Server issues and verifies SEP-10 challenges with Freighter
+  - JWT sessions tied to wallet public keys
+  - KALE holdings checked via read-only Soroban calls
+  - Server-authoritative skin gating prevents client bypass
+- **Files touched:**
+  - `server/src/lib/sep10.ts` - SEP-10 challenge issuing and verification
+  - `server/src/lib/jwt.ts` - JWT minting and verification
+  - `server/src/middlewares/requireAuth.ts` - JWT authentication middleware
+  - `server/src/routes/auth.ts` - SEP-10 challenge/verify endpoints
+  - `server/src/lib/stellar-rpc-kale.ts` - KALE balance reading via Soroban
+  - `server/src/lib/soroban-kale.ts` - KALE holdings helper
+  - `server/src/routes/kale-gating.ts` - KALE eligibility and redemption routes
+  - `src/lib/auth.ts` - Frontend Freighter authentication
+  - `src/lib/session.ts` - Frontend JWT session management
+  - `src/components/skins/SkinsGrid.tsx` - KALE skins UI component
+  - `src/pages/KaleSkins.tsx` - Updated with real auth and skins grid
+- **Configuration:**
+  - `KALE_FAKE_BALANCE=true` for deterministic testing
+  - Thresholds: 1/5/25/100 KALE for Common/Rare/Epic/Legendary
+  - 15-minute JWT expiry for security
+- **Future Considerations:**
+  - Add hold duration requirements (e.g., must hold 7+ days)
+  - Include staked KALE in balance calculations
+  - Support multi-token requirements

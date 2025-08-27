@@ -69,13 +69,24 @@ export function useFreighter(): UseFreighterReturn {
         
         addToast('Wallet connected successfully', 'success');
       } else {
-        addToast('Failed to connect wallet', 'error');
+        const errorMessage = connection.error || 'Failed to connect wallet';
+        addToast(errorMessage, 'error');
+        
+        // Clear any stored connection data
+        localStorage.removeItem('wallet_address');
+        localStorage.removeItem('wallet_connected');
       }
     } catch (error) {
       console.error('Failed to connect:', error);
       setConnected(false);
       setPublicKey('');
-      addToast('Failed to connect wallet', 'error');
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect wallet';
+      addToast(errorMessage, 'error');
+      
+      // Clear any stored connection data
+      localStorage.removeItem('wallet_address');
+      localStorage.removeItem('wallet_connected');
     } finally {
       setConnecting(false);
     }

@@ -1,5 +1,4 @@
 import * as Freighter from "@stellar/freighter-api";
-import { Networks } from "@stellar/stellar-sdk";
 
 // Contract addresses (testnet)
 export const ENVELOPE_CONTRACT = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHBCASH';
@@ -7,13 +6,14 @@ export const USDC_CONTRACT = 'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHM
 export const WXLM_CONTRACT = 'CBP7NO6F7FRDHSOFQBT2L2UWYIZ2PU2ZOQOWDGDWX2LECTJGX2GQJRV2';
 
 // Network configuration
-export const NETWORK_PASSPHRASE = Networks.TESTNET;
+export const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
 export const RPC_URL = 'https://soroban-testnet.stellar.org';
 
 // Types
 export interface WalletConnection {
   publicKey: string;
   connected: boolean;
+  error?: string;
 }
 
 export interface TransactionResult {
@@ -31,7 +31,30 @@ declare global {
 
 // Check if Freighter is installed
 export function detectFreighter(): boolean {
-  return typeof window !== 'undefined' && window.freighter !== undefined;
+  if (typeof window === 'undefined') {
+    console.log('Window is undefined (SSR)');
+    return false;
+  }
+  
+  try {
+    // Check multiple ways Freighter might be available
+    const hasFreighterWindow = 'freighter' in window && window.freighter !== undefined;
+    const hasFreighterApi = typeof Freighter !== 'undefined';
+    
+    console.log('Freighter detection:', {
+      windowFreighter: window.freighter,
+      hasFreighterWindow,
+      hasFreighterApi,
+      freighterKeys: window.freighter ? Object.keys(window.freighter) : [],
+      freighterApiKeys: Freighter ? Object.keys(Freighter) : []
+    });
+    
+    // Return true if either method detects Freighter
+    return hasFreighterWindow || hasFreighterApi;
+  } catch (error) {
+    console.error('Error detecting Freighter:', error);
+    return false;
+  }
 }
 
 // Alias for compatibility
@@ -40,20 +63,57 @@ export const isFreighterInstalled = detectFreighter;
 // Connect to Freighter wallet
 export async function connect(): Promise<WalletConnection> {
   try {
-    if (!detectFreighter()) {
-      // Return disconnected state when no Freighter
-      return { publicKey: '', connected: false };
+    console.log('🔗 Attempting to connect wallet...');
+    
+    // Direct Freighter API check and call
+    console.log('🔍 Direct API test:', {
+      freighterImported: !!Freighter,
+      requestAccessExists: typeof Freighter?.requestAccess === 'function',
+    });
+    
+    if (!Freighter || typeof Freighter.requestAccess !== 'function') {
+      console.log('❌ Freighter API not available');
+      throw new Error('Freighter wallet extension not found. Please install Freighter and refresh the page.');
     }
     
+    console.log('✅ Calling Freighter.requestAccess() directly...');
     const result = await Freighter.requestAccess();
-    if (result.address) {
+    console.log('📋 Raw Freighter response:', JSON.stringify(result, null, 2));
+    
+    // Handle different response formats
+    if (result?.address) {
+      console.log('🎉 Successfully connected with address:', result.address);
       return { publicKey: result.address, connected: true };
     }
     
-    return { publicKey: '', connected: false };
+    if (result?.error) {
+      console.log('⚠️ Freighter returned error:', result.error);
+      throw new Error(`Freighter error: ${result.error}`);
+    }
+    
+    // Handle case where result is empty or user cancelled
+    console.log('❌ No address received - user likely cancelled or Freighter is locked');
+    throw new Error('Connection cancelled. Please unlock Freighter and try again.');
+    
   } catch (error) {
-    console.error('Failed to connect wallet:', error);
-    return { publicKey: '', connected: false };
+    console.error('💥 Failed to connect wallet:', error);
+    
+    // Return more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('User rejected')) {
+        return { publicKey: '', connected: false, error: 'Connection rejected by user' };
+      }
+      if (error.message.includes('not found') || error.message.includes('undefined')) {
+        return { publicKey: '', connected: false, error: 'Freighter wallet not installed' };
+      }
+    }
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown connection error';
+    return { 
+      publicKey: '', 
+      connected: false, 
+      error: errorMessage 
+    };
   }
 }
 

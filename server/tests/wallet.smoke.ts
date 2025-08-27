@@ -1,0 +1,23 @@
+import axios from "axios";
+import { Keypair } from "@stellar/stellar-sdk";
+const API_BASE = process.env.API_BASE || "http://localhost:4000";
+const FRIENDBOT = "https://friendbot.stellar.org";
+const sleep = (ms:number)=>new Promise(r=>setTimeout(r,ms));
+
+async function waitServer() {
+  for (let i=0;i<10;i++){ try { await axios.get(`${API_BASE}/api/health`, {timeout:1500}); return; } catch { await sleep(500); } }
+  throw new Error("Server not reachable");
+}
+
+(async () => {
+  await waitServer();
+  const kp = Keypair.random(); const pub = kp.publicKey();
+  await axios.get(`${FRIENDBOT}/?addr=${encodeURIComponent(pub)}`, { timeout: 10000 });
+  const resp = await axios.get(`${API_BASE}/api/wallet/balances/${pub}`, { timeout: 5000 });
+  if (!resp.data?.ok) throw new Error("balances endpoint not ok");
+  const xlm = Number(resp.data.xlm);
+  if (!Number.isFinite(xlm) || xlm <= 0) throw new Error("no XLM balance");
+  const hasXLM = Array.isArray(resp.data.balances) && resp.data.balances.some((b:any)=>b?.code==="XLM");
+  if (!hasXLM) throw new Error("XLM missing");
+  console.log("✅ Wallet balances smoke OK:", { account: pub, xlm: resp.data.xlm });
+})().catch(e=>{ console.error("❌ Wallet balances smoke FAIL:", e?.message||e); process.exit(1); });

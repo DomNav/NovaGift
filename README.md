@@ -22,6 +22,8 @@ NovaGift is a decentralized platform for sending cryptocurrency gifts through di
 - **KM/Rewards API**: Track user karma and rewards
 - **Email Notifications**: Resend integration for envelope claims
 - **SQLite Database**: Persistent storage for user profiles
+- **SEP-10 Authentication**: Real wallet auth via Freighter
+- **KALE Token Gating**: Hold-to-unlock premium skins via Soroban
 
 ### Frontend (React/TypeScript)
 - **Wallet Integration**: Freighter wallet support
@@ -153,6 +155,15 @@ cargo test -p envelope
 npm test
 ```
 
+### Smoke Tests
+```bash
+# Start server first
+npm run server:dev
+
+# Run smoke tests
+npm run smoke:endpoints
+```
+
 ## API Endpoints
 
 ### Envelope Management
@@ -160,6 +171,12 @@ npm test
 - `POST /api/envelope/fund` - Confirm on-chain funding
 - `POST /api/envelope/open` - Claim with preimage (fee-sponsored)
 - `POST /api/envelope/cancel` - Cancel expired envelope
+
+### Wallet & Balances
+- `GET /api/wallet/balances/:account` - Get wallet balances (returns { ok, account, xlm, balances[] })
+
+### Rates & Prices
+- `GET /api/rates/spot?base=XLM&quote=USD` - Get price rates (Reflector-ready with CoinGecko fallback)
 
 ### Studio/Rewards
 - `GET /api/studio/me?wallet=G...` - Get user profile and KM
@@ -170,7 +187,7 @@ npm test
 - `POST /notify/envelope-funded` - Email notification trigger
 
 ### Health
-- `GET /api/health` - Service health check
+- `GET /api/health` - Health check with service status (DB/Horizon/RPC)
 
 See [API Documentation](docs/api.md) for detailed request/response formats.
 
@@ -242,6 +259,24 @@ NovaGift/
 - Expiry mechanism for unclaimed envelopes
 - Fixed-point arithmetic for overflow protection
 - Token approval required before envelope creation
+
+## Auth & KALE Gating
+
+### SEP-10 Authentication
+- **Real wallet auth:** Uses SEP-10 standard via Freighter
+  - `/auth/sep10/challenge` → returns challenge XDR (server-signed)
+  - Client signs with `@stellar/freighter-api`, then:
+  - `/auth/sep10/verify` → issues JWT tied to wallet (sub = G...).
+
+### KALE Hold-to-Unlock Skins
+- **JWT-protected endpoints:**
+  - `GET /api/kale/eligibility` → { holdings, eligible, rules }
+  - `POST /api/kale/redeem-kale-gated` → unlocks if holdings ≥ threshold
+- **Environment variables:**
+  - `KALE_CONTRACT_ID` - KALE token contract address
+  - `KALE_FAKE_BALANCE` - Use fake balances for testing
+  - `WEB_AUTH_HOME_DOMAIN`, `WEB_AUTH_DOMAIN`, `WEB_AUTH_SERVER_SECRET`
+  - `JWT_SECRET`, `JWT_EXPIRES_IN`
 
 ## License
 
