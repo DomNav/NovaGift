@@ -1,0 +1,45 @@
+--- /dev/null
++++ b/server/src/lib/log.ts
+@@ -0,0 +1,42 @@
++/**
++ * Simple logger with redaction for sensitive fields
++ */
++
++const REDACTED_FIELDS = [
++  'authorization',
++  'x-api-key',
++  'link',
++  'xdr',
++  'password',
++  'secret',
++  'token',
++  'jwt',
++];
++
++function redactSensitive(obj: any): any {
++  if (typeof obj !== 'object' || obj === null) {
++    return obj;
++  }
++
++  const result: any = Array.isArray(obj) ? [] : {};
++  
++  for (const key in obj) {
++    const lowerKey = key.toLowerCase();
++    if (REDACTED_FIELDS.some(field => lowerKey.includes(field))) {
++      result[key] = '[REDACTED]';
++    } else if (typeof obj[key] === 'object') {
++      result[key] = redactSensitive(obj[key]);
++    } else {
++      result[key] = obj[key];
++    }
++  }
++  
++  return result;
++}
++
++export const logger = {
++  info: (message: string, data?: any) => console.log(message, data ? redactSensitive(data) : ''),
++  error: (message: string, error?: any) => console.error(message, error ? redactSensitive(error) : ''),
++  warn: (message: string, data?: any) => console.warn(message, data ? redactSensitive(data) : ''),
++  debug: (message: string, data?: any) => console.debug(message, data ? redactSensitive(data) : ''),
++};

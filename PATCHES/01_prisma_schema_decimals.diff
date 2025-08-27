@@ -1,0 +1,38 @@
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -28,7 +28,7 @@ model Envelope {
+   id               String          @id
+   status           EnvelopeStatus
+   asset            Asset
+-  amount           Decimal
++  amount           Decimal         @db.Decimal(30, 7)
+   decimals         Int
+   sender           String
+   hash             String
+@@ -38,7 +38,7 @@ model Envelope {
+   openedTxId       String?
+   recipient        String?
+   assetDelivered   Asset?
+-  amountDelivered  Decimal?
++  amountDelivered  Decimal?        @db.Decimal(30, 7)
+   canceledTxId     String?
+   createdAt        DateTime        @default(now())
+   fundedAt         DateTime?
+@@ -60,7 +60,7 @@ model Jti {
+ model Profile {
+   wallet              String   @id
+   km                  Int      @default(0)
+-  usdEarned           Decimal  @default(0)
++  usdEarned           Decimal  @default(0) @db.Decimal(18, 2)
+   language            String   @default("en")
+   consentGiven        Boolean  @default(false)
+   consentTimestamp    DateTime?
+@@ -72,7 +72,7 @@ model SwapReceipt {
+   id         String   @id @default(cuid())
+   envelopeId String
+   route      String
+-  price      Decimal
++  price      Decimal  @db.Decimal(18, 8)
+   txId       String?
+   createdAt  DateTime @default(now())
+ 

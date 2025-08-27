@@ -30,9 +30,9 @@
   }
   
   .light .glass-card {
-    background-color: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
   }
   
   .btn-primary {
@@ -125,11 +125,43 @@
   }
   
   .light .btn-secondary {
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: #f8fafc;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    color: #0f172a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
   .light .btn-secondary:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: #e2e8f0;
+    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  .guide-button {
+    font-weight: 600;
+    letter-spacing: 0.025em;
+  }
+  
+  .light .guide-button {
+    background-color: #1e293b;
+    color: #f8fafc;
+    border-color: #334155;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  .light .guide-button:hover {
+    background-color: #334155;
+    border-color: #475569;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Progress bar improvements for light mode */
+  .light .bg-black\/20 {
+    background-color: rgba(0, 0, 0, 0.15);
+  }
+  
+  .light .bg-black\/5 {
+    background-color: rgba(0, 0, 0, 0.08);
   }
   
   .input-base {

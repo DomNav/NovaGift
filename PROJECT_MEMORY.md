@@ -1,7 +1,7 @@
-# SoroSeal Project Memory
+# NovaGift Project Memory
 
 ## Project Overview
-**Name**: SoroSeal  
+**Name**: NovaGift  
 **Type**: Blockchain Gift Envelope Platform  
 **Network**: Stellar/Soroban Testnet  
 **Status**: Implementation Complete (Aug 22, 2025)  

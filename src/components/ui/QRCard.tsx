@@ -6,7 +6,7 @@ interface QRCardProps {
   memo?: string
 }
 
-export const QRCard = ({ address, amount = '100', memo = 'SoroSeal Gift' }: QRCardProps) => {
+export const QRCard = ({ address, amount = '100', memo = 'NovaGift Gift' }: QRCardProps) => {
   const [copied, setCopied] = useState(false)
   
   const handleCopy = () => {

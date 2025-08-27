@@ -8,7 +8,7 @@ import { Resend } from "resend";
 const PORT = Number(process.env.PORT || 4000);
 const DB_PATH = process.env.DATABASE_PATH || "./data/app.db";
 const resendKey = process.env.RESEND_API_KEY || "";
-const fromEmail = process.env.FROM_EMAIL || "noreply@soroseal.app";
+const fromEmail = process.env.FROM_EMAIL || "noreply@novagift.app";
 
 const db = openDB(DB_PATH);
 ensureSchema(db);
@@ -60,7 +60,7 @@ app.post("/hooks/reflector", async (req, res) => {
       await resend.emails.send({
         from: fromEmail,
         to: [fromEmail],
-        subject: "Soroseal: Reflector event",
+        subject: "NovaGift: Reflector event",
         text: JSON.stringify(req.body, null, 2),
       });
     } catch (e) {
@@ -72,5 +72,5 @@ app.post("/hooks/reflector", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Soroseal server listening on :${PORT}`);
+  console.log(`NovaGift server listening on :${PORT}`);
 });

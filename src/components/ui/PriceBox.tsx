@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import clsx from 'clsx'
+import { PaymentToggle } from './PaymentToggle'
 
 interface PriceBoxProps {
   amount: string
@@ -21,30 +21,10 @@ export const PriceBox = ({ amount, onPaymentMethodChange }: PriceBoxProps) => {
     <div className="glass-card p-6 space-y-4">
       <div className="space-y-2">
         <label className="text-sm text-brand-text/60">Paying with</label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleMethodChange('USDC')}
-            className={clsx(
-              'flex-1 py-2 px-4 rounded-lg transition-all duration-200',
-              paymentMethod === 'USDC'
-                ? 'bg-brand-primary text-white'
-                : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10',
-            )}
-          >
-            <span className="font-medium">USDC</span>
-          </button>
-          <button
-            onClick={() => handleMethodChange('XLM')}
-            className={clsx(
-              'flex-1 py-2 px-4 rounded-lg transition-all duration-200',
-              paymentMethod === 'XLM'
-                ? 'bg-brand-primary text-white'
-                : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10',
-            )}
-          >
-            <span className="font-medium">XLM</span>
-          </button>
-        </div>
+        <PaymentToggle
+          value={paymentMethod}
+          onChange={handleMethodChange}
+        />
       </div>
       
       <div className="border-t border-white/10 pt-4 space-y-3">

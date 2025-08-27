@@ -1,0 +1,42 @@
+--- /dev/null
++++ b/server/src/middleware/error.ts
+@@ -0,0 +1,39 @@
++import { Request, Response, NextFunction } from 'express';
++import { logger } from '../lib/log';
++import { config } from '../config';
++
++interface ErrorWithStatus extends Error {
++  status?: number;
++  code?: string;
++}
++
++export function errorHandler(
++  err: ErrorWithStatus,
++  req: Request,
++  res: Response,
++  next: NextFunction
++) {
++  // Log the error
++  logger.error('Request error:', {
++    error: err.message,
++    stack: config.nodeEnv === 'development' ? err.stack : undefined,
++    path: req.path,
++    method: req.method,
++    body: req.body,
++    query: req.query,
++  });
++
++  // Determine status code
++  const status = err.status || 500;
++
++  // Send response
++  res.status(status).json({
++    ok: false,
++    error: {
++      message: err.message || 'Internal server error',
++      code: err.code,
++      // Only include stack trace in development
++      stack: config.nodeEnv === 'development' ? err.stack : undefined,
++    },
++  });
++}

@@ -12,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | null>(null)
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(() => {
     // Check localStorage first
-    const saved = localStorage.getItem('soroseal_theme')
+    const saved = localStorage.getItem('novagift_theme')
     if (saved === 'light' || saved === 'dark') return saved
     
     // Check system preference
@@ -27,7 +27,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const root = document.documentElement
     root.classList.remove('light', 'dark')
     root.classList.add(theme)
-    localStorage.setItem('soroseal_theme', theme)
+    localStorage.setItem('novagift_theme', theme)
   }, [theme])
 
   const toggleTheme = () => {

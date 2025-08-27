@@ -1,17 +1,26 @@
 import { useState, useEffect, useRef } from 'react'
 import { connect, disconnect, formatAddress, isFreighterInstalled } from '@/lib/wallet'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import KaleometerChip from '@/components/ui/KaleometerChip'
+import { debugFreighterConnection } from '@/lib/wallet-debug'
+
+import AuraPointsChip from '@/components/ui/AuraPointsChip'
+import WalletBalancePill from '@/components/ui/WalletBalancePill'
+import { HeaderPriceTicker } from '@/components/PriceTicker'
+import { NotificationButton } from '@/components/ui/NotificationButton'
 
 export const Header = () => {
-  const [wallet, setWallet] = useState<{ publicKey: string } | null>(null)
+  const [wallet, setWallet] = useState<{ publicKey: string; connected: boolean } | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
   const [showDisconnectMenu, setShowDisconnectMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Auto-connect on mount for demo
-    handleConnect()
+    // Check for stored connection on mount
+    const storedAddress = localStorage.getItem('wallet_address')
+    const storedConnected = localStorage.getItem('wallet_connected') === 'true'
+    
+    if (storedAddress && storedConnected && isFreighterInstalled()) {
+      setWallet({ publicKey: storedAddress, connected: true })
+    }
   }, [])
 
   useEffect(() => {
@@ -28,12 +37,38 @@ export const Header = () => {
   }, [])
 
   const handleConnect = async () => {
+    console.log('🎯 Connect button clicked in Header')
     setIsConnecting(true)
     try {
+      // First, run debug test
+      console.log('🔧 Running debug test...')
+      await debugFreighterConnection()
+      
+      // Then try normal connection
       const result = await connect()
-      setWallet(result)
+      console.log('🔄 Connect result in Header:', result)
+      
+      if (result.connected && result.publicKey) {
+        setWallet(result)
+        localStorage.setItem('wallet_address', result.publicKey)
+        localStorage.setItem('wallet_connected', 'true')
+        console.log('✅ Wallet connected and stored in Header')
+      } else {
+        console.log('❌ Wallet not connected - connection failed or user rejected')
+        console.log('📊 Result details:', result)
+        setWallet(null)
+        
+        // Clear any stored data
+        localStorage.removeItem('wallet_address')
+        localStorage.removeItem('wallet_connected')
+      }
     } catch (error) {
-      console.error('Failed to connect wallet:', error)
+      console.error('💥 Failed to connect wallet in Header:', error)
+      setWallet(null)
+      
+      // Clear any stored data
+      localStorage.removeItem('wallet_address')
+      localStorage.removeItem('wallet_connected')
     } finally {
       setIsConnecting(false)
     }
@@ -52,27 +87,25 @@ export const Header = () => {
   }
 
   return (
-    <header className="h-16 bg-brand-surface/50 backdrop-blur-lg border-b border-brand-text/10 dark:border-white/10 px-6 flex items-center justify-between">
+    <header className="h-16 bg-brand-surface/30 backdrop-blur-lg px-6 flex items-center justify-between border-b border-brand-text/10 dark:border-white/10">
       <div className="flex items-center gap-4">
         <h2 className="text-lg font-medium text-brand-text/80">Dashboard</h2>
       </div>
       
       <div className="flex items-center gap-4">
-        <KaleometerChip />
-        <ThemeToggle />
+        <HeaderPriceTicker />
+        <AuraPointsChip />
+        <WalletBalancePill account={wallet?.publicKey || null} />
+        <NotificationButton />
         
-        {!isFreighterInstalled() && (
-          <span className="text-xs text-brand-text/50">Demo Mode</span>
-        )}
-        
-        {wallet ? (
+        {wallet && wallet.connected && wallet.publicKey ? (
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setShowDisconnectMenu(!showDisconnectMenu)}
-              className="glass-card px-4 py-2 flex items-center gap-2 hover:bg-brand-text/5 transition-colors"
+              className="glass-card px-4 py-2 flex items-center gap-2 hover:bg-brand-text/5 transition-colors max-w-[160px] min-w-[120px]"
             >
-              <div className="w-2 h-2 bg-brand-positive rounded-full animate-pulse" />
-              <span className="text-sm font-mono">{formatAddress(wallet.publicKey)}</span>
+              <div className="w-2 h-2 bg-brand-positive rounded-full animate-pulse flex-shrink-0" />
+              <span className="text-sm font-mono truncate">{formatAddress(wallet.publicKey)}</span>
               <svg 
                 className={`w-4 h-4 text-brand-text/50 transition-transform ${showDisconnectMenu ? 'rotate-180' : ''}`}
                 fill="none" 
@@ -95,8 +128,9 @@ export const Header = () => {
                     </svg>
                     Disconnect Wallet
                   </button>
-                  <div className="px-3 py-2 text-xs text-brand-text/50 border-t border-brand-text/10 dark:border-white/10">
-                    {wallet.publicKey}
+                  <div className="px-3 py-2 text-xs border-t border-brand-text/10 dark:border-white/10">
+                    <div className="text-brand-text/70 mb-1 font-medium">Wallet Address:</div>
+                    <div className="text-brand-text/50 font-mono break-all">{wallet.publicKey}</div>
                   </div>
                 </div>
               </div>
@@ -106,7 +140,7 @@ export const Header = () => {
           <button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="btn-secondary text-sm"
+            className="px-4 py-2 rounded-full text-xs font-medium text-white bg-gradient-to-r from-gray-600/80 to-blue-500 hover:from-gray-500/90 hover:to-blue-400 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-xl"
           >
             {isConnecting ? 'Connecting...' : 'Connect Wallet'}
           </button>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useToast } from '@/hooks/useToast'
 import { useTheme } from '@/contexts/ThemeContext'
+import { PaymentToggle } from '@/components/ui/PaymentToggle'
 import clsx from 'clsx'
 
 export const Settings = () => {
@@ -17,7 +18,7 @@ export const Settings = () => {
   
   const handleSave = () => {
     // Save settings (mock)
-    localStorage.setItem('soroseal_settings', JSON.stringify(settings))
+    localStorage.setItem('novagift_settings', JSON.stringify(settings))
     addToast('Settings saved successfully!', 'success')
   }
   
@@ -38,7 +39,7 @@ export const Settings = () => {
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-antonio gradient-text mb-2">Settings</h1>
-        <p className="text-brand-text/60">Configure your SoroSeal preferences</p>
+        <p className="text-brand-text/60">Configure your NovaGift preferences</p>
       </div>
       
       <div className="space-y-6">
@@ -152,14 +153,10 @@ export const Settings = () => {
               <label className="block text-sm font-medium mb-2">
                 Default Currency
               </label>
-              <select
-                value={settings.currency}
-                onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
-                className="input-base"
-              >
-                <option value="USDC">USDC</option>
-                <option value="XLM">XLM</option>
-              </select>
+              <PaymentToggle
+                value={settings.currency as 'USDC' | 'XLM'}
+                onChange={(currency) => setSettings({ ...settings, currency })}
+              />
             </div>
             
             <div>
@@ -235,7 +232,7 @@ export const Settings = () => {
         {/* About */}
         <div className="glass-card p-4 text-center">
           <p className="text-xs text-brand-text/60">
-            SoroSeal v0.1.0 • Built on Stellar • Powered by Soroswap
+            NovaGift v0.1.0 • Built on Stellar • Powered by Soroswap
           </p>
           <div className="flex justify-center gap-4 mt-2">
             <a href="#" className="text-xs text-brand-primary hover:text-brand-secondary">

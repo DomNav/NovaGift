@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { EnvelopeCard } from '@/components/ui/EnvelopeCard'
+import { EnvelopeOpeningDemo } from '@/components/ui/EnvelopeOpeningDemo'
 import { useToast } from '@/hooks/useToast'
 import { useSkins } from '@/store/skins'
 
@@ -11,14 +12,14 @@ export const Create = () => {
   const [expiry, setExpiry] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   
-  const { presets, selectedSealedId, unlocked, hydrate, getById } = useSkins()
+  const { selectedSealedId, selectedOpenedId, hydrate, getById } = useSkins()
   
   useEffect(() => {
     hydrate()
   }, [])
   
   const sealedSkin = getById(selectedSealedId)
-  const isLockedSealed = sealedSkin?.requires && !unlocked.includes(sealedSkin.id)
+  const openedSkin = getById(selectedOpenedId)
   
   const handleCreate = async () => {
     if (!recipient) {
@@ -150,24 +151,38 @@ export const Create = () => {
         </div>
         
         {/* Preview */}
-        <div className="flex flex-col items-center justify-center">
-          <h3 className="text-lg font-medium mb-4">Live Preview</h3>
-          <EnvelopeCard
-            variant="sealed"
-            skin={sealedSkin}
-            locked={isLockedSealed}
-            usdCents={parseFloat(amount || '0') * 100}
-            toLabel={recipient || 'GDEMO...RECIPIENT'}
-            fromLabel="You"
-          />
+        <div className="space-y-8">
+          <div className="flex flex-col items-center">
+            <h3 className="text-lg font-medium mb-4">Live Preview</h3>
+            
+            {/* Sealed Preview */}
+            <div className="space-y-4">
+              <div className="text-center">
+                <h4 className="text-sm font-medium text-brand-text/80 mb-2">Sealed Envelope</h4>
+                <EnvelopeCard
+                  variant="sealed"
+                  skin={sealedSkin}
+                  usdCents={parseFloat(amount || '0') * 100}
+                  toLabel={recipient || 'GDEMO...RECIPIENT'}
+                  fromLabel="You"
+                />
+                <p className="text-xs text-brand-text/60 mt-2">
+                  How the envelope appears before opening
+                </p>
+              </div>
+            </div>
+          </div>
           
-          <div className="mt-6 text-center">
-            <p className="text-sm text-brand-text/60">
-              This is how your envelope will appear
-            </p>
-            <p className="text-xs text-brand-text/40 mt-1">
-              The recipient will see this when they receive it
-            </p>
+          {/* Opening Demo */}
+          <div className="flex flex-col items-center">
+            <h4 className="text-sm font-medium text-brand-text/80 mb-4">Opening Experience</h4>
+            <EnvelopeOpeningDemo
+              sealedSkin={sealedSkin}
+              openedSkin={openedSkin}
+              usdCents={parseFloat(amount || '0') * 100}
+              toLabel={recipient || 'GDEMO...RECIPIENT'}
+              fromLabel="You"
+            />
           </div>
         </div>
       </div>

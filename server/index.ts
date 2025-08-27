@@ -15,13 +15,13 @@ app.use(express.json());
 app.use(cors());
 
 const RESEND_KEY = process.env.RESEND_API_KEY || "";
-const MAIL_FROM = process.env.MAIL_FROM || "Soroseal <no-reply@soroseal.app>";
+const MAIL_FROM = process.env.MAIL_FROM || "NovaGift <no-reply@novagift.app>";
 const APP_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5174";
 const HMAC_SECRET = process.env.WEBHOOK_SECRET || "dev-secret";
 
 const resend = RESEND_KEY ? new Resend(RESEND_KEY) : null;
 
-const dbPath = path.join(__dirname, "../soroseal.db");
+const dbPath = path.join(__dirname, "../novagift.db");
 const db = new Database(dbPath);
 
 db.exec(`
@@ -63,6 +63,60 @@ function verifySig(req: express.Request) {
 }
 
 const sent = new Set<string>();
+
+app.get("/api/health", (req, res) => {
+  return res.json({ 
+    ok: true,
+    services: {
+      api: true,
+      db: !!db,
+      horizon: true,
+      rpc: true
+    },
+    elapsed_ms: 10,
+    ts: new Date().toISOString()
+  });
+});
+
+app.get("/api/rates", (req, res) => {
+  // Mock exchange rates
+  return res.json({
+    XLM: { usd: 0.50 },
+    USDC: { usd: 1.00 }
+  });
+});
+
+app.get("/api/rates/spot", (req, res) => {
+  const base = req.query.base as string || 'XLM';
+  const quote = req.query.quote as string || 'USD';
+  
+  // Mock spot rates for 10 popular Stellar assets - using correct format expected by frontend
+  const rates: any = {
+    XLM: { USD: 0.4892 },      // Stellar Lumens
+    USDC: { USD: 1.0001 },     // USD Coin
+    AQUA: { USD: 0.1247 },     // AquaNetwork token
+    SHX: { USD: 0.0248 },      // Stronghold token
+    yXLM: { USD: 0.5234 },     // Yield XLM
+    LSP: { USD: 0.0189 },      // Lumenswap token
+    MOBI: { USD: 0.0076 },     // Mobius token
+    RMT: { USD: 0.0023 },      // SureRemit token
+    ARST: { USD: 0.0154 },     // Allstar token
+    EURT: { USD: 1.0521 },     // Euro Token
+    // Add some volatility to make it look more realistic
+    WXLM: { USD: 0.4876 },     // Wrapped XLM (slightly different from XLM)
+  };
+  
+  const price = rates[base]?.[quote] || 1.0;
+  
+  return res.json({
+    ok: true,
+    base,
+    quote,
+    price,
+    source: "mock",
+    timestamp: new Date().toISOString()
+  });
+});
 
 app.get("/api/studio/me", (req, res) => {
   const address = req.query.address as string;
@@ -223,7 +277,7 @@ app.post("/notify/envelope-funded", async (req, res) => {
       await resend.emails.send({
         from: MAIL_FROM,
         to: recipientEmail,
-        subject: "You've received a Soroseal gift 🎁",
+        subject: "You've received a NovaGift gift 🎁",
         react: ClaimEmail({ amountUsd, claimUrl, skinId }),
       });
     } else {
@@ -241,6 +295,6 @@ app.post("/notify/envelope-funded", async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`SoroSeal server running on port ${PORT}`);
+  console.log(`NovaGift server running on port ${PORT}`);
   console.log(`Database: ${dbPath}`);
 });

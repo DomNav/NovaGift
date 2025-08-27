@@ -3,17 +3,19 @@ import { useTheme } from '@/contexts/ThemeContext'
 interface ThemeLogoProps {
   className?: string
   alt?: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'full'
   // Optional: specify different logos for each theme
   lightModeLogo?: string
   darkModeLogo?: string
   // Optional: use single transparent logo (default behavior)
   transparentLogo?: string
+  // Optional: use the new JPG logo format
+  useJpgLogo?: boolean
 }
 
 export const ThemeLogo = ({ 
   className = '', 
-  alt = 'SoroSeal Logo',
+  alt = 'NovaGift Logo',
   size = 'md',
   lightModeLogo,
   darkModeLogo,
@@ -25,7 +27,8 @@ export const ThemeLogo = ({
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-16 h-16', 
-    lg: 'w-24 h-24'
+    lg: 'w-24 h-24',
+    'full': 'w-full h-auto'
   }
   
   // Determine which logo to use
@@ -40,8 +43,8 @@ export const ThemeLogo = ({
       return transparentLogo
     }
     
-    // Default: use the transparent version for better cross-theme visibility
-    return '/assets/images/soroseal-high-resolution-logo-transparent.png'
+    // Default: use the JPG logo
+    return '/assets/images/novagift-logo.jpg'
   }
   
   return (
@@ -50,13 +53,14 @@ export const ThemeLogo = ({
       alt={alt}
       className={`
         ${sizeClasses[size]} 
-        mx-auto 
+        ${size === 'full' ? '' : 'mx-auto'}
         opacity-90 
         hover:opacity-100 
         transition-all 
         duration-200 
         drop-shadow-lg
-        ${theme === 'dark' ? 'filter brightness-110 contrast-110' : 'filter brightness-95 contrast-105'}
+        object-contain
+        ${theme === 'dark' ? 'filter brightness-110 contrast-110 shadow-2xl shadow-blue-500/30' : 'filter brightness-95 contrast-105'}
         ${className}
       `}
     />

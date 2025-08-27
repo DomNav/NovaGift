@@ -1,7 +1,7 @@
-# SoroSeal Project Memory
+# NovaGift Project Memory
 
 ## Project Overview
-SoroSeal is a crypto gifting application that allows users to create, send, and receive digital envelopes containing cryptocurrency. The application features gamified elements, customizable skins, and a reward system.
+NovaGift is a crypto gifting application that allows users to create, send, and receive digital envelopes containing cryptocurrency. The application features gamified elements, customizable skins, and a reward system.
 
 ## Technical Stack
 
@@ -10,8 +10,8 @@ SoroSeal is a crypto gifting application that allows users to create, send, and 
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **UI Components**: Radix UI (comprehensive component library)
-- **Routing**: React Router DOM (in soroseal/web)
-- **State Management**: Zustand (in soroseal/web)
+- **Routing**: React Router DOM (in novagift/web)
+- **State Management**: Zustand (in novagift/web)
 - **Animations**: Motion library, Canvas Confetti
 - **Icons**: Lucide React
 - **Forms**: React Hook Form
@@ -30,7 +30,7 @@ SoroSeal is a crypto gifting application that allows users to create, send, and 
 ## Project Structure
 
 ```
-SoroSeal/
+NovaGift/
 ├── src/                     # Main application source
 │   ├── components/          # Reusable components
 │   │   ├── ui/             # Radix UI components (50+ components)
@@ -39,7 +39,7 @@ SoroSeal/
 │   ├── views/              # Page views
 │   ├── guidelines/         # Development guidelines
 │   └── styles/             # Global styles
-└── soroseal/web/           # Alternative web implementation
+└── novagift/web/           # Alternative web implementation
     ├── src/
     │   ├── components/     # Component library
     │   ├── pages/          # Page components
@@ -71,7 +71,7 @@ SoroSeal/
 4. **OpenReveal** - Envelope opening/reveal animation
 5. **KaleSkins** - Skin customization gallery
 
-### Advanced Features (soroseal/web)
+### Advanced Features (novagift/web)
 1. **Theme System** - Dark/light mode with ThemeContext
 2. **Toast Notifications** - Custom toast system
 3. **Reward System** - Points and achievements (rewards.ts store)
@@ -94,7 +94,7 @@ Complete implementation of 50+ UI components including:
 
 ### Completed
 - ✅ Full UI component library setup
-- ✅ Two parallel implementations (main and soroseal/web)
+- ✅ Two parallel implementations (main and novagift/web)
 - ✅ Figma design integration
 - ✅ Basic routing structure
 - ✅ Theme system implementation
@@ -220,7 +220,7 @@ npm run notify:dev
 4. Build warnings in console need addressing
 
 ## Resources
-- [Figma Design](https://www.figma.com/design/vm9pQuoHVwQ8VM0HRUtwle/Soroseal-Crypto-Gifting-App)
+- [Figma Design](https://www.figma.com/design/vm9pQuoHVwQ8VM0HRUtwle/NovaGift-Crypto-Gifting-App)
 - Radix UI Documentation
 - Tailwind CSS Documentation
 - Vite Documentation
@@ -231,3 +231,113 @@ For questions or issues, refer to the project repository or contact the developm
 ---
 *Last Updated: Current Session*
 *Version: 0.1.0*
+
+## Update Log
+
+### PIPEDA-lite Compliance Implementation
+- **What changed**: Added PIPEDA-lite data privacy controls for consent management and data retention
+- **Files touched**:
+  - `server/src/middlewares/consent.ts` - New consent middleware for profile data access
+  - `server/src/jobs/retention.ts` - New retention job for automated data deletion/anonymization
+  - `server/src/routes/profile.ts` - New profile routes with consent enforcement
+  - `server/src/server.ts` - Updated to import consent middleware and profile routes
+  - `package.json` - Added retention script command
+- **New env/flags**: 
+  - Header `x-wallet` used to identify users for consent checks
+  - Consent enforcement on profile-accessing routes
+  - `npm run retention` command for data retention job execution
+
+### Vercel Deployment Configuration
+- **What changed**: Configured NovaGift for Vercel serverless deployment with PostgreSQL
+- **Files touched**:
+  - `vercel.json` - New Vercel configuration with API routing and build settings
+  - `api/serverless.ts` - New serverless handler wrapping Express app for Vercel
+  - `prisma/schema.prisma` - Updated to PostgreSQL with Vercel adapter support
+  - `DEPLOY.md` - New comprehensive deployment documentation
+- **New env/flags**:
+  - `DATABASE_URL` - Pooled PostgreSQL connection with `?pgbouncer=true`
+  - `DIRECT_URL` - Direct PostgreSQL connection for migrations
+  - `CORS_ORIGIN` - Frontend URL for CORS configuration
+  - Vercel-specific build command: `npm install && npx prisma generate`
+
+### Soroban HTLC Contract Refactoring
+- **What changed**: Refactored NovaGift's Soroban HTLC-like contract for improved clarity, safety, and maintainability
+- **Files touched**:
+  - `contracts/envelope/src/lib.rs` - Refactored main contract with proper HTLC logic, Status enum, and event emissions
+  - `contracts/envelope/src/oracle.rs` - New oracle module with ReflectorClient trait following Bachini pattern
+  - `contracts/envelope/src/error.rs` - New error module with comprehensive contract error definitions
+  - `contracts/envelope/src/tests.rs` - New comprehensive test suite covering happy path, wrong preimage, timeout refund, and security scenarios
+- **New env/flags**:
+  - HTLC-style operations: create, fund, open (with preimage), cancel (after timeout)
+  - Oracle integration for price feeds with staleness checks
+  - Comprehensive error handling with `#[contracterror]` attribute
+  - Test coverage using `soroban-sdk::testutils`
+
+### Repository Audit and Infrastructure Assessment
+- **What changed**: Comprehensive audit of NovaGift repository state and infrastructure readiness
+- **Files touched**:
+  - `PATCHES/01_prisma_schema_decimals.diff` - Fix for Prisma decimal precision
+  - `PATCHES/02_create_logger.diff` - New logger with sensitive data redaction
+  - `PATCHES/03_create_error_middleware.diff` - Global error handling middleware
+  - `PATCHES/04_server_package_scripts.diff` - Missing npm scripts for server
+  - `PATCHES/05_envelope_route_use_db.diff` - Database integration for envelope routes
+  - `AUDIT_REPORT.md` - Comprehensive audit report with 65% completion status
+  - `TODO_NEXT.md` - Prioritized action items for manual setup and implementation
+- **Key findings**:
+  - Core infrastructure in place (Freighter, Reflector, Prisma schema, consent middleware)
+  - Critical gaps: envelope routes still use MemoryStore, missing migrations, incorrect decimal precision
+  - 15 of 23 checklist items passed
+  - Patches prepared for immediate fixes to reach 85-90% completion
+- **New env/flags**:
+  - Identified need for DATABASE_URL configuration (SQLite for dev, PostgreSQL for production)
+  - Missing CONTRACT_ID needs deployment or recovery
+  - FEE_SPONSOR account required for testnet operations
+
+### Fix Pack v1 Implementation
+- **What changed**: Applied comprehensive fix pack to improve code quality, security, and maintainability
+- **Files touched**:
+  - `.env.example` - Updated with authoritative template containing all required environment variables
+  - `server/src/config/env.ts` - New Zod-validated environment configuration module
+  - `prisma/schema.prisma` - Fixed decimal precision mappings for Envelope, Profile, and SwapReceipt models
+  - `server/src/routes/envelope.ts` - Replaced MemoryStore with Prisma database via envelopeRepo
+  - `server/src/lib/log.ts` - New Pino logger with sensitive data redaction
+  - `server/src/middleware/error.ts` - New global error handling middleware
+  - `server/src/server.ts` - Wired httpLogger and errorMiddleware
+  - `server/package.json` - Added lint, test, and retention scripts
+  - `server/src/routes/envelope.smoke.spec.ts` - Added minimal smoke test
+  - `.github/workflows/retention.yml` - New GitHub Action for daily retention job
+- **New env/flags**:
+  - DATABASE_URL - Required database connection string
+  - POOLING - Boolean flag for connection pooling
+  - Strict Zod validation for all environment variables
+  - Improved JTI idempotency using Prisma Jti model
+## Recent Feature Additions
+
+### SEP-10 Auth & KALE Token Gating (2025-08-26)
+- **Decision:** Implemented real SEP-10 authentication replacing mock challenges
+- **Rationale:** Production-ready wallet authentication using industry standard
+- **Implementation:**
+  - Server issues and verifies SEP-10 challenges with Freighter
+  - JWT sessions tied to wallet public keys
+  - KALE holdings checked via read-only Soroban calls
+  - Server-authoritative skin gating prevents client bypass
+- **Files touched:**
+  - `server/src/lib/sep10.ts` - SEP-10 challenge issuing and verification
+  - `server/src/lib/jwt.ts` - JWT minting and verification
+  - `server/src/middlewares/requireAuth.ts` - JWT authentication middleware
+  - `server/src/routes/auth.ts` - SEP-10 challenge/verify endpoints
+  - `server/src/lib/stellar-rpc-kale.ts` - KALE balance reading via Soroban
+  - `server/src/lib/soroban-kale.ts` - KALE holdings helper
+  - `server/src/routes/kale-gating.ts` - KALE eligibility and redemption routes
+  - `src/lib/auth.ts` - Frontend Freighter authentication
+  - `src/lib/session.ts` - Frontend JWT session management
+  - `src/components/skins/SkinsGrid.tsx` - KALE skins UI component
+  - `src/pages/KaleSkins.tsx` - Updated with real auth and skins grid
+- **Configuration:**
+  - `KALE_FAKE_BALANCE=true` for deterministic testing
+  - Thresholds: 1/5/25/100 KALE for Common/Rare/Epic/Legendary
+  - 15-minute JWT expiry for security
+- **Future Considerations:**
+  - Add hold duration requirements (e.g., must hold 7+ days)
+  - Include staked KALE in balance calculations
+  - Support multi-token requirements
