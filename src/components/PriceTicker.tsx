@@ -345,18 +345,13 @@ export function HeaderPriceTicker() {
   const [walletConnected, setWalletConnected] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Expanded list of 10 popular Stellar assets supported by Reflector
+  // Core 5 assets for reliable price display
   const assets: Asset[] = [
-    { code: 'XLM', display: 'XLM', decimals: 7 }, // Stellar Lumens
-    { code: 'USDC', display: 'USDC', decimals: 7 }, // USD Coin
-    { code: 'AQUA', display: 'AQUA', decimals: 7 }, // AquaNetwork token
+    { code: 'XLM', display: 'XLM', decimals: 4 }, // Stellar Lumens
+    { code: 'USDC', display: 'USDC', decimals: 2 }, // USD Coin
+    { code: 'AQUA', display: 'AQUA', decimals: 6 }, // AquaNetwork token
+    { code: 'yXLM', display: 'yXLM', decimals: 4 }, // Yield XLM
     { code: 'SHX', display: 'SHX', decimals: 5 }, // Stronghold token
-    { code: 'yXLM', display: 'yXLM', decimals: 7 }, // Yield XLM
-    { code: 'LSP', display: 'LSP', decimals: 7 }, // Lumenswap token
-    { code: 'MOBI', display: 'MOBI', decimals: 7 }, // Mobius token
-    { code: 'RMT', display: 'RMT', decimals: 7 }, // SureRemit token
-    { code: 'ARST', display: 'ARST', decimals: 7 }, // Allstar token
-    { code: 'EURT', display: 'EURT', decimals: 6 }, // Euro Token
   ];
 
   // Monitor system health

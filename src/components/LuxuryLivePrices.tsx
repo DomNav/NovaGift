@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePrices, useAssetPrice } from '@/hooks/usePrices';
+import { usePrices, transformPriceData } from '@/hooks/usePrices';
 
 // ---- Types
 interface Asset {
@@ -24,37 +24,25 @@ interface LuxuryLivePricesProps {
 
 // ---- Enhanced Live Price Component
 function LuxuryLivePrice({
+  priceData,
   asset,
 }: {
+  priceData?: { priceUsd: number; updatedAt: string } | null;
   asset: Asset;
 }) {
-  const { data, isLoading, isError } = useAssetPrice(asset.code);
   const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
 
   useEffect(() => {
-    if (data) {
+    if (priceData) {
       setLastUpdate(Date.now());
     }
-  }, [data]);
+  }, [priceData]);
 
-  if (isLoading) {
-    return (
-      <motion.div
-        className="flex items-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        <div className="animate-pulse bg-gradient-to-r from-brand-text/20 to-brand-text/10 h-4 w-16 rounded"></div>
-      </motion.div>
-    );
-  }
-
-  if (isError || !data) {
+  if (!priceData) {
     return <span className="text-xs text-brand-text/50">—</span>;
   }
 
-  const price = data.priceUsd;
+  const price = priceData.priceUsd;
 
   return (
     <motion.div className="flex items-center gap-2">
@@ -96,21 +84,32 @@ export default function LuxuryLivePrices({
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
-  // Default assets if none provided
+  // Default assets - Reduced to 5 for reliability
   const defaultAssets: Asset[] = [
-    { code: 'XLM', display: 'XLM', decimals: 7 },
-    { code: 'USDC', display: 'USDC', decimals: 7 },
-    { code: 'AQUA', display: 'AQUA', decimals: 7 },
+    { code: 'XLM', display: 'XLM', decimals: 4 },
+    { code: 'USDC', display: 'USDC', decimals: 2 },
+    { code: 'AQUA', display: 'AQUA', decimals: 6 },
+    { code: 'yXLM', display: 'yXLM', decimals: 4 },
     { code: 'SHX', display: 'SHX', decimals: 5 },
-    { code: 'yXLM', display: 'yXLM', decimals: 7 },
-    { code: 'LSP', display: 'LSP', decimals: 7 },
-    { code: 'MOBI', display: 'MOBI', decimals: 7 },
-    { code: 'RMT', display: 'RMT', decimals: 7 },
-    { code: 'ARST', display: 'ARST', decimals: 7 },
-    { code: 'EURT', display: 'EURT', decimals: 6 },
   ];
 
   const displayAssets = assets.length > 0 ? assets : defaultAssets;
+  
+  // Fetch all prices at once using batch fetching
+  const { data: pricesData, isLoading, isError } = usePrices(displayAssets.map(a => a.code));
+  
+  // Create a map for quick price lookup - handle case variations
+  const priceMap = new Map<string, { priceUsd: number; updatedAt: string }>();
+  if (pricesData) {
+    pricesData.forEach(price => {
+      priceMap.set(price.symbol.toUpperCase(), price);
+      priceMap.set(price.symbol.toLowerCase(), price);
+      // Handle yXLM specifically
+      if (price.symbol.toUpperCase() === 'YXLM') {
+        priceMap.set('yXLM', price);
+      }
+    });
+  }
 
   const handleAssetClick = (asset: Asset) => {
     setSelectedAsset(asset);
@@ -207,7 +206,11 @@ export default function LuxuryLivePrices({
                   {asset.display}
                 </motion.span>
 
-                <LuxuryLivePrice asset={asset} />
+                {isLoading ? (
+                  <div className="animate-pulse bg-gradient-to-r from-brand-text/20 to-brand-text/10 h-4 w-16 rounded"></div>
+                ) : (
+                  <LuxuryLivePrice priceData={priceMap.get(asset.code) || priceMap.get(asset.code.toUpperCase())} asset={asset} />
+                )}
               </div>
 
               {/* Subtle accent line */}
@@ -280,7 +283,7 @@ export default function LuxuryLivePrices({
 
                 <div className="flex justify-between items-center p-3 rounded-lg bg-brand-text/5">
                   <span className="text-brand-text/70">Current Price:</span>
-                  <LuxuryLivePrice asset={selectedAsset} />
+                  <LuxuryLivePrice priceData={priceMap.get(selectedAsset.code) || priceMap.get(selectedAsset.code.toUpperCase())} asset={selectedAsset} />
                 </div>
               </div>
 

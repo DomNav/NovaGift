@@ -10,10 +10,9 @@ const QuerySchema = z.object({
   symbols: z.string().optional(), // comma-separated
 });
 
-// Default assets to fetch if none specified
+// Default assets to fetch if none specified - Reduced to 5 for reliability
 const DEFAULT_SYMBOLS = [
-  "XLM", "USDC", "AQUA", "SHX", "yXLM", 
-  "LSP", "MOBI", "RMT", "ARST", "EURT"
+  "XLM", "USDC", "AQUA", "yXLM", "SHX"
 ];
 
 /**

@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-// Default assets to fetch
+// Default assets to fetch - Reduced to 5 for reliability
 const DEFAULT_SYMBOLS = [
-  "XLM", "USDC", "AQUA", "SHX", "yXLM",
-  "LSP", "MOBI", "RMT", "ARST", "EURT"
+  "XLM", "USDC", "AQUA", "yXLM", "SHX"
 ];
 
 // Price data interface

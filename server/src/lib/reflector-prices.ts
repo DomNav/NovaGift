@@ -17,10 +17,9 @@ type Price = z.infer<typeof PriceItem>;
 const CACHE_TTL_MS = 10_000; // 10 seconds
 let cached: { at: number; data: Price[] } | null = null;
 
-// Well-known asset list for NovaGift
+// Well-known asset list for NovaGift - Reduced to 5 for reliability
 const SUPPORTED_ASSETS = [
-  'XLM', 'USDC', 'AQUA', 'SHX', 'yXLM', 
-  'LSP', 'MOBI', 'RMT', 'ARST', 'EURT'
+  'XLM', 'USDC', 'AQUA', 'yXLM', 'SHX'
 ];
 
 // Fallback prices for resilience
@@ -30,6 +29,7 @@ const FALLBACK_PRICES: Record<string, number> = {
   AQUA: 0.0042,
   SHX: 0.0247,
   yXLM: 0.43,
+  YXLM: 0.43,  // Handle both cases
   LSP: 0.0012,
   MOBI: 0.008,
   RMT: 0.00001,
@@ -55,38 +55,9 @@ export async function fetchReflectorPrices(symbols: string[]): Promise<Price[]> 
   const errors: string[] = [];
 
   try {
-    // Try to fetch from existing /api/rates/spot endpoint first
-    // This already has Reflector, CoinGecko, and DEX integration
-    const apiBase = process.env.APP_BASE_URL || `http://localhost:${config.port}`;
-    
     for (const symbol of symbols) {
-      try {
-        // Use existing rates endpoint which already has multiple sources
-        const response = await fetch(`${apiBase}/api/rates/spot?base=${symbol}&quote=USD`, {
-          // @ts-ignore - node-fetch types
-          timeout: 3000,
-          headers: {
-            'Accept': 'application/json',
-          }
-        });
 
-        if (response.ok) {
-          const data = await response.json() as any;
-          
-          if (data.ok && data.price) {
-            prices.push({
-              symbol: symbol.toUpperCase(),
-              priceUsd: Number(data.price),
-              updatedAt: new Date().toISOString(),
-            });
-            continue;
-          }
-        }
-      } catch (err) {
-        console.log(`Failed to fetch ${symbol} from rates API:`, err);
-      }
-
-      // Try direct Reflector oracle as backup
+      // Try direct Reflector oracle first
       if (config.enableReflector) {
         try {
           const network = config.stellarNetwork === 'pubnet' ? 'pubnet' : 'testnet';
@@ -102,7 +73,7 @@ export async function fetchReflectorPrices(symbols: string[]): Promise<Price[]> 
             continue;
           }
         } catch (err) {
-          console.log(`Failed to fetch ${symbol} from Reflector oracle:`, err);
+          // Silent fail - will use fallback
         }
       }
 

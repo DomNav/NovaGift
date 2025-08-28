@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useAssetPrice } from '@/hooks/usePrices';
+import { usePrices } from '@/hooks/usePrices';
 
 interface Asset {
   code: string;
@@ -25,30 +25,24 @@ interface ExpandedTickerViewProps {
 // Live Price Component - Real implementation
 function LivePrice({
   asset,
+  price,
 }: {
   asset: Asset;
+  price?: { priceUsd: number } | null;
 }) {
-  const { data, isLoading, isError } = useAssetPrice(asset.code);
-
-  if (isLoading) {
-    return (
-      <span className="text-sm font-semibold text-brand-text/50 animate-pulse">Loading...</span>
-    );
-  }
-
-  if (isError || !data) {
+  if (!price) {
     return <span className="text-sm font-semibold text-brand-text/60">—</span>;
   }
 
   return (
     <motion.span
       className="text-sm font-semibold text-brand-text tabular-nums"
-      key={data.priceUsd}
+      key={price.priceUsd}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      ${data.priceUsd.toFixed(asset.decimals || 4)}
+      ${price.priceUsd.toFixed(asset.decimals || 4)}
     </motion.span>
   );
 }
@@ -59,6 +53,23 @@ export default function ExpandedTickerView({
   onClose,
   position,
 }: ExpandedTickerViewProps) {
+  // Fetch all prices at once
+  const { data: pricesData, isLoading } = usePrices(assets.map(a => a.code));
+  
+  // Create price map for quick lookup - handle case variations
+  const priceMap = new Map<string, { priceUsd: number }>();
+  if (pricesData) {
+    pricesData.forEach(price => {
+      priceMap.set(price.symbol.toUpperCase(), { priceUsd: price.priceUsd });
+      // Also set lowercase version for flexibility
+      priceMap.set(price.symbol.toLowerCase(), { priceUsd: price.priceUsd });
+      // Handle yXLM specifically
+      if (price.symbol.toUpperCase() === 'YXLM') {
+        priceMap.set('yXLM', { priceUsd: price.priceUsd });
+      }
+    });
+  }
+
   // Aggressively ensure modal priority when visible
   useEffect(() => {
     if (isVisible) {
@@ -241,7 +252,11 @@ export default function ExpandedTickerView({
                     >
                       {asset.display}
                     </motion.span>
-                    <LivePrice asset={asset} />
+                    {isLoading ? (
+                      <span className="text-sm font-semibold text-brand-text/50 animate-pulse">Loading...</span>
+                    ) : (
+                      <LivePrice asset={asset} price={priceMap.get(asset.code) || priceMap.get(asset.code.toUpperCase())} />
+                    )}
                   </div>
 
                   {/* Subtle accent line */}
