@@ -62,30 +62,18 @@ export const NotificationButton = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative glass-card p-2 hover:bg-brand-text/5 transition-colors rounded-lg"
+        className="relative glass-card px-3 py-1.5 hover:bg-brand-text/5 transition-colors rounded-full"
         disabled={isLoading}
       >
-        <svg 
-          className="w-5 h-5 text-brand-text/70" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15 17h5l-5 5v-5zm0 0H9a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v10z" 
-          />
-        </svg>
-        
+        <span className="text-xs">🔔</span>
+
         {/* Notification Badge */}
         {summary.totalUnread > 0 && (
           <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs font-medium rounded-full flex items-center justify-center px-1">
             {summary.totalUnread > 99 ? '99+' : summary.totalUnread}
           </div>
         )}
-        
+
         {/* Pulse indicator for pending envelopes */}
         {summary.pendingEnvelopes > 0 && (
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-brand-positive rounded-full animate-pulse" />
@@ -108,12 +96,13 @@ export const NotificationButton = () => {
                 </button>
               )}
             </div>
-            
+
             {/* Summary */}
             {summary.pendingEnvelopes > 0 && (
               <div className="mt-2 p-2 bg-brand-positive/10 rounded-md">
                 <p className="text-xs text-brand-positive font-medium">
-                  🎁 {summary.pendingEnvelopes} gift{summary.pendingEnvelopes === 1 ? '' : 's'} waiting to be opened!
+                  🎁 {summary.pendingEnvelopes} gift{summary.pendingEnvelopes === 1 ? '' : 's'}{' '}
+                  waiting to be opened!
                 </p>
               </div>
             )}
@@ -171,29 +160,21 @@ interface NotificationContentProps {
 
 const NotificationContent = ({ notification }: NotificationContentProps) => (
   <div className="flex items-start gap-3">
-    <div className="text-lg mt-0.5 flex-shrink-0">
-      {getNotificationIcon(notification.type)}
-    </div>
-    
+    <div className="text-lg mt-0.5 flex-shrink-0">{getNotificationIcon(notification.type)}</div>
+
     <div className="flex-1 min-w-0">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-brand-text truncate">
-          {notification.title}
-        </p>
+        <p className="text-sm font-medium text-brand-text truncate">{notification.title}</p>
         {!notification.read && (
           <div className="w-2 h-2 bg-brand-positive rounded-full flex-shrink-0 ml-2" />
         )}
       </div>
-      
-      <p className="text-xs text-brand-text/70 mt-1 line-clamp-2">
-        {notification.message}
-      </p>
-      
+
+      <p className="text-xs text-brand-text/70 mt-1 line-clamp-2">{notification.message}</p>
+
       <div className="flex items-center justify-between mt-2">
-        <span className="text-xs text-brand-text/50">
-          {formatTimeAgo(notification.timestamp)}
-        </span>
-        
+        <span className="text-xs text-brand-text/50">{formatTimeAgo(notification.timestamp)}</span>
+
         {notification.amountUsd && (
           <span className="text-xs font-medium text-brand-positive">
             ${notification.amountUsd.toFixed(2)}

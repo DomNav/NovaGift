@@ -1,26 +1,26 @@
-import clsx from 'clsx'
-import GradientShader, { ShaderSettings } from '../skins/GradientShader'
-import EnvelopeOpenFX from "@/components/effects/EnvelopeOpenFX";
-import CountUp from "@/components/effects/CountUp";
+import clsx from 'clsx';
+import GradientShader, { ShaderSettings } from '../skins/GradientShader';
+import EnvelopeOpenFX from '@/components/effects/EnvelopeOpenFX';
+import CountUp from '@/components/effects/CountUp';
 
-export type EnvelopeSkin = { 
-  id: string; 
-  name: string; 
-  premium?: boolean; 
-  settings: ShaderSettings; 
+export type EnvelopeSkin = {
+  id: string;
+  name: string;
+  premium?: boolean;
+  settings: ShaderSettings;
 };
 
 export type EnvelopeCardProps = {
-  variant?: "sealed" | "opened";
+  variant?: 'sealed' | 'opened';
   usdCents?: number;
   toLabel?: string;
   fromLabel?: string;
   skin?: EnvelopeSkin;
   className?: string;
   // Animation props
-  openingFx?: boolean;               // show overlay while opening (sealed state)
-  onOpenFxDone?: () => void;        // callback when FX completes
-  animateAmount?: boolean;          // if opened, animate amount count-up
+  openingFx?: boolean; // show overlay while opening (sealed state)
+  onOpenFxDone?: () => void; // callback when FX completes
+  animateAmount?: boolean; // if opened, animate amount count-up
   // Legacy props for backward compatibility
   isSealed?: boolean;
   amount?: string;
@@ -28,7 +28,7 @@ export type EnvelopeCardProps = {
   sender?: string;
   expiresAt?: string;
   gradientClass?: string;
-}
+};
 
 export const EnvelopeCard = ({
   // New props
@@ -51,11 +51,11 @@ export const EnvelopeCard = ({
   gradientClass = 'from-brand-primary to-brand-accent',
 }: EnvelopeCardProps) => {
   // Use new props if provided, otherwise fall back to legacy
-  const isCardSealed = variant ? variant === "sealed" : isSealed;
+  const isCardSealed = variant ? variant === 'sealed' : isSealed;
   const displayAmount = usdCents !== undefined ? (usdCents / 100).toFixed(2) : amount;
   const recipientLabel = toLabel || recipient;
   const senderLabel = fromLabel || sender;
-  
+
   return (
     <div
       className={clsx(
@@ -63,26 +63,22 @@ export const EnvelopeCard = ({
         'shadow-lg hover:shadow-xl transform hover:scale-105',
         'ring-1 ring-black/10 dark:ring-white/10',
         'border border-black/5 dark:border-white/5',
-        className,
+        className
       )}
     >
       {/* Background gradient - use skin if provided */}
       {skin ? (
-        <GradientShader 
-          className="absolute inset-0"
-          settings={skin.settings}
-          rounded=""
-        />
+        <GradientShader className="absolute inset-0" settings={skin.settings} rounded="" />
       ) : (
         <div className={clsx('absolute inset-0 bg-gradient-to-br', gradientClass)} />
       )}
-      
+
       {/* Glass effect overlay - theme-aware and reduced opacity */}
       <div className="absolute inset-0 bg-white/3 dark:bg-white/8 backdrop-blur-sm z-5" />
-      
+
       {/* Opening animation overlay */}
       {openingFx && <EnvelopeOpenFX running={openingFx} onDone={onOpenFxDone} />}
-      
+
       {/* Content */}
       <div className="relative z-10 h-full p-6 flex flex-col justify-between text-white">
         {isCardSealed ? (
@@ -94,12 +90,14 @@ export const EnvelopeCard = ({
                 Sealed
               </span>
             </div>
-            
+
             <div className="text-center">
               <p className="text-white/80 text-sm mb-1 drop-shadow-md">Gift Envelope</p>
-              <p className="text-white text-2xl font-antonio drop-shadow-lg">${displayAmount} USDC</p>
+              <p className="text-white text-2xl font-antonio drop-shadow-lg">
+                ${displayAmount} USDC
+              </p>
             </div>
-            
+
             <div className="flex items-center justify-between text-xs text-white/80 drop-shadow-md">
               <span>To: {recipientLabel.slice(0, 8)}...</span>
               {expiresAt && <span>Expires: {expiresAt}</span>}
@@ -114,18 +112,21 @@ export const EnvelopeCard = ({
                 Opened
               </span>
             </div>
-            
+
             <div className="text-center">
               <p className="text-white/80 text-sm mb-1 drop-shadow-md">You received</p>
-              {animateAmount && typeof usdCents === "number" ? (
-                <CountUp toCents={usdCents} className="text-white text-3xl font-antonio text-glow" />
+              {animateAmount && typeof usdCents === 'number' ? (
+                <CountUp
+                  toCents={usdCents}
+                  className="text-white text-3xl font-antonio text-glow"
+                />
               ) : (
                 <p className="text-white text-3xl font-antonio text-glow">
-                  ${usdCents ? (usdCents/100).toFixed(2) : amount} USDC
+                  ${usdCents ? (usdCents / 100).toFixed(2) : amount} USDC
                 </p>
               )}
             </div>
-            
+
             <div className="space-y-1">
               <div className="flex justify-between text-xs text-white/90 drop-shadow-md">
                 <span>From:</span>
@@ -139,10 +140,10 @@ export const EnvelopeCard = ({
           </>
         )}
       </div>
-      
+
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 z-5" />
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 z-5" />
     </div>
-  )
-}
+  );
+};

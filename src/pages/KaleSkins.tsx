@@ -14,7 +14,7 @@ export default function KaleSkins() {
       setSessionToken(token);
       setIsLoggedIn(true);
       console.log('Logged in as:', publicKey);
-    } catch (e) { 
+    } catch (e) {
       console.error('Login failed:', e);
       alert('Login failed. Please make sure Freighter is installed and connected.');
     } finally {
@@ -27,23 +27,21 @@ export default function KaleSkins() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">KALE Skins</h1>
         {!isLoggedIn && (
-          <button 
-            onClick={login} 
+          <button
+            onClick={login}
             disabled={loading}
             className="px-3 py-1.5 rounded-xl shadow bg-brand-primary text-white hover:bg-brand-secondary disabled:opacity-50"
           >
             {loading ? 'Connecting...' : 'Connect Freighter'}
           </button>
         )}
-        {isLoggedIn && (
-          <div className="text-sm text-green-600">✓ Connected</div>
-        )}
+        {isLoggedIn && <div className="text-sm text-green-600">✓ Connected</div>}
       </div>
-      
+
       <p className="text-sm opacity-70 mb-4">
         Powered by Soroban · KALE · Your KALE never leaves your wallet.
       </p>
-      
+
       {isLoggedIn ? (
         <SkinsGrid />
       ) : (
@@ -51,8 +49,8 @@ export default function KaleSkins() {
           <p className="text-brand-text/70 dark:text-brand-text/80 mb-4">
             Connect your Freighter wallet to view KALE-gated skins
           </p>
-          <button 
-            onClick={login} 
+          <button
+            onClick={login}
             disabled={loading}
             className="px-6 py-2 rounded-xl bg-brand-primary text-white hover:bg-brand-secondary disabled:opacity-50"
           >

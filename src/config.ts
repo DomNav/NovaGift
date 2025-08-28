@@ -33,4 +33,4 @@ export const config = {
       { id: 'obsidian', name: 'Obsidian', start: '#1F2937', mid: '#374151', end: '#4B5563' },
     ],
   },
-}
+};

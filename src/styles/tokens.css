@@ -1,37 +1,37 @@
 /* Dark theme (default) */
 :root {
   /* Brand Colors */
-  --brand-primary: #1D2BFF;
-  --brand-bg: #0B1020;
-  --brand-surface: #0E1220;
-  --brand-text: #F8FAFF;
-  --brand-positive: #2ECC71;
-  
+  --brand-primary: #1d2bff;
+  --brand-bg: #0b1020;
+  --brand-surface: #0e1220;
+  --brand-text: #f8faff;
+  --brand-positive: #2ecc71;
+
   /* Secondary Colors */
-  --brand-secondary: #4A5FFF;
-  --brand-accent: #7B8CFF;
-  --brand-muted: #A0ABFF;
-  
+  --brand-secondary: #4a5fff;
+  --brand-accent: #7b8cff;
+  --brand-muted: #a0abff;
+
   /* Gradient Presets */
-  --gradient-start: #1D2BFF;
-  --gradient-mid: #4A5FFF;
-  --gradient-end: #7B8CFF;
-  
+  --gradient-start: #1d2bff;
+  --gradient-mid: #4a5fff;
+  --gradient-end: #7b8cff;
+
   /* Semantic Colors */
-  --color-error: #FF4757;
-  --color-warning: #FFA502;
+  --color-error: #ff4757;
+  --color-warning: #ffa502;
   --color-success: var(--brand-positive);
-  --color-info: #54A0FF;
-  
+  --color-info: #54a0ff;
+
   /* Surface Variants */
   --surface-card: rgba(30, 35, 50, 0.8);
   --surface-overlay: rgba(14, 18, 32, 0.95);
   --surface-border: rgba(248, 250, 255, 0.1);
-  
+
   /* Progress Indicators */
-  --progress-active: #F8FAFF;
+  --progress-active: #f8faff;
   --progress-inactive: rgba(248, 250, 255, 0.6);
-  
+
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -42,37 +42,37 @@
 /* Light theme */
 .light {
   /* Brand Colors */
-  --brand-primary: #1D2BFF;
-  --brand-bg: #F8FAFF;
-  --brand-surface: #FFFFFF;
-  --brand-text: #0B1020;
-  --brand-positive: #2ECC71;
-  
+  --brand-primary: #1d2bff;
+  --brand-bg: #f8faff;
+  --brand-surface: #ffffff;
+  --brand-text: #0b1020;
+  --brand-positive: #2ecc71;
+
   /* Secondary Colors */
-  --brand-secondary: #4A5FFF;
-  --brand-accent: #7B8CFF;
-  --brand-muted: #6B7280;
-  
+  --brand-secondary: #4a5fff;
+  --brand-accent: #7b8cff;
+  --brand-muted: #6b7280;
+
   /* Gradient Presets */
-  --gradient-start: #4A5FFF;
-  --gradient-mid: #7B8CFF;
-  --gradient-end: #A0ABFF;
-  
+  --gradient-start: #4a5fff;
+  --gradient-mid: #7b8cff;
+  --gradient-end: #a0abff;
+
   /* Semantic Colors */
-  --color-error: #DC2626;
-  --color-warning: #F59E0B;
+  --color-error: #dc2626;
+  --color-warning: #f59e0b;
   --color-success: var(--brand-positive);
-  --color-info: #3B82F6;
-  
+  --color-info: #3b82f6;
+
   /* Surface Variants */
   --surface-card: rgba(255, 255, 255, 0.9);
   --surface-overlay: rgba(255, 255, 255, 0.95);
   --surface-border: rgba(0, 0, 0, 0.1);
-  
+
   /* Progress Indicators */
-  --progress-active: #0B1020;
+  --progress-active: #0b1020;
   --progress-inactive: rgba(11, 16, 32, 0.7);
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);

@@ -1,16 +1,16 @@
-import * as Freighter from "@stellar/freighter-api";
+import * as Freighter from '@stellar/freighter-api';
 
 // Simple debug function to test Freighter directly
 export async function debugFreighterConnection() {
   console.log('🔍 DEBUG: Testing Freighter connection...');
-  
+
   // Check window object
   console.log('📊 Window check:', {
     hasWindow: typeof window !== 'undefined',
     hasFreighterProp: typeof window !== 'undefined' && 'freighter' in window,
     windowFreighter: typeof window !== 'undefined' ? window.freighter : undefined,
   });
-  
+
   // Check Freighter API
   console.log('📊 Freighter API check:', {
     freighterImport: Freighter,
@@ -18,7 +18,7 @@ export async function debugFreighterConnection() {
     hasIsConnected: typeof Freighter?.isConnected === 'function',
     hasSignTransaction: typeof Freighter?.signTransaction === 'function',
   });
-  
+
   try {
     // Test requestAccess directly
     console.log('🔗 Testing Freighter.requestAccess()...');

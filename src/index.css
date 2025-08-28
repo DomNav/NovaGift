@@ -11,12 +11,14 @@
     @apply bg-brand-bg text-brand-text antialiased;
     font-family: 'Inter Variable', sans-serif;
   }
-  
-  h1, h2, h3 {
+
+  h1,
+  h2,
+  h3 {
     font-family: 'Antonio', sans-serif;
     font-weight: 700;
   }
-  
+
   *:focus-visible {
     @apply outline-none ring-2 ring-brand-primary ring-offset-2 ring-offset-brand-bg;
   }
@@ -28,79 +30,83 @@
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+
   .light .glass-card {
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.05);
   }
-  
+
   .btn-primary {
     @apply px-6 py-3 bg-brand-primary text-white rounded-lg font-medium 
            hover:bg-brand-secondary transition-colors duration-200
            active:scale-95 transform;
   }
-  
+
   .btn-granite-primary {
     @apply px-6 py-3 text-white rounded-lg font-medium 
            transition-all duration-300 active:scale-95 transform
            relative overflow-hidden;
-    background: linear-gradient(135deg, 
-      #1D2BFF 0%,     /* Original blue */
-      #4A5FFF 15%,    /* Lighter blue */
-      #6366f1 25%,    /* Indigo */
-      #8b5cf6 35%,    /* Purple */
-      #64748b 45%,    /* Slate gray */
-      #475569 55%,    /* Dark slate */
-      #7c3aed 65%,    /* Violet */
-      #3b82f6 75%,    /* Blue */
-      #1e40af 85%,    /* Dark blue */
-      #1D2BFF 100%    /* Back to original blue */
+    background: linear-gradient(
+      135deg,
+      #1d2bff 0%,
+      /* Original blue */ #4a5fff 15%,
+      /* Lighter blue */ #6366f1 25%,
+      /* Indigo */ #8b5cf6 35%,
+      /* Purple */ #64748b 45%,
+      /* Slate gray */ #475569 55%,
+      /* Dark slate */ #7c3aed 65%,
+      /* Violet */ #3b82f6 75%,
+      /* Blue */ #1e40af 85%,
+      /* Dark blue */ #1d2bff 100% /* Back to original blue */
     );
     background-size: 200% 200%;
     animation: granite-shift 4s ease-in-out infinite;
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       0 4px 12px rgba(29, 43, 255, 0.3),
       0 2px 4px rgba(0, 0, 0, 0.2);
   }
-  
+
   .btn-granite-primary:hover {
     background-size: 180% 180%;
     animation-duration: 2s;
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
       0 6px 16px rgba(29, 43, 255, 0.4),
       0 3px 6px rgba(0, 0, 0, 0.25);
     transform: translateY(-1px);
   }
-  
+
   .btn-granite-primary:active {
     transform: translateY(0) scale(0.98);
   }
-  
+
   .btn-granite-primary:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     animation: none;
     background-size: 100% 100%;
     transform: none;
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
       0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
+
   .btn-granite-primary:disabled:hover {
     transform: none;
     background-size: 100% 100%;
     animation: none;
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
       0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
+
   @keyframes granite-shift {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 50%;
     }
     25% {
@@ -113,57 +119,57 @@
       background-position: 0% 100%;
     }
   }
-  
+
   .btn-secondary {
     @apply px-6 py-3 bg-brand-surface text-brand-text rounded-lg font-medium 
            transition-colors duration-200 active:scale-95 transform;
     border: 1px solid rgba(248, 250, 255, 0.2);
   }
-  
+
   .btn-secondary:hover {
     background-color: rgba(248, 250, 255, 0.1);
   }
-  
+
   .light .btn-secondary {
     background-color: #f8fafc;
     border: 1px solid rgba(0, 0, 0, 0.15);
     color: #0f172a;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  
+
   .light .btn-secondary:hover {
     background-color: #e2e8f0;
     border-color: rgba(0, 0, 0, 0.25);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
-  
+
   .guide-button {
     font-weight: 600;
     letter-spacing: 0.025em;
   }
-  
+
   .light .guide-button {
     background-color: #1e293b;
     color: #f8fafc;
     border-color: #334155;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   }
-  
+
   .light .guide-button:hover {
     background-color: #334155;
     border-color: #475569;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
-  
+
   /* Progress bar improvements for light mode */
   .light .bg-black\/20 {
     background-color: rgba(0, 0, 0, 0.15);
   }
-  
+
   .light .bg-black\/5 {
     background-color: rgba(0, 0, 0, 0.08);
   }
-  
+
   .input-base {
     @apply w-full px-4 py-3 bg-brand-surface rounded-lg text-brand-text
            focus:border-brand-primary focus:outline-none focus:ring-1 
@@ -171,64 +177,67 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     --tw-placeholder-opacity: 0.5;
   }
-  
+
   .input-base::placeholder {
     color: rgba(248, 250, 255, 0.5);
   }
-  
+
   .input-base:focus {
     --tw-ring-color: rgba(29, 43, 255, 0.5);
   }
-  
+
   .light .input-base {
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
-  
+
   .light .input-base::placeholder {
     color: rgba(11, 16, 32, 0.5);
   }
-  
+
   .gradient-text {
     @apply bg-gradient-to-r from-brand-primary to-brand-accent 
            bg-clip-text text-transparent;
   }
-  
+
   .logo-banner {
     @apply relative;
-    background: linear-gradient(135deg, 
+    background: linear-gradient(
+      135deg,
       rgba(29, 43, 255, 0.1) 0%,
       rgba(74, 95, 255, 0.15) 25%,
       rgba(123, 140, 255, 0.1) 50%,
       rgba(29, 43, 255, 0.08) 100%
     );
     border: 1px solid rgba(29, 43, 255, 0.3);
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       0 4px 12px rgba(29, 43, 255, 0.2),
       0 0 24px rgba(29, 43, 255, 0.1);
     transition: all 0.3s ease;
   }
-  
+
   .logo-banner:hover {
     transform: translateY(-1px);
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
       0 6px 16px rgba(29, 43, 255, 0.3),
       0 0 32px rgba(29, 43, 255, 0.15);
     border-color: rgba(29, 43, 255, 0.4);
   }
-  
+
   .banner-glow {
-    background: radial-gradient(circle at 50% 50%, 
+    background: radial-gradient(
+      circle at 50% 50%,
       rgba(29, 43, 255, 0.4) 0%,
       rgba(74, 95, 255, 0.2) 30%,
       transparent 70%
     );
     animation: pulse-glow 3s ease-in-out infinite;
   }
-  
+
   .banner-shine {
-    background: linear-gradient(45deg, 
+    background: linear-gradient(
+      45deg,
       transparent 30%,
       rgba(255, 255, 255, 0.1) 50%,
       transparent 70%
@@ -236,23 +245,24 @@
     transform: translateX(-100%);
     animation: shine-sweep 4s ease-in-out infinite;
   }
-  
+
   .light .logo-banner {
-    background: linear-gradient(135deg, 
+    background: linear-gradient(
+      135deg,
       rgba(29, 43, 255, 0.05) 0%,
       rgba(74, 95, 255, 0.08) 25%,
       rgba(123, 140, 255, 0.05) 50%,
       rgba(29, 43, 255, 0.03) 100%
     );
     border: 1px solid rgba(29, 43, 255, 0.2);
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.8),
       0 2px 8px rgba(29, 43, 255, 0.1),
       0 0 16px rgba(29, 43, 255, 0.05);
   }
-  
+
   .light .logo-banner:hover {
-    box-shadow: 
+    box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.9),
       0 4px 12px rgba(29, 43, 255, 0.15),
       0 0 24px rgba(29, 43, 255, 0.08);
@@ -268,9 +278,10 @@
       transform: translateX(100%);
     }
   }
-  
+
   @keyframes pulse-glow {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 0.3;
       transform: scale(1);
     }
@@ -279,7 +290,7 @@
       transform: scale(1.02);
     }
   }
-  
+
   @keyframes shine-sweep {
     0% {
       transform: translateX(-100%);
@@ -296,28 +307,62 @@
       opacity: 0;
     }
   }
-  
+
   .animate-shimmer {
     animation: shimmer 1.5s ease-in-out infinite;
   }
 }
 
 @keyframes waxPop {
-  0% { transform: translateY(-6px) scale(0.8); opacity: .0; }
-  30% { transform: translateY(0) scale(1.08); opacity: 1; }
-  60% { transform: translateY(2px) scale(0.96); }
-  80% { transform: translateY(0) scale(1.00); }
-  100% { transform: translateY(16px) scale(0.9); opacity: 0; }
+  0% {
+    transform: translateY(-6px) scale(0.8);
+    opacity: 0;
+  }
+  30% {
+    transform: translateY(0) scale(1.08);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(2px) scale(0.96);
+  }
+  80% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(16px) scale(0.9);
+    opacity: 0;
+  }
 }
 @keyframes holoSweep {
-  0% { transform: translateX(-120%); opacity: 0; }
-  10% { opacity: .85; }
-  90% { opacity: .85; }
-  100% { transform: translateX(120%); opacity: 0; }
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  90% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .anim-none, .fx-wax, .fx-sweep { animation: none !important; transition: none !important; }
+  .anim-none,
+  .fx-wax,
+  .fx-sweep {
+    animation: none !important;
+    transition: none !important;
+  }
 }
-.fx-wax { animation: waxPop 550ms cubic-bezier(.2,.8,.2,1) forwards; }
-.fx-sweep { animation: holoSweep 700ms ease-in-out forwards; }
-.text-glow { text-shadow: 0 2px 12px rgba(0,0,0,.35); }
+.fx-wax {
+  animation: waxPop 550ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.fx-sweep {
+  animation: holoSweep 700ms ease-in-out forwards;
+}
+.text-glow {
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}

@@ -1,11 +1,11 @@
 let _token: string | null = null;
 
-export function setSessionToken(t: string) { 
-  _token = t; 
+export function setSessionToken(t: string) {
+  _token = t;
 }
 
-export function getSessionToken(): string | null { 
-  return _token; 
+export function getSessionToken(): string | null {
+  return _token;
 }
 
 export function authHeaders() {

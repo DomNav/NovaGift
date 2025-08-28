@@ -1,8 +1,8 @@
-import { useTheme } from '@/contexts/ThemeContext'
-import clsx from 'clsx'
+import { useTheme } from '@/contexts/ThemeContext';
+import clsx from 'clsx';
 
 export const ThemeToggle = () => {
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <button
@@ -25,5 +25,5 @@ export const ThemeToggle = () => {
         {theme === 'dark' ? '🌙' : '☀️'}
       </div>
     </button>
-  )
-}
+  );
+};

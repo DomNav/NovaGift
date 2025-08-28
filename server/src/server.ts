@@ -10,9 +10,12 @@ import authRoutes from './routes/auth';
 import kaleRoutes from './routes/kale-gating';
 import kalePublicRoutes from './routes/kale-public';
 import walletRoutes from './routes/wallet';
+import walletXlmRoutes from './routes/wallet.xlm';
 import ratesRoutes from './routes/rates';
+import pricesRoutes from './routes/prices';
 import healthRoutes from './routes/health';
 import notificationRoutes from './routes/notifications';
+import passkeyRoutes from './routes/passkey';
 import { apiLimiter } from './middlewares/rate';
 import { requireConsent, checkConsent } from './middlewares/consent';
 
@@ -39,11 +42,14 @@ app.use('/auth', authRoutes);
 app.use('/api/kale', kaleRoutes);
 app.use('/api/kale-public', kalePublicRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/wallet', walletXlmRoutes);
 app.use('/api/rates', ratesRoutes);
+app.use('/api/prices', pricesRoutes);
 app.use('/api/envelope', envelopeRoutes);
 app.use('/api/stellar', stellarRoutes);
 app.use('/api/profile', profileRoutes); // Profile routes include consent middleware
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/passkey', passkeyRoutes);
 
 // Health check
 app.use('/api/health', healthRoutes);
@@ -52,21 +58,24 @@ app.use('/api/health', healthRoutes);
 app.use(errorMiddleware);
 
 // Start server
-const server = app.listen(config.port, () => {
-  console.log(`NovaGift server running on port ${config.port}`);
-  console.log(`Environment: ${config.nodeEnv}`);
-  console.log(`Network: ${config.nodeEnv === 'production' ? 'mainnet' : 'testnet'}`);
-  console.log(`Fee sponsorship: ${config.enableFeeSponsorship ? 'enabled' : 'disabled'}`);
-  console.log(`Reflector: ${config.enableReflector ? 'enabled' : 'disabled'}`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(config.port, () => {
+    console.log(`NovaGift server running on port ${config.port}`);
+    console.log(`Environment: ${config.nodeEnv}`);
+    console.log(`Network: ${config.nodeEnv === 'production' ? 'mainnet' : 'testnet'}`);
+    console.log(`Fee sponsorship: ${config.enableFeeSponsorship ? 'enabled' : 'disabled'}`);
+    console.log(`Reflector: ${config.enableReflector ? 'enabled' : 'disabled'}`);
   });
-});
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+}
+
 
 export default app;

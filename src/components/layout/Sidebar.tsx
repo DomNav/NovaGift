@@ -1,7 +1,7 @@
-import { NavLink } from 'react-router-dom'
-import clsx from 'clsx'
-import { ThemeLogo } from '@/components/ui/ThemeLogo'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { NavLink } from 'react-router-dom';
+import clsx from 'clsx';
+import { ThemeLogo } from '@/components/ui/ThemeLogo';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const navigation = [
   { name: 'Create', href: '/', icon: '🎁' },
@@ -10,7 +10,7 @@ const navigation = [
   { name: 'Activity', href: '/activity', icon: '📊' },
   { name: 'Studio', href: '/studio', icon: '🎨' },
   { name: 'Settings', href: '/settings', icon: '🔧' },
-]
+];
 
 export const Sidebar = () => {
   return (
@@ -22,7 +22,7 @@ export const Sidebar = () => {
           </div>
         </div>
       </div>
-      
+
       <nav className="flex-1 p-1">
         <ul className="space-y-3">
           {navigation.map((item) => (
@@ -34,32 +34,34 @@ export const Sidebar = () => {
                     'flex items-center gap-2 px-3 py-3 rounded-lg transition-all duration-300',
                     'hover:bg-white/10 dark:hover:bg-gray-800/50 hover:scale-105',
                     'hover:shadow-lg dark:hover:shadow-blue-500/20 transform',
-                                    isActive
-                  ? 'bg-brand-primary/10 text-brand-text dark:bg-brand-primary/20'
-                  : 'text-brand-text/70 dark:text-white',
+                    isActive
+                      ? 'bg-brand-primary/10 text-brand-text dark:bg-brand-primary/20'
+                      : 'text-brand-text/70 dark:text-white'
                   )
                 }
               >
                 <span className="text-2xl group-hover:scale-125 transition-transform duration-300">
                   {item.icon}
                 </span>
-                <span className="text-xl font-medium font-inter text-brand-primary dark:text-white group-hover:translate-x-1 transition-transform duration-300">{item.name}</span>
+                <span className="text-xl font-medium font-inter text-brand-primary dark:text-white group-hover:translate-x-1 transition-transform duration-300">
+                  {item.name}
+                </span>
               </NavLink>
             </li>
           ))}
         </ul>
       </nav>
-      
+
       {/* Theme Toggle */}
       <div className="p-2 flex justify-center">
         <ThemeToggle />
       </div>
-      
+
       <div className="p-2">
         <div className="text-center">
           <p className="text-xs text-brand-text/60">Version 0.1.0</p>
         </div>
       </div>
     </aside>
-  )
-}
+  );
+};

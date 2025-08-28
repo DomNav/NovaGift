@@ -1,13 +1,13 @@
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 
 interface PaymentToggleProps {
-  value: 'USDC' | 'XLM'
-  onChange: (val: 'USDC' | 'XLM') => void
+  value: 'USDC' | 'XLM';
+  onChange: (val: 'USDC' | 'XLM') => void;
 }
 
 export const PaymentToggle = ({ value, onChange }: PaymentToggleProps) => {
   return (
-    <div 
+    <div
       className="relative flex bg-brand-surface/30 rounded-xl p-2"
       role="radiogroup"
       aria-label="Payment method selection"
@@ -26,7 +26,7 @@ export const PaymentToggle = ({ value, onChange }: PaymentToggleProps) => {
           damping: 30,
         }}
       />
-      
+
       {/* USDC Option */}
       <button
         onClick={() => onChange('USDC')}
@@ -45,7 +45,7 @@ export const PaymentToggle = ({ value, onChange }: PaymentToggleProps) => {
           USDC
         </motion.span>
       </button>
-      
+
       {/* XLM Option */}
       <button
         onClick={() => onChange('XLM')}
@@ -55,9 +55,7 @@ export const PaymentToggle = ({ value, onChange }: PaymentToggleProps) => {
         aria-label="Pay with XLM"
       >
         <motion.span
-          className={`font-semibold block ${
-            value === 'XLM' ? 'text-white' : 'text-brand-text/60'
-          }`}
+          className={`font-semibold block ${value === 'XLM' ? 'text-white' : 'text-brand-text/60'}`}
           whileHover={{ opacity: value === 'XLM' ? 1 : 0.8 }}
           transition={{ duration: 0.2 }}
         >
@@ -65,5 +63,5 @@ export const PaymentToggle = ({ value, onChange }: PaymentToggleProps) => {
         </motion.span>
       </button>
     </div>
-  )
-}
+  );
+};

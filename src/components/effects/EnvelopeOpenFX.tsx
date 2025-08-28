@@ -1,13 +1,19 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 export default function EnvelopeOpenFX({
   running,
   onDone,
-}: { running: boolean; onDone?: () => void }) {
+}: {
+  running: boolean;
+  onDone?: () => void;
+}) {
   useEffect(() => {
     if (!running) return;
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (reduce) { onDone?.(); return; }
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if (reduce) {
+      onDone?.();
+      return;
+    }
     const timer = setTimeout(() => onDone?.(), 300); // quick transition
     return () => clearTimeout(timer);
   }, [running, onDone]);

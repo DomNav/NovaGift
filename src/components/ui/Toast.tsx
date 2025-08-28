@@ -1,10 +1,10 @@
-import { useToast } from '@/hooks/useToast'
-import clsx from 'clsx'
+import { useToast } from '@/hooks/useToast';
+import clsx from 'clsx';
 
 export const Toast = () => {
-  const { toasts, removeToast } = useToast()
+  const { toasts, removeToast } = useToast();
 
-  if (toasts.length === 0) return null
+  if (toasts.length === 0) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 space-y-2">
@@ -20,7 +20,7 @@ export const Toast = () => {
               'bg-red-500/20 border-red-500/50 text-red-100': toast.type === 'error',
               'bg-blue-500/20 border-blue-500/50 text-blue-100': toast.type === 'info',
               'bg-yellow-500/20 border-yellow-500/50 text-yellow-100': toast.type === 'warning',
-            },
+            }
           )}
           onClick={() => removeToast(toast.id)}
         >
@@ -36,5 +36,5 @@ export const Toast = () => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};

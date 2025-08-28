@@ -28,12 +28,42 @@ const Env = z.object({
   // SEP-10 / Web Auth
   WEB_AUTH_HOME_DOMAIN: z.string(),
   WEB_AUTH_DOMAIN: z.string(),
-  WEB_AUTH_SERVER_SECRET: z.string().regex(/^S/), // Stellar secret seed
+  WEB_AUTH_SERVER_SECRET: z.string().optional().default(''), // Stellar secret seed
   
   // Sessions
   JWT_SECRET: z.string(),
   JWT_EXPIRES_IN: z.string().default('900s'),
+  
+  // Passkey support (optional, required when ENABLE_PASSKEYS=true)
+  ENABLE_PASSKEYS: z.coerce.boolean().default(false),
+  STELLAR_RPC_URL: z.string().url().optional(),
+  PASSKEY_FACTORY_ID: z.string().optional(),
+  MERCURY_URL: z.string().url().optional(),
+  MERCURY_JWT: z.string().optional(),
+  LAUNCHTUBE_URL: z.string().url().optional(),
+  LAUNCHTUBE_JWT: z.string().optional(),
 });
 
-export const env = Env.parse(process.env);
+// Parse base environment
+const baseEnv = Env.parse(process.env);
+
+// Additional validation when passkeys are enabled
+if (baseEnv.ENABLE_PASSKEYS) {
+  const requiredPasskeyVars = [
+    'STELLAR_RPC_URL',
+    'NETWORK_PASSPHRASE', 
+    'PASSKEY_FACTORY_ID',
+    'MERCURY_URL',
+    'MERCURY_JWT',
+    'LAUNCHTUBE_URL', 
+    'LAUNCHTUBE_JWT'
+  ];
+  
+  const missing = requiredPasskeyVars.filter(key => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(`ENABLE_PASSKEYS=true but missing required vars: ${missing.join(', ')}`);
+  }
+}
+
+export const env = baseEnv;
 export const isProd = env.NODE_ENV === 'production';

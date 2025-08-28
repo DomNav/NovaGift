@@ -13,25 +13,27 @@ import GradientShader from '../components/skins/GradientShader';
 import { Store, Unlock, Lock, ArrowRight } from 'lucide-react';
 
 // Mock envelope card component using GradientShader
-function SkinEnvelopeCard({ 
-  skin, 
-  locked = false, 
-  size = "md" 
-}: { 
-  skin: Skin; 
-  locked?: boolean; 
-  size?: "sm" | "md" 
+function SkinEnvelopeCard({
+  skin,
+  locked = false,
+  size = 'md',
+}: {
+  skin: Skin;
+  locked?: boolean;
+  size?: 'sm' | 'md';
 }) {
-  const cardClass = size === "sm" ? "h-24 w-32" : "h-32 w-48";
-  
+  const cardClass = size === 'sm' ? 'h-24 w-32' : 'h-32 w-48';
+
   return (
-    <div className={`relative ${cardClass} rounded-xl overflow-hidden shadow-lg border-2 border-white/20`}>
-      <GradientShader 
+    <div
+      className={`relative ${cardClass} rounded-xl overflow-hidden shadow-lg border-2 border-white/20`}
+    >
+      <GradientShader
         settings={skin.settings}
-        animation={locked ? "none" : skin.animation}
+        animation={locked ? 'none' : skin.animation}
         rounded="rounded-xl"
       />
-      
+
       {/* Mock envelope content */}
       <div className="absolute inset-0 p-3 flex flex-col justify-between text-white">
         <div className="flex justify-between items-start">
@@ -40,13 +42,13 @@ function SkinEnvelopeCard({
             <span className="text-xs">🎁</span>
           </div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-sm font-mono">$100</div>
           <div className="text-xs opacity-80">USDC</div>
         </div>
       </div>
-      
+
       {locked && (
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-xl flex items-center justify-center">
           <Lock className="w-6 h-6 text-white/70" />
@@ -63,7 +65,7 @@ export default function SkinStore() {
 
   const handleApplySkin = (skin: Skin) => {
     const prog = progressForRule(skin.requires, { sendCount, totalUsdCents });
-    
+
     if (!prog.eligible) {
       toast.error(prog.tooltip);
       return;
@@ -77,15 +79,12 @@ export default function SkinStore() {
 
   const handleGoToFund = () => {
     // This would navigate to the fund page
-    toast.info("Redirecting to Fund page...");
+    toast.info('Redirecting to Fund page...');
   };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <PageHeader 
-        title="Skin Store"
-        description="Unlock new envelope skins by sending gifts"
-      />
+      <PageHeader title="Skin Store" description="Unlock new envelope skins by sending gifts" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left and Center - Skin Grid */}
@@ -110,9 +109,7 @@ export default function SkinStore() {
                     <motion.div
                       key={skin.id}
                       className={`relative rounded-xl cursor-pointer border-2 transition-all ${
-                        isSelected 
-                          ? 'border-white/20' 
-                          : 'border-transparent hover:border-white/10'
+                        isSelected ? 'border-white/20' : 'border-transparent hover:border-white/10'
                       }`}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -120,11 +117,7 @@ export default function SkinStore() {
                     >
                       {/* Skin preview */}
                       <div className="p-3">
-                        <SkinEnvelopeCard 
-                          skin={skin} 
-                          locked={!isUnlocked} 
-                          size="sm" 
-                        />
+                        <SkinEnvelopeCard skin={skin} locked={!isUnlocked} size="sm" />
                       </div>
 
                       {/* Name chip */}
@@ -135,14 +128,17 @@ export default function SkinStore() {
                       {/* Status badge */}
                       <div className="absolute top-2 right-2">
                         {skin.requires ? (
-                          <Badge 
-                            variant={isUnlocked ? "default" : "secondary"}
+                          <Badge
+                            variant={isUnlocked ? 'default' : 'secondary'}
                             className="text-[10px] px-1.5 py-0.5"
                           >
-                            {isUnlocked ? "Unlocked" : "Locked"}
+                            {isUnlocked ? 'Unlocked' : 'Locked'}
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-800 border-green-200">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-800 border-green-200"
+                          >
                             Free
                           </Badge>
                         )}
@@ -152,16 +148,24 @@ export default function SkinStore() {
                       {!isUnlocked && skin.requires && (
                         <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/70 backdrop-blur">
                           <ProgressPills
-                            send={prog.sendReq ? {
-                              current: prog.sendReq.current,
-                              required: prog.sendReq.required,
-                              ratio: prog.sendReq.ratio
-                            } : undefined}
-                            usdReq={prog.usdReq ? {
-                              current: prog.usdReq.current,
-                              required: prog.usdReq.required,
-                              ratio: prog.usdReq.ratio
-                            } : undefined}
+                            send={
+                              prog.sendReq
+                                ? {
+                                    current: prog.sendReq.current,
+                                    required: prog.sendReq.required,
+                                    ratio: prog.sendReq.ratio,
+                                  }
+                                : undefined
+                            }
+                            usdReq={
+                              prog.usdReq
+                                ? {
+                                    current: prog.usdReq.current,
+                                    required: prog.usdReq.required,
+                                    ratio: prog.usdReq.ratio,
+                                  }
+                                : undefined
+                            }
                             className="justify-center"
                           />
                         </div>
@@ -191,16 +195,20 @@ export default function SkinStore() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Animation:</span>
-                    <span className="capitalize">{selectedSkin.animation || "None"}</span>
+                    <span className="capitalize">{selectedSkin.animation || 'None'}</span>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Status:</span>
                     <span>
                       {unlocked.includes(selectedSkin.id) ? (
-                        <Badge variant="default" className="text-xs">Unlocked</Badge>
+                        <Badge variant="default" className="text-xs">
+                          Unlocked
+                        </Badge>
                       ) : (
-                        <Badge variant="secondary" className="text-xs">Locked</Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          Locked
+                        </Badge>
                       )}
                     </span>
                   </div>
@@ -218,37 +226,38 @@ export default function SkinStore() {
                 {/* Action buttons */}
                 <div className="space-y-2 pt-4">
                   {(() => {
-                    const prog = progressForRule(selectedSkin.requires, { sendCount, totalUsdCents });
+                    const prog = progressForRule(selectedSkin.requires, {
+                      sendCount,
+                      totalUsdCents,
+                    });
                     const isUnlocked = unlocked.includes(selectedSkin.id);
-                    
+
                     if (isUnlocked) {
                       return (
-                        <Button 
+                        <Button
                           onClick={() => handleApplySkin(selectedSkin)}
                           className="w-full"
-                          variant={selectedId === selectedSkin.id ? "secondary" : "default"}
+                          variant={selectedId === selectedSkin.id ? 'secondary' : 'default'}
                         >
-                          {selectedId === selectedSkin.id ? "Currently Applied" : "Apply to All Envelopes"}
+                          {selectedId === selectedSkin.id
+                            ? 'Currently Applied'
+                            : 'Apply to All Envelopes'}
                         </Button>
                       );
                     } else {
                       return (
                         <>
-                          <Button 
-                            disabled 
+                          <Button
+                            disabled
                             className="w-full opacity-60 cursor-not-allowed"
                             title={prog.tooltip}
                           >
                             <Lock className="w-4 h-4 mr-2" />
                             {prog.tooltip}
                           </Button>
-                          
+
                           {prog.usdReq && prog.usdReq.remainingCents > 0 && (
-                            <Button 
-                              onClick={handleGoToFund}
-                              variant="outline" 
-                              className="w-full"
-                            >
+                            <Button onClick={handleGoToFund} variant="outline" className="w-full">
                               <ArrowRight className="w-4 h-4 mr-2" />
                               Go to Fund
                             </Button>
@@ -264,19 +273,27 @@ export default function SkinStore() {
                   <div className="pt-4 border-t">
                     <div className="text-sm text-muted-foreground mb-2">Progress:</div>
                     {(() => {
-                      const prog = progressForRule(selectedSkin.requires, { sendCount, totalUsdCents });
+                      const prog = progressForRule(selectedSkin.requires, {
+                        sendCount,
+                        totalUsdCents,
+                      });
                       return (
                         <div className="space-y-2">
                           {prog.sendReq && (
                             <div className="flex justify-between text-xs">
                               <span>Sends:</span>
-                              <span>{prog.sendReq.current}/{prog.sendReq.required}</span>
+                              <span>
+                                {prog.sendReq.current}/{prog.sendReq.required}
+                              </span>
                             </div>
                           )}
                           {prog.usdReq && (
                             <div className="flex justify-between text-xs">
                               <span>Total Sent:</span>
-                              <span>${(prog.usdReq.current/100).toFixed(0)}/${(prog.usdReq.required/100).toFixed(0)}</span>
+                              <span>
+                                ${(prog.usdReq.current / 100).toFixed(0)}/$
+                                {(prog.usdReq.required / 100).toFixed(0)}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -307,11 +324,13 @@ export default function SkinStore() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total Sent:</span>
-                <span className="font-mono">${(totalUsdCents/100).toFixed(2)}</span>
+                <span className="font-mono">${(totalUsdCents / 100).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Unlocked Skins:</span>
-                <span className="font-mono">{unlocked.length}/{presets.length}</span>
+                <span className="font-mono">
+                  {unlocked.length}/{presets.length}
+                </span>
               </div>
             </CardContent>
           </Card>

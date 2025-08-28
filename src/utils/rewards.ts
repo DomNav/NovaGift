@@ -1,5 +1,5 @@
 // src/utils/rewards.ts
-import type { UnlockRule } from "@/store/skins";
+import type { UnlockRule } from '@/store/skins';
 
 export const cents = (n: number) => Math.max(0, Math.round(n || 0));
 export const usd = (centsVal: number, digits = 0) =>
@@ -7,11 +7,11 @@ export const usd = (centsVal: number, digits = 0) =>
 
 /** Human label: "Unlocks at 5 sends and $100 total", "Unlocks at first send", etc. */
 export function ruleLabel(rule?: UnlockRule): string {
-  if (!rule || (!rule.minSends && !rule.minUsdCents)) return "Free";
+  if (!rule || (!rule.minSends && !rule.minUsdCents)) return 'Free';
   const parts: string[] = [];
-  if (rule.minSends) parts.push(rule.minSends === 1 ? "first send" : `${rule.minSends} sends`);
+  if (rule.minSends) parts.push(rule.minSends === 1 ? 'first send' : `${rule.minSends} sends`);
   if (rule.minUsdCents) parts.push(`${usd(rule.minUsdCents, 0)} total`);
-  return `Unlocks at ${parts.join(" and ")}`;
+  return `Unlocks at ${parts.join(' and ')}`;
 }
 
 export type RewardsProg = {
@@ -27,7 +27,7 @@ export function progressForRule(
   rewards: { sendCount: number; totalUsdCents: number }
 ): RewardsProg {
   if (!rule || (!rule.minSends && !rule.minUsdCents)) {
-    return { eligible: true, tooltip: "Free skin" };
+    return { eligible: true, tooltip: 'Free skin' };
   }
 
   const curS = rewards.sendCount || 0;
@@ -35,7 +35,7 @@ export function progressForRule(
 
   const out: RewardsProg = {
     eligible: true,
-    tooltip: "",
+    tooltip: '',
   };
 
   if (rule.minSends) {
@@ -56,7 +56,7 @@ export function progressForRule(
   // Tooltip message
   const needs: string[] = [];
   if (out.sendReq && out.sendReq.remaining > 0) {
-    needs.push(out.sendReq.remaining === 1 ? "1 more send" : `${out.sendReq.remaining} more sends`);
+    needs.push(out.sendReq.remaining === 1 ? '1 more send' : `${out.sendReq.remaining} more sends`);
   }
   if (out.usdReq && out.usdReq.remainingCents > 0) {
     const d = out.usdReq.remainingCents;
@@ -64,6 +64,6 @@ export function progressForRule(
     const dollarsUp = Math.ceil(d / 100);
     needs.push(`$${dollarsUp} more sent`);
   }
-  out.tooltip = out.eligible ? "Ready to apply" : `Unlock by ${needs.join(" and ")}`;
+  out.tooltip = out.eligible ? 'Ready to apply' : `Unlock by ${needs.join(' and ')}`;
   return out;
 }

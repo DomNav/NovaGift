@@ -10,6 +10,8 @@ NovaGift is a decentralized platform for sending cryptocurrency gifts through di
 - **Cross-asset delivery** via Reflector integration
 - **Rate limiting** for API protection
 - **In-memory store** for MVP (SQLite ready)
+- **Send XLM (Testnet)**: client signs in Freighter; supports unfunded recipients (CreateAccount).
+  Endpoint: POST /api/wallet/build-xlm-payment
 
 ## Architecture
 
@@ -26,7 +28,8 @@ NovaGift is a decentralized platform for sending cryptocurrency gifts through di
 - **KALE Token Gating**: Hold-to-unlock premium skins via Soroban
 
 ### Frontend (React/TypeScript)
-- **Wallet Integration**: Freighter wallet support
+- **Multi-Wallet Support**: Stellar Wallets Kit integration (Freighter, Albedo, xBull, etc.)
+- **Passkey Smart-Wallets (beta)**: Optional WebAuthn-based smart contract wallets
 - **Interactive UI**: Animated envelope reveals
 - **Studio Mode**: Custom skins and personalization
 
@@ -38,6 +41,24 @@ NovaGift is a decentralized platform for sending cryptocurrency gifts through di
 - Stellar Freighter wallet extension
 
 ## Quick Start
+
+### Passkey Smart-Wallet (beta)
+
+NovaGift includes optional support for [Passkey Kit](https://github.com/kalepail/passkey-kit) smart contract wallets. This feature is experimental and disabled by default.
+
+**⚠️ Security Audit Warning**: The passkey-kit integration has not been audited. Use at your own risk and only on testnet.
+
+To enable passkey support:
+
+1. Set `ENABLE_PASSKEYS=true` in your `.env` file
+2. Configure the required passkey services:
+   - `STELLAR_RPC_URL` - Stellar RPC endpoint
+   - `PASSKEY_FACTORY_ID` - Factory contract ID from passkey-kit deployment
+   - `MERCURY_URL` and `MERCURY_JWT` - Mercury indexer service
+   - `LAUNCHTUBE_URL` and `LAUNCHTUBE_JWT` - LaunchTube relay service
+3. Deploy passkey contracts via [passkey-kit](https://github.com/kalepail/passkey-kit)
+
+When enabled, users will see a "Claim with Passkey (beta)" option on the envelope opening screen.
 
 ### Backend API Quick Demo
 
@@ -170,6 +191,14 @@ npm run smoke:endpoints
 - `POST /api/envelope/create` - Create new envelope with HTLC
 - `POST /api/envelope/fund` - Confirm on-chain funding
 - `POST /api/envelope/open` - Claim with preimage (fee-sponsored)
+
+### Price Feeds (Reflector Network)
+- `GET /api/prices` - Get current USD prices for assets
+  - Query params: `symbols=XLM,USDC,AQUA` (optional, defaults to all supported)
+  - Returns: `[{ symbol, priceUsd, updatedAt }]`
+  - Features: 10s cache, zod validation, automatic fallbacks
+- `GET /api/prices/single/:symbol` - Get price for single asset
+- `GET /api/prices/health` - Check price service status
 - `POST /api/envelope/cancel` - Cancel expired envelope
 
 ### Wallet & Balances

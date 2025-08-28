@@ -1,10 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 export default function CountUp({
   toCents,
   ms = 700,
   className,
-}: { toCents: number; ms?: number; className?: string }) {
+}: {
+  toCents: number;
+  ms?: number;
+  className?: string;
+}) {
   const [val, setVal] = useState(0);
   const started = useRef(false);
 

@@ -1,54 +1,54 @@
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ThemeLogoProps {
-  className?: string
-  alt?: string
-  size?: 'sm' | 'md' | 'lg' | 'full'
+  className?: string;
+  alt?: string;
+  size?: 'sm' | 'md' | 'lg' | 'full';
   // Optional: specify different logos for each theme
-  lightModeLogo?: string
-  darkModeLogo?: string
+  lightModeLogo?: string;
+  darkModeLogo?: string;
   // Optional: use single transparent logo (default behavior)
-  transparentLogo?: string
+  transparentLogo?: string;
   // Optional: use the new JPG logo format
-  useJpgLogo?: boolean
+  useJpgLogo?: boolean;
 }
 
-export const ThemeLogo = ({ 
-  className = '', 
+export const ThemeLogo = ({
+  className = '',
   alt = 'NovaGift Logo',
   size = 'md',
   lightModeLogo,
   darkModeLogo,
-  transparentLogo
+  transparentLogo,
 }: ThemeLogoProps) => {
-  const { theme } = useTheme()
-  
+  const { theme } = useTheme();
+
   // Size variants
   const sizeClasses = {
     sm: 'w-8 h-8',
-    md: 'w-16 h-16', 
+    md: 'w-16 h-16',
     lg: 'w-24 h-24',
-    'full': 'w-full h-auto'
-  }
-  
+    full: 'w-full h-auto',
+  };
+
   // Determine which logo to use
   const getLogoSrc = () => {
     // If specific theme logos are provided, use them
     if (lightModeLogo && darkModeLogo) {
-      return theme === 'dark' ? darkModeLogo : lightModeLogo
+      return theme === 'dark' ? darkModeLogo : lightModeLogo;
     }
-    
+
     // If transparent logo is specified, use it
     if (transparentLogo) {
-      return transparentLogo
+      return transparentLogo;
     }
-    
+
     // Default: use the JPG logo
-    return '/assets/images/novagift-logo.jpg'
-  }
-  
+    return '/assets/images/novagift-logo.jpg';
+  };
+
   return (
-    <img 
+    <img
       src={getLogoSrc()}
       alt={alt}
       className={`
@@ -64,5 +64,5 @@ export const ThemeLogo = ({
         ${className}
       `}
     />
-  )
-}
+  );
+};

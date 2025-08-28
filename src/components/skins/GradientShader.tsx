@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 
 export type ShaderSettings = {
-  angle: number;              // deg
-  noise: number;              // 0..1
+  angle: number; // deg
+  noise: number; // 0..1
   stops: [string, string, string?, string?]; // up to 4 CSS color strings
 };
 
-export type AnimationKind = "none" | "shimmer" | "stars" | "pulse" | "camo";
+export type AnimationKind = 'none' | 'shimmer' | 'stars' | 'pulse' | 'camo';
 
 type Props = {
   className?: string;
@@ -16,42 +16,42 @@ type Props = {
   speed?: number;
 };
 
-export default function GradientShader({ 
-  className = "", 
-  settings, 
-  rounded = "rounded-2xl",
-  animation = "none",
-  speed = 1
+export default function GradientShader({
+  className = '',
+  settings,
+  rounded = 'rounded-2xl',
+  animation = 'none',
+  speed = 1,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
+
   // Generate noise pattern on canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Set canvas size
     canvas.width = 400;
     canvas.height = 400;
-    
+
     // Create noise pattern with reduced intensity
     const imageData = ctx.createImageData(canvas.width, canvas.height);
     const data = imageData.data;
-    
+
     for (let i = 0; i < data.length; i += 4) {
       const noise = Math.random() * 255 * settings.noise * 0.3; // Reduced intensity
-      data[i] = noise;     // R
+      data[i] = noise; // R
       data[i + 1] = noise; // G
       data[i + 2] = noise; // B
       data[i + 3] = 255 * settings.noise * 0.2; // Reduced alpha
     }
-    
+
     ctx.putImageData(imageData, 0, 0);
   }, [settings.noise]);
-  
+
   // Build gradient string
   const gradientStops = settings.stops
     .filter(Boolean)
@@ -60,22 +60,24 @@ export default function GradientShader({
       return `${color} ${position}%`;
     })
     .join(', ');
-  
+
   // Fallback gradient if no stops are defined
   const fallbackGradient = 'linear-gradient(135deg, #1D2BFF 0%, #4A5FFF 50%, #7B8CFF 100%)';
-  
+
   const gradientStyle = {
-    background: gradientStops ? `linear-gradient(${settings.angle}deg, ${gradientStops})` : fallbackGradient,
+    background: gradientStops
+      ? `linear-gradient(${settings.angle}deg, ${gradientStops})`
+      : fallbackGradient,
     // Ensure the gradient is visible
     minHeight: '100%',
     minWidth: '100%',
   };
-  
+
   // Test if the component is working
   if (!settings || !settings.stops || !settings.stops[0] || !settings.stops[1]) {
     console.warn('GradientShader: No valid settings provided, using fallback');
     return (
-      <div 
+      <div
         className={`absolute inset-0 overflow-hidden ${rounded} ${className}`}
         style={{ background: fallbackGradient }}
       >
@@ -85,35 +87,33 @@ export default function GradientShader({
       </div>
     );
   }
-  
+
   return (
-    <div 
+    <div
       className={`absolute inset-0 overflow-hidden ${rounded} ${className}`}
       style={gradientStyle}
     >
-
-      
       {/* Subtle background pattern for depth */}
-      <div 
+      <div
         className="absolute inset-0 opacity-5 dark:opacity-10"
         style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 0%, transparent 50%)`,
         }}
       />
-      
+
       {/* Noise overlay */}
-      <canvas 
+      <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full opacity-10 dark:opacity-20 pointer-events-none"
-        style={{ 
+        style={{
           mixBlendMode: 'multiply',
           objectFit: 'cover',
         }}
       />
-      
+
       {/* Animation overlays based on animation type */}
-      {animation === "shimmer" && (
-        <div 
+      {animation === 'shimmer' && (
+        <div
           className="absolute inset-0 opacity-60"
           style={{
             background: `linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)`,
@@ -121,9 +121,9 @@ export default function GradientShader({
           }}
         />
       )}
-      
-      {animation === "stars" && (
-        <div 
+
+      {animation === 'stars' && (
+        <div
           className="absolute inset-0 opacity-40"
           style={{
             background: `radial-gradient(circle at 33% 33%, #fff 1px, transparent 1px), radial-gradient(circle at 66% 66%, #fff 1px, transparent 1px)`,
@@ -132,9 +132,9 @@ export default function GradientShader({
           }}
         />
       )}
-      
-      {animation === "pulse" && (
-        <div 
+
+      {animation === 'pulse' && (
+        <div
           className="absolute inset-0 opacity-30"
           style={{
             background: `radial-gradient(ellipse at center, rgba(255,255,255,0.4) 0%, transparent 70%)`,
@@ -142,9 +142,9 @@ export default function GradientShader({
           }}
         />
       )}
-      
-      {animation === "camo" && (
-        <div 
+
+      {animation === 'camo' && (
+        <div
           className="absolute inset-0 opacity-50"
           style={{
             background: `
@@ -156,7 +156,7 @@ export default function GradientShader({
           }}
         />
       )}
-      
+
       <style>{`
         @keyframes shimmerMove {
           0% { transform: translateX(-100%); }
