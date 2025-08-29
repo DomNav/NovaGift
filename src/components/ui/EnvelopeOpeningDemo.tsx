@@ -6,6 +6,7 @@ interface EnvelopeOpeningDemoProps {
   sealedSkin?: EnvelopeSkin;
   openedSkin?: EnvelopeSkin;
   usdCents?: number;
+  asset?: 'USDC' | 'XLM';
   toLabel?: string;
   fromLabel?: string;
 }
@@ -14,6 +15,7 @@ export const EnvelopeOpeningDemo = ({
   sealedSkin,
   openedSkin,
   usdCents = 10000,
+  asset = 'USDC',
   toLabel = 'GDEMO...RECIPIENT',
   fromLabel = 'You',
 }: EnvelopeOpeningDemoProps) => {
@@ -74,6 +76,7 @@ export const EnvelopeOpeningDemo = ({
             variant="sealed"
             skin={sealedSkin}
             amount="???" // Hide amount in sealed state for surprise
+            asset={asset}
             toLabel={toLabel}
             fromLabel={fromLabel}
             openingFx={isOpening}
@@ -85,6 +88,7 @@ export const EnvelopeOpeningDemo = ({
             variant="opened"
             skin={openedSkin}
             usdCents={usdCents}
+            asset={asset}
             toLabel={toLabel}
             fromLabel={fromLabel}
             animateAmount={true}
@@ -99,17 +103,39 @@ export const EnvelopeOpeningDemo = ({
           <button
             onClick={handleOpenDemo}
             disabled={isOpening}
-            className="btn-granite-primary text-sm flex items-center gap-2 px-4 py-2"
+            className="relative flex items-center justify-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:animate-none"
+            style={{
+              background: `linear-gradient(
+                135deg,
+                #1d2bff 0%,
+                #4a5fff 15%,
+                #6366f1 25%,
+                #8b5cf6 35%,
+                #64748b 45%,
+                #475569 55%,
+                #7c3aed 65%,
+                #3b82f6 75%,
+                #1e40af 85%,
+                #1d2bff 100%
+              )`,
+              backgroundSize: isOpening ? '100% 100%' : '200% 200%',
+              animation: isOpening ? 'none' : 'granite-shift 4s ease-in-out infinite',
+              boxShadow: `
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 4px 12px rgba(29, 43, 255, 0.3),
+                0 2px 4px rgba(0, 0, 0, 0.2)
+              `
+            }}
           >
             {isOpening ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Opening...</span>
+                <span className="font-semibold tracking-wide">Opening...</span>
               </>
             ) : (
               <>
                 <span>🎁</span>
-                <span>Demo Opening</span>
+                <span className="font-semibold tracking-wide">Demo Opening</span>
               </>
             )}
           </button>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PaymentToggle } from './PaymentToggle';
+import { useAssetPrice } from '@/hooks/usePrices';
 
 interface PriceBoxProps {
   amount: string;
@@ -14,8 +15,30 @@ export const PriceBox = ({ amount, onPaymentMethodChange }: PriceBoxProps) => {
     onPaymentMethodChange?.(method);
   };
 
-  // Mock conversion rate
-  const xlmAmount = paymentMethod === 'XLM' ? (parseFloat(amount) * 8.5).toFixed(2) : amount;
+  // Fetch live prices for XLM and USDC (USDC typically ~= 1 USD)
+  const {
+    data: xlmPriceData,
+    isLoading: xlmLoading,
+    error: xlmError,
+  } = useAssetPrice('XLM');
+
+  const {
+    data: usdcPriceData,
+    isLoading: usdcLoading,
+    error: usdcError,
+  } = useAssetPrice('USDC');
+
+  // Calculate conversion rate and display amounts
+  const xlmUsdPrice = xlmPriceData?.priceUsd ?? 0;
+  const usdcUsdPrice = usdcPriceData?.priceUsd ?? 1; // default to 1 if unavailable
+
+  // 1 USDC (≈1 USD) equals how many XLM?
+  const usdcToXlmRate = xlmUsdPrice > 0 ? (1 / xlmUsdPrice) : 0;
+
+  // Determine amount to display based on selected payment method
+  const displayAmount = paymentMethod === 'XLM'
+    ? (parseFloat(amount) * usdcUsdPrice * usdcToXlmRate).toFixed(2)
+    : amount;
 
   return (
     <div className="glass-card p-6 space-y-4">
@@ -28,7 +51,7 @@ export const PriceBox = ({ amount, onPaymentMethodChange }: PriceBoxProps) => {
         <div className="flex justify-between items-center">
           <span className="text-sm text-brand-text/60">Amount</span>
           <span className="text-lg font-medium">
-            {xlmAmount} {paymentMethod}
+            {displayAmount} {paymentMethod}
           </span>
         </div>
 
@@ -40,7 +63,11 @@ export const PriceBox = ({ amount, onPaymentMethodChange }: PriceBoxProps) => {
         <div className="flex justify-between items-center">
           <span className="text-sm text-brand-text/60">Reflector Price</span>
           <div className="flex items-center gap-2">
-            <span className="text-sm">1 USDC = 8.5 XLM</span>
+            <span className="text-sm">
+              {xlmLoading || usdcLoading || usdcToXlmRate === 0
+                ? 'Loading...'
+                : `1 USDC = ${usdcToXlmRate.toFixed(3)} XLM`}
+            </span>
             <span className="text-xs text-brand-positive">Live</span>
           </div>
         </div>
@@ -50,7 +77,7 @@ export const PriceBox = ({ amount, onPaymentMethodChange }: PriceBoxProps) => {
         <div className="flex justify-between items-center">
           <span className="font-medium">Total</span>
           <span className="text-xl font-antonio gradient-text">
-            {xlmAmount} {paymentMethod}
+            {displayAmount} {paymentMethod}
           </span>
         </div>
       </div>

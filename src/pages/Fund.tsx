@@ -91,22 +91,44 @@ export const Fund = () => {
           <button
             onClick={handleSend}
             disabled={isProcessing || isSuccess}
-            className="w-full btn-granite-primary flex items-center justify-center gap-2"
+            className="w-full relative flex items-center justify-center gap-3 px-6 py-3 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden text-white disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:animate-none"
+            style={{
+              background: `linear-gradient(
+                135deg,
+                #1d2bff 0%,
+                #4a5fff 15%,
+                #6366f1 25%,
+                #8b5cf6 35%,
+                #64748b 45%,
+                #475569 55%,
+                #7c3aed 65%,
+                #3b82f6 75%,
+                #1e40af 85%,
+                #1d2bff 100%
+              )`,
+              backgroundSize: (isProcessing || isSuccess) ? '100% 100%' : '200% 200%',
+              animation: (isProcessing || isSuccess) ? 'none' : 'granite-shift 4s ease-in-out infinite',
+              boxShadow: `
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 4px 12px rgba(29, 43, 255, 0.3),
+                0 2px 4px rgba(0, 0, 0, 0.2)
+              `
+            }}
           >
             {isProcessing ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Processing...</span>
+                <span className="font-semibold tracking-wide">Processing...</span>
               </>
             ) : isSuccess ? (
               <>
                 <span>✓</span>
-                <span>Success!</span>
+                <span className="font-semibold tracking-wide">Success!</span>
               </>
             ) : (
               <>
                 <span>🚀</span>
-                <span>
+                <span className="font-semibold tracking-wide">
                   Send {amount} {paymentMethod}
                 </span>
               </>

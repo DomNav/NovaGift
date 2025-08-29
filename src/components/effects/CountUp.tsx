@@ -4,10 +4,12 @@ export default function CountUp({
   toCents,
   ms = 700,
   className,
+  asset = 'USDC',
 }: {
   toCents: number;
   ms?: number;
   className?: string;
+  asset?: 'USDC' | 'XLM';
 }) {
   const [val, setVal] = useState(0);
   const started = useRef(false);
@@ -27,5 +29,9 @@ export default function CountUp({
     requestAnimationFrame(step);
   }, [toCents, ms]);
 
-  return <span className={className}>${(val / 100).toFixed(2)} USDC</span>;
+  return (
+    <span className={className}>
+      {asset === 'USDC' ? `$${(val / 100).toFixed(2)}` : `${(val / 100).toFixed(2)}`} {asset}
+    </span>
+  );
 }

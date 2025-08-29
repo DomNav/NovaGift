@@ -13,6 +13,7 @@ export type EnvelopeSkin = {
 export type EnvelopeCardProps = {
   variant?: 'sealed' | 'opened';
   usdCents?: number;
+  asset?: 'USDC' | 'XLM';
   toLabel?: string;
   fromLabel?: string;
   skin?: EnvelopeSkin;
@@ -34,6 +35,7 @@ export const EnvelopeCard = ({
   // New props
   variant,
   usdCents,
+  asset = 'USDC',
   toLabel,
   fromLabel,
   skin,
@@ -94,7 +96,7 @@ export const EnvelopeCard = ({
             <div className="text-center">
               <p className="text-white/80 text-sm mb-1 drop-shadow-md">Gift Envelope</p>
               <p className="text-white text-2xl font-antonio drop-shadow-lg">
-                ${displayAmount} USDC
+                {asset === 'USDC' ? `$${displayAmount}` : `${displayAmount}`} {asset}
               </p>
             </div>
 
@@ -118,11 +120,12 @@ export const EnvelopeCard = ({
               {animateAmount && typeof usdCents === 'number' ? (
                 <CountUp
                   toCents={usdCents}
+                  asset={asset}
                   className="text-white text-3xl font-antonio text-glow"
                 />
               ) : (
                 <p className="text-white text-3xl font-antonio text-glow">
-                  ${usdCents ? (usdCents / 100).toFixed(2) : amount} USDC
+                  {asset === 'USDC' ? `$${usdCents ? (usdCents / 100).toFixed(2) : amount}` : `${usdCents ? (usdCents / 100).toFixed(2) : amount}`} {asset}
                 </p>
               )}
             </div>

@@ -36,12 +36,12 @@ describe('PaymentToggle', () => {
     const xlmSpan = screen.getByText('XLM');
 
     expect(usdcSpan).toHaveClass('text-white');
-    expect(xlmSpan).toHaveClass('text-brand-text/60');
+    expect(xlmSpan).toHaveClass('text-brand-text dark:text-white');
 
     // Rerender with XLM selected
     rerender(<PaymentToggle value="XLM" onChange={mockOnChange} />);
 
-    expect(usdcSpan).toHaveClass('text-brand-text/60');
+    expect(usdcSpan).toHaveClass('text-brand-text dark:text-white');
     expect(xlmSpan).toHaveClass('text-white');
   });
 });

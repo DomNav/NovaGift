@@ -94,35 +94,101 @@ export const Activity = () => {
         <button
           onClick={() => setFilter('all')}
           className={clsx(
-            'px-4 py-2 rounded-lg transition-all duration-200',
+            'relative px-4 py-2 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden',
             filter === 'all'
-              ? 'bg-brand-primary text-white'
+              ? 'text-white'
               : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10'
           )}
+          style={filter === 'all' ? {
+            background: `linear-gradient(
+              135deg,
+              #1d2bff 0%,
+              #4a5fff 15%,
+              #6366f1 25%,
+              #8b5cf6 35%,
+              #64748b 45%,
+              #475569 55%,
+              #7c3aed 65%,
+              #3b82f6 75%,
+              #1e40af 85%,
+              #1d2bff 100%
+            )`,
+            backgroundSize: '200% 200%',
+            animation: 'granite-shift 4s ease-in-out infinite',
+            boxShadow: `
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 4px 12px rgba(29, 43, 255, 0.3),
+              0 2px 4px rgba(0, 0, 0, 0.2)
+            `
+          } : {}}
         >
-          All
+          <span className="font-semibold tracking-wide">All</span>
         </button>
         <button
           onClick={() => setFilter('sent')}
           className={clsx(
-            'px-4 py-2 rounded-lg transition-all duration-200',
+            'relative px-4 py-2 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden',
             filter === 'sent'
-              ? 'bg-brand-primary text-white'
+              ? 'text-white'
               : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10'
           )}
+          style={filter === 'sent' ? {
+            background: `linear-gradient(
+              135deg,
+              #1d2bff 0%,
+              #4a5fff 15%,
+              #6366f1 25%,
+              #8b5cf6 35%,
+              #64748b 45%,
+              #475569 55%,
+              #7c3aed 65%,
+              #3b82f6 75%,
+              #1e40af 85%,
+              #1d2bff 100%
+            )`,
+            backgroundSize: '200% 200%',
+            animation: 'granite-shift 4s ease-in-out infinite',
+            boxShadow: `
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 4px 12px rgba(29, 43, 255, 0.3),
+              0 2px 4px rgba(0, 0, 0, 0.2)
+            `
+          } : {}}
         >
-          Sent
+          <span className="font-semibold tracking-wide">Sent</span>
         </button>
         <button
           onClick={() => setFilter('received')}
           className={clsx(
-            'px-4 py-2 rounded-lg transition-all duration-200',
+            'relative px-4 py-2 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden',
             filter === 'received'
-              ? 'bg-brand-primary text-white'
+              ? 'text-white'
               : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10'
           )}
+          style={filter === 'received' ? {
+            background: `linear-gradient(
+              135deg,
+              #1d2bff 0%,
+              #4a5fff 15%,
+              #6366f1 25%,
+              #8b5cf6 35%,
+              #64748b 45%,
+              #475569 55%,
+              #7c3aed 65%,
+              #3b82f6 75%,
+              #1e40af 85%,
+              #1d2bff 100%
+            )`,
+            backgroundSize: '200% 200%',
+            animation: 'granite-shift 4s ease-in-out infinite',
+            boxShadow: `
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 4px 12px rgba(29, 43, 255, 0.3),
+              0 2px 4px rgba(0, 0, 0, 0.2)
+            `
+          } : {}}
         >
-          Received
+          <span className="font-semibold tracking-wide">Received</span>
         </button>
       </div>
 

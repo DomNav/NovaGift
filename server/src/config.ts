@@ -27,7 +27,7 @@ export const config = {
   feeSponsorKey: process.env.FEE_SPONSOR || '',
   
   // URLs
-  appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:5173',
+  appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:5174',
   reflectorApiUrl: process.env.REFLECTOR_API_URL || 'https://api.reflector.testnet.example',
   
   // Features - Enable Reflector for both testnet and mainnet

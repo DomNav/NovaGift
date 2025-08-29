@@ -202,13 +202,38 @@ export const Settings = () => {
         <div className="flex gap-4">
           <button
             onClick={handleSave}
-            className="btn-granite-primary flex-1 flex items-center justify-center gap-2"
+            className="flex-1 relative flex items-center justify-center gap-3 px-6 py-3 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden text-white"
+            style={{
+              background: `linear-gradient(
+                135deg,
+                #1d2bff 0%,
+                #4a5fff 15%,
+                #6366f1 25%,
+                #8b5cf6 35%,
+                #64748b 45%,
+                #475569 55%,
+                #7c3aed 65%,
+                #3b82f6 75%,
+                #1e40af 85%,
+                #1d2bff 100%
+              )`,
+              backgroundSize: '200% 200%',
+              animation: 'granite-shift 4s ease-in-out infinite',
+              boxShadow: `
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 4px 12px rgba(29, 43, 255, 0.3),
+                0 2px 4px rgba(0, 0, 0, 0.2)
+              `
+            }}
           >
             <span>💾</span>
-            <span>Save Settings</span>
+            <span className="font-semibold tracking-wide">Save Settings</span>
           </button>
-          <button onClick={handleReset} className="btn-secondary flex-1">
-            Reset to Defaults
+          <button 
+            onClick={handleReset} 
+            className="flex-1 relative flex items-center justify-center gap-2 px-4 py-3 rounded-full transition-all duration-300 backdrop-blur-xl border border-slate-300 dark:border-slate-600 shadow-md hover:shadow-lg bg-white/80 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700/90 text-slate-700 dark:text-slate-200 font-medium"
+          >
+            <span className="font-semibold tracking-wide">Reset to Defaults</span>
           </button>
         </div>
 

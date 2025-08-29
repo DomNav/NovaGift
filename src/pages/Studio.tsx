@@ -297,7 +297,29 @@ export const Studio = () => {
 
           <div className="mt-6">
             <button
-              className="w-full btn-granite-primary text-sm flex items-center justify-center gap-2"
+              className="w-full relative flex items-center justify-center gap-3 px-6 py-3 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden text-white text-sm"
+              style={{
+                background: `linear-gradient(
+                  135deg,
+                  #1d2bff 0%,
+                  #4a5fff 15%,
+                  #6366f1 25%,
+                  #8b5cf6 35%,
+                  #64748b 45%,
+                  #475569 55%,
+                  #7c3aed 65%,
+                  #3b82f6 75%,
+                  #1e40af 85%,
+                  #1d2bff 100%
+                )`,
+                backgroundSize: '200% 200%',
+                animation: 'granite-shift 4s ease-in-out infinite',
+                boxShadow: `
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                  0 4px 12px rgba(29, 43, 255, 0.3),
+                  0 2px 4px rgba(0, 0, 0, 0.2)
+                `
+              }}
               onClick={() => {
                 setSelectedFor('sealed', selectedSealedId);
                 setSelectedFor('opened', selectedOpenedId);
@@ -305,7 +327,7 @@ export const Studio = () => {
               }}
             >
               <span>✨</span>
-              <span>Apply to All Envelopes</span>
+              <span className="font-semibold tracking-wide">Apply to All Envelopes</span>
             </button>
           </div>
         </div>
