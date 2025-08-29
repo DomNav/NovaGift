@@ -1,18 +1,33 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { fetchProjects, type ProjectRow } from '@/api/projects.api';
+import { fetchProjects, type ProjectRow, type ProjectKind } from '@/api/projects.api';
+import { NewProjectModal } from '@/components/projects/NewProjectModal';
+import { PageHeader } from '@/components/PageHeader';
 
 const statusPill = (s: ProjectRow['status']) => {
   const map: Record<ProjectRow['status'], string> = {
-    draft: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100',
-    funded: 'bg-cyan-200 text-cyan-900 dark:bg-cyan-700 dark:text-white',
-    issued: 'bg-indigo-200 text-indigo-900 dark:bg-indigo-700 dark:text-white',
-    expired: 'bg-orange-200 text-orange-900 dark:bg-orange-700 dark:text-white',
+    DRAFT: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100',
+    FUNDED: 'bg-cyan-200 text-cyan-900 dark:bg-cyan-700 dark:text-white',
+    ACTIVE: 'bg-emerald-200 text-emerald-900 dark:bg-emerald-700 dark:text-white',
+    ENDED: 'bg-orange-200 text-orange-900 dark:bg-orange-700 dark:text-white',
   };
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-medium ${map[s]}`}>
-      {s[0].toUpperCase() + s.slice(1)}
+      {s[0] + s.slice(1).toLowerCase()}
+    </span>
+  );
+};
+
+const kindPill = (k: ProjectRow['kind']) => {
+  const map: Record<ProjectRow['kind'], string> = {
+    STANDARD: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    QR_EVENT: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+  };
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${map[k]}`}>
+      {k === 'QR_EVENT' ? 'QR Event' : 'Standard'}
     </span>
   );
 };
@@ -20,19 +35,40 @@ const statusPill = (s: ProjectRow['status']) => {
 export default function ProjectsIndex() {
   const nav = useNavigate();
   const { data, isLoading } = useQuery({ queryKey: ['projects'], queryFn: fetchProjects });
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+
+  const handleCreateProject = (kind: ProjectKind) => {
+    // For now, navigate to a mock project or create endpoint
+    console.log('Creating project of kind:', kind);
+    // TODO: Implement actual project creation
+  };
 
   if (isLoading) return <div className="p-6 text-slate-500">Loading projects…</div>;
 
   const projects = data ?? [];
 
+  const breadcrumbs = [
+    { label: 'Studio', href: '/studio' },
+    { label: 'Projects' }
+  ];
+
   if (!projects.length) {
     return (
-      <div className="p-10 text-center">
-        <p className="text-lg text-slate-600 dark:text-slate-300 mb-4">No projects yet</p>
-        <button className="relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/button border border-brand-text/10 dark:border-white/10 shadow-lg hover:shadow-xl bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-400/90 hover:to-indigo-400/90 dark:from-blue-600/80 dark:to-indigo-600/80 dark:hover:from-blue-500/90 dark:hover:to-indigo-500/90">
-          <span className="text-sm font-semibold tracking-wide text-white">Create your first project</span>
-          <div className="absolute inset-0 rounded-full opacity-0 group-hover/button:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-blue-300/20 to-indigo-300/20 dark:from-blue-400/20 dark:to-indigo-400/20"></div>
-        </button>
+      <div className="p-6">
+        <PageHeader
+          title="Projects"
+          description="Manage and track your gift projects"
+          breadcrumbs={breadcrumbs}
+        />
+        <div className="p-10 text-center">
+          <p className="text-lg text-slate-600 dark:text-slate-300 mb-4">No projects yet</p>
+          <button 
+            onClick={() => setShowNewProjectModal(true)}
+            className="relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/button border border-brand-text/10 dark:border-white/10 shadow-lg hover:shadow-xl bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-400/90 hover:to-indigo-400/90 dark:from-blue-600/80 dark:to-indigo-600/80 dark:hover:from-blue-500/90 dark:hover:to-indigo-500/90">
+            <span className="text-sm font-semibold tracking-wide text-white">Create your first project</span>
+            <div className="absolute inset-0 rounded-full opacity-0 group-hover/button:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-blue-300/20 to-indigo-300/20 dark:from-blue-400/20 dark:to-indigo-400/20"></div>
+          </button>
+        </div>
       </div>
     );
   }
@@ -57,13 +93,18 @@ export default function ProjectsIndex() {
 
   return (
     <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Projects</h1>
-        <button className="relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/button border border-brand-text/10 dark:border-white/10 shadow-lg hover:shadow-xl bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-400/90 hover:to-indigo-400/90 dark:from-blue-600/80 dark:to-indigo-600/80 dark:hover:from-blue-500/90 dark:hover:to-indigo-500/90">
+      <PageHeader
+        title="Projects"
+        description="Manage and track your gift projects"
+        breadcrumbs={breadcrumbs}
+      >
+        <button 
+          onClick={() => setShowNewProjectModal(true)}
+          className="relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/button border border-brand-text/10 dark:border-white/10 shadow-lg hover:shadow-xl bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-400/90 hover:to-indigo-400/90 dark:from-blue-600/80 dark:to-indigo-600/80 dark:hover:from-blue-500/90 dark:hover:to-indigo-500/90">
           <span className="text-sm font-semibold tracking-wide text-white">+ New Project</span>
           <div className="absolute inset-0 rounded-full opacity-0 group-hover/button:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-blue-300/20 to-indigo-300/20 dark:from-blue-400/20 dark:to-indigo-400/20"></div>
         </button>
-      </div>
+      </PageHeader>
 
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 xl:col-span-9">
@@ -72,6 +113,7 @@ export default function ProjectsIndex() {
               <thead className="text-left text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="px-6 py-3">Name</th>
+                  <th className="px-6 py-3">Type</th>
                   <th className="px-6 py-3">Recipients</th>
                   <th className="px-6 py-3">Asset</th>
                   <th className="px-6 py-3">Budget</th>
@@ -88,10 +130,13 @@ export default function ProjectsIndex() {
                     onClick={() => nav(`/studio/projects/${p.id}`)}
                   >
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{p.name}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{p.recipientsCount} recipients</td>
-                    <td className="px-6 py-4">{p.asset}</td>
+                    <td className="px-6 py-4">{kindPill(p.kind)}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                      {p.kind === 'QR_EVENT' ? `${p.recipientsCount} codes` : `${p.recipientsCount} recipients`}
+                    </td>
+                    <td className="px-6 py-4">{p.assetCode}</td>
                     <td className="px-6 py-4">
-                      {p.asset === 'USDC' ? `$${p.budget.toLocaleString()}` : `${p.budget} ${p.asset}`}
+                      {p.assetCode === 'USDC' ? `$${p.budget.toLocaleString()}` : `${p.budget} ${p.assetCode}`}
                     </td>
                     <td className="px-6 py-4">{p.schedule.issueAt}</td>
                     <td className="px-6 py-4">{statusPill(p.status)}</td>
@@ -136,6 +181,12 @@ export default function ProjectsIndex() {
           </div>
         </div>
       </div>
+
+      <NewProjectModal
+        isOpen={showNewProjectModal}
+        onClose={() => setShowNewProjectModal(false)}
+        onCreateProject={handleCreateProject}
+      />
     </div>
   );
 }

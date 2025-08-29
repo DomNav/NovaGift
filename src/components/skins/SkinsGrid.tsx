@@ -66,9 +66,9 @@ export function SkinsGrid() {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <div className="text-sm opacity-70">KALE Holdings: {holdings}</div>
+        <div className="text-sm text-brand-text/70">KALE Holdings: {holdings}</div>
         <button
-          className="px-3 py-1.5 rounded-xl shadow"
+          className="btn-secondary rounded-full disabled:opacity-50"
           onClick={refreshEligibility}
           disabled={loading}
         >
@@ -80,14 +80,16 @@ export function SkinsGrid() {
           const can = eligible[id];
           const rule = rules[id];
           return (
-            <div key={id} className="rounded-2xl p-4 shadow">
-              <div className="font-medium">{id}</div>
-              <div className="mt-1 text-xs opacity-70">{rule.label}</div>
+            <div key={id} className="glass-card p-4">
+              <div className="font-medium text-brand-text">{id}</div>
+              <div className="mt-1 text-xs text-brand-text/70">{rule.label}</div>
               <button
                 onClick={() => redeem(id)}
                 disabled={!can}
-                className={`mt-3 w-full rounded-xl px-3 py-2 ${
-                  can ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'
+                className={`mt-3 w-full rounded-full px-3 py-2 font-medium transition-colors duration-200 disabled:opacity-50 ${
+                  can 
+                    ? 'btn-granite-primary' 
+                    : 'bg-brand-surface/50 text-brand-text/50 border border-surface-border cursor-not-allowed'
                 }`}
               >
                 {can ? 'Unlock' : `Hold ≥ ${rule.threshold} KALE`}

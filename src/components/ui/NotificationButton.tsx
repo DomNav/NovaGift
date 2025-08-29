@@ -65,7 +65,7 @@ export const NotificationButton = () => {
         className="relative glass-card px-3 py-1.5 hover:bg-brand-text/5 transition-colors rounded-full"
         disabled={isLoading}
       >
-        <span className="text-xs">🔔</span>
+        <span className="text-sm">🔔</span>
 
         {/* Notification Badge */}
         {summary.totalUnread > 0 && (
@@ -82,7 +82,7 @@ export const NotificationButton = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-brand-surface border border-brand-text/10 dark:border-white/10 rounded-lg shadow-lg backdrop-blur-lg z-50 max-h-96 overflow-hidden">
+        <div className="absolute top-full right-0 mt-2 w-80 bg-brand-surface border border-brand-text/10 dark:border-white/10 rounded-lg shadow-lg backdrop-blur-lg z-[9999] max-h-96 overflow-hidden">
           {/* Header */}
           <div className="p-4 border-b border-brand-text/10 dark:border-white/10">
             <div className="flex items-center justify-between">

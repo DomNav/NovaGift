@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { PageHeader } from '../components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
+
+
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { useSkins, type Skin } from '../store/skins';
@@ -26,7 +26,7 @@ function SkinEnvelopeCard({
 
   return (
     <div
-      className={`relative ${cardClass} rounded-xl overflow-hidden shadow-lg border-2 border-white/20`}
+      className={`relative ${cardClass} rounded-xl overflow-hidden shadow-lg border border-surface-border`}
     >
       <GradientShader
         settings={skin.settings}
@@ -89,16 +89,16 @@ export default function SkinStore() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left and Center - Skin Grid */}
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>All Skins ({presets.length})</span>
+          <div className="glass-card">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-2xl font-semibold leading-none tracking-tight">All Skins ({presets.length})</span>
                 <Badge variant="secondary" className="text-xs">
                   {unlocked.length} Unlocked
                 </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </div>
+            </div>
+            <div className="px-6 pb-6">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {presets.map((skin) => {
                   const isUnlocked = unlocked.includes(skin.id);
@@ -109,7 +109,7 @@ export default function SkinStore() {
                     <motion.div
                       key={skin.id}
                       className={`relative rounded-xl cursor-pointer border-2 transition-all ${
-                        isSelected ? 'border-white/20' : 'border-transparent hover:border-white/10'
+                        isSelected ? 'border-surface-border' : 'border-transparent hover:border-surface-border/50'
                       }`}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -174,18 +174,18 @@ export default function SkinStore() {
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Right - Selection Panel */}
         <div className="space-y-6">
           {selectedSkin ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{selectedSkin.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <div className="glass-card">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold leading-none tracking-tight mb-4">{selectedSkin.name}</h3>
+              </div>
+              <div className="px-6 pb-6 space-y-4">
                 {/* Large preview */}
                 <div className="flex justify-center">
                   <SkinEnvelopeCard skin={selectedSkin} size="md" />
@@ -194,12 +194,12 @@ export default function SkinStore() {
                 {/* Details */}
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Animation:</span>
+                    <span className="text-brand-text/70">Animation:</span>
                     <span className="capitalize">{selectedSkin.animation || 'None'}</span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status:</span>
+                    <span className="text-brand-text/70">Status:</span>
                     <span>
                       {unlocked.includes(selectedSkin.id) ? (
                         <Badge variant="default" className="text-xs">
@@ -215,8 +215,8 @@ export default function SkinStore() {
 
                   {selectedSkin.requires && (
                     <div className="space-y-2">
-                      <div className="text-muted-foreground">Requirements:</div>
-                      <div className="text-xs bg-muted p-2 rounded">
+                      <div className="text-brand-text/70">Requirements:</div>
+                      <div className="text-xs bg-brand-surface/50 p-2 rounded border border-surface-border">
                         {ruleLabel(selectedSkin.requires)}
                       </div>
                     </div>
@@ -234,33 +234,39 @@ export default function SkinStore() {
 
                     if (isUnlocked) {
                       return (
-                        <Button
+                        <button
                           onClick={() => handleApplySkin(selectedSkin)}
-                          className="w-full"
-                          variant={selectedId === selectedSkin.id ? 'secondary' : 'default'}
+                          className={`w-full rounded-full px-6 py-3 font-medium transition-colors duration-200 ${
+                            selectedId === selectedSkin.id
+                              ? 'btn-secondary'
+                              : 'btn-granite-primary'
+                          }`}
                         >
                           {selectedId === selectedSkin.id
                             ? 'Currently Applied'
                             : 'Apply to All Envelopes'}
-                        </Button>
+                        </button>
                       );
                     } else {
                       return (
                         <>
-                          <Button
+                          <button
                             disabled
-                            className="w-full opacity-60 cursor-not-allowed"
+                            className="w-full rounded-full px-6 py-3 font-medium opacity-60 cursor-not-allowed bg-brand-surface/50 text-brand-text/50 border border-surface-border"
                             title={prog.tooltip}
                           >
-                            <Lock className="w-4 h-4 mr-2" />
+                            <Lock className="w-4 h-4 mr-2 inline" />
                             {prog.tooltip}
-                          </Button>
+                          </button>
 
                           {prog.usdReq && prog.usdReq.remainingCents > 0 && (
-                            <Button onClick={handleGoToFund} variant="outline" className="w-full">
-                              <ArrowRight className="w-4 h-4 mr-2" />
+                            <button 
+                              onClick={handleGoToFund} 
+                              className="w-full btn-secondary rounded-full"
+                            >
+                              <ArrowRight className="w-4 h-4 mr-2 inline" />
                               Go to Fund
-                            </Button>
+                            </button>
                           )}
                         </>
                       );
@@ -271,7 +277,7 @@ export default function SkinStore() {
                 {/* Progress display for locked skins */}
                 {!unlocked.includes(selectedSkin.id) && selectedSkin.requires && (
                   <div className="pt-4 border-t">
-                    <div className="text-sm text-muted-foreground mb-2">Progress:</div>
+                    <div className="text-sm text-brand-text/70 mb-2">Progress:</div>
                     {(() => {
                       const prog = progressForRule(selectedSkin.requires, {
                         sendCount,
@@ -301,39 +307,39 @@ export default function SkinStore() {
                     })()}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
+            <div className="glass-card">
+              <div className="p-8 text-center text-brand-text/60">
                 <Store className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Select a skin to view details</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Stats card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Your Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div className="glass-card">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold leading-none tracking-tight mb-6">Your Progress</h3>
+            </div>
+            <div className="px-6 pb-6 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Sends:</span>
+                <span className="text-brand-text/70">Total Sends:</span>
                 <span className="font-mono">{sendCount}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Sent:</span>
+                <span className="text-brand-text/70">Total Sent:</span>
                 <span className="font-mono">${(totalUsdCents / 100).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Unlocked Skins:</span>
+                <span className="text-brand-text/70">Unlocked Skins:</span>
                 <span className="font-mono">
                   {unlocked.length}/{presets.length}
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,10 +1,51 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { connect, disconnect, isFreighterInstalled } from '@/lib/wallet';
 import { debugFreighterConnection } from '@/lib/wallet-debug';
 
 import { UnifiedHeaderPill } from '@/components/ui/UnifiedHeaderPill';
 
+// Function to get page title based on current route
+const getPageTitle = (pathname: string): string => {
+  // Handle exact matches first
+  switch (pathname) {
+    case '/':
+      return 'Create Gift';
+    case '/fund':
+      return 'Fund Gift';
+    case '/open':
+      return 'Open Gift';
+    case '/activity':
+      return 'Activity';
+    case '/studio':
+      return 'Studio';
+    case '/projects':
+      return 'Projects';
+    case '/contacts':
+      return 'Contacts';
+    case '/settings':
+      return 'Settings';
+    case '/studio/projects':
+      return 'Studio Projects';
+    case '/skins':
+      return 'Skin Store';
+    case '/kale-skins':
+      return 'KALE Skins';
+    default:
+      // Handle dynamic routes
+      if (pathname.startsWith('/projects/')) {
+        return 'Project Details';
+      }
+      if (pathname.startsWith('/studio/projects/')) {
+        return 'Project Details';
+      }
+      // Default fallback
+      return 'Dashboard';
+  }
+};
+
 export const Header = () => {
+  const location = useLocation();
   const [wallet, setWallet] = useState<{ publicKey: string; connected: boolean } | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -71,9 +112,9 @@ export const Header = () => {
   };
 
   return (
-    <header className="h-16 bg-brand-surface/30 backdrop-blur-lg px-6 flex items-center justify-between">
+    <header className="fixed top-0 left-64 right-0 h-20 bg-brand-surface/30 backdrop-blur-lg px-6 flex items-center justify-between z-40 border-b border-surface-border">
       <div className="flex items-center gap-4">
-        <h2 className="text-lg font-medium text-brand-text/80">Dashboard</h2>
+        <h2 className="text-lg font-medium text-brand-text/80">{getPageTitle(location.pathname)}</h2>
       </div>
 
       <div className="flex items-center gap-4">

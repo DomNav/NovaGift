@@ -2,6 +2,9 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProject, type Recipient } from '@/api/projects.api';
 import ProgressGraph from '@/components/studio/ProgressGraph';
+import { EventPoster } from '@/components/qr/EventPoster';
+import { QrPackTable } from '@/components/qr/QrPackTable';
+import { PageHeader } from '@/components/PageHeader';
 
 const chip = (label: string, cls: string) => (
   <span className={`px-2 py-1 rounded-full text-xs font-medium ${cls}`}>{label}</span>
@@ -24,20 +27,130 @@ export default function ProjectDetails() {
   if (isLoading || !data) return <div className="p-6 text-slate-500">Loading…</div>;
   const p = data;
 
+  const breadcrumbs = [
+    { label: 'Studio', href: '/studio' },
+    { label: 'Projects', href: '/studio/projects' },
+    { label: p.name }
+  ];
 
+  // Handle QR Event projects differently
+  if (p.kind === 'QR_EVENT') {
+    const steps = ['Draft', 'Funded', 'Active', 'Ended'];
+    const idx = steps.findIndex((s) => s.toLowerCase() === p.status.toLowerCase());
+    
+    return (
+      <div className="p-6 space-y-6">
+        <PageHeader
+          title={p.name}
+          description={`${p.kind === 'QR_EVENT' ? 'QR Event' : 'Standard'} Project • ${p.assetCode} • ${p.status}`}
+          breadcrumbs={breadcrumbs}
+          showBackButton={true}
+          backLabel="Back to Projects"
+        />
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 md:col-span-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 p-4">
+            <div className="text-sm text-slate-500">BUDGET / ASSET</div>
+            <div className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+              {p.assetCode === 'USDC' ? `$${p.budget.toLocaleString()}` : `${p.budget} ${p.assetCode}`}
+            </div>
+            <div className="text-sm mt-1">{p.assetCode}</div>
+            <div className="text-xs text-slate-500 mt-2">
+              {p.qrEvent?.amount} {p.assetCode} per claim
+            </div>
+          </div>
 
+          <div className="col-span-12 md:col-span-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 p-4">
+            <div className="text-sm text-slate-500">EVENT SCHEDULE</div>
+            <div className="mt-2 leading-6">
+              <div>
+                Starts: <span className="font-medium">{p.schedule.issueAt}</span>
+              </div>
+              {p.schedule.expiresAt && (
+                <div>
+                  Ends: <span className="font-medium">{p.schedule.expiresAt}</span>
+                </div>
+              )}
+              <div className="text-xs text-slate-500 mt-2">
+                Event Type: {p.qrEvent?.eventType}
+              </div>
+            </div>
+          </div>
+
+          <div className="col-span-12 md:col-span-3">
+            <ProgressGraph 
+              stats={p.stats} 
+              totalRecipients={p.qrEvent?.poolSize || 0}
+            />
+          </div>
+        </div>
+
+        {/* QR Event specific content */}
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 lg:col-span-8">
+            {p.qrEvent && (
+              <QrPackTable 
+                codes={p.qrEvent.codes}
+                onGenerateMore={() => console.log('Generate more codes')}
+                onExportCsv={() => console.log('Export CSV')}
+              />
+            )}
+          </div>
+          <div className="col-span-12 lg:col-span-4">
+            {p.qrEvent && (
+              <EventPoster 
+                event={{...p.qrEvent, name: p.name, assetCode: p.assetCode}}
+                sampleCode={p.qrEvent.codes[0]?.code || 'SAMPLE123'}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 p-4">
+          <div className="text-sm text-slate-500 mb-3">Event Timeline</div>
+          <div className="flex items-center gap-4">
+            {steps.map((s, i) => (
+              <div key={s} className="flex items-center gap-2">
+                <div
+                  className={`h-6 w-6 rounded-full grid place-items-center ${
+                    i <= idx
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  {i <= idx ? '✓' : i + 1}
+                </div>
+                <span className="text-sm">{s}</span>
+                {i < steps.length - 1 && (
+                  <div className={`w-20 h-px ${i < idx ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard project flow
   const steps = ['Draft', 'Funded', 'Issued', 'Expired'];
-  const idx = steps.findIndex((s) => s.toLowerCase() === p.status);
+  const idx = steps.findIndex((s) => s.toLowerCase() === p.status.toLowerCase());
 
   return (
     <div className="p-6 space-y-6">
+      <PageHeader
+        title={p.name}
+        description={`${p.kind === 'QR_EVENT' ? 'QR Event' : 'Standard'} Project • ${p.assetCode} • ${p.status}`}
+        breadcrumbs={breadcrumbs}
+        showBackButton={true}
+        backLabel="Back to Projects"
+      />
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 md:col-span-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 p-4">
           <div className="text-sm text-slate-500">BUDGET / ASSET</div>
           <div className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-            {p.asset === 'USDC' ? `$${p.budget.toLocaleString()}` : `${p.budget} ${p.asset}`}
+            {p.assetCode === 'USDC' ? `$${p.budget.toLocaleString()}` : `${p.budget} ${p.assetCode}`}
           </div>
-          <div className="text-sm mt-1">{p.asset}</div>
+          <div className="text-sm mt-1">{p.assetCode}</div>
         </div>
 
         <div className="col-span-12 md:col-span-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 p-4">

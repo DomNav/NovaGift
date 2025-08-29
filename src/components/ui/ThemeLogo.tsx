@@ -54,15 +54,27 @@ export const ThemeLogo = ({
       className={`
         ${sizeClasses[size]} 
         ${size === 'full' ? '' : 'mx-auto'}
-        opacity-90 
+        opacity-95 
         hover:opacity-100 
+        hover:scale-110
+        hover:rotate-2
+        hover:drop-shadow-2xl
+        hover:brightness-110
         transition-all 
-        duration-200 
-        drop-shadow-lg
+        duration-300 
+        ease-out
         object-contain
-        ${theme === 'dark' ? 'filter brightness-110 contrast-110 shadow-2xl shadow-blue-500/30' : 'filter brightness-95 contrast-105'}
+        bg-transparent
+        mix-blend-normal
+        cursor-pointer
+        transform-gpu
+        ${theme === 'dark' ? 'hover:drop-shadow-[0_20px_35px_rgba(59,130,246,0.3)]' : 'hover:drop-shadow-[0_20px_35px_rgba(37,99,235,0.2)]'}
         ${className}
       `}
+      style={{ 
+        imageRendering: 'crisp-edges',
+        backgroundColor: 'transparent'
+      }}
     />
   );
 };

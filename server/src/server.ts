@@ -16,6 +16,9 @@ import pricesRoutes from './routes/prices';
 import healthRoutes from './routes/health';
 import notificationRoutes from './routes/notifications';
 import passkeyRoutes from './routes/passkey';
+import contactsRoutes from './routes/contacts';
+import qrRoutes from './routes/qr';
+import oracleRoutes from './routes/oracle';
 import { apiLimiter } from './middlewares/rate';
 import { requireConsent, checkConsent } from './middlewares/consent';
 
@@ -50,6 +53,9 @@ app.use('/api/stellar', stellarRoutes);
 app.use('/api/profile', profileRoutes); // Profile routes include consent middleware
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/passkey', passkeyRoutes);
+app.use('/api/contacts', contactsRoutes);
+app.use('/api/qr', qrRoutes);
+app.use('/api/oracle', oracleRoutes);
 
 // Health check
 app.use('/api/health', healthRoutes);

@@ -11,6 +11,7 @@ const Env = z.object({
 
   NOVAGIFT_CONTRACT_ID: z.string().optional().default(''),
   ENABLE_REFLECTOR: z.string().optional().default('false'),
+  REFLECTOR_URL: z.string().url().optional().default('https://reflector-api.stellar.org'),
 
   LINK_SIGNING_KEY: z.string().optional().default(''),
   FEE_SPONSOR: z.string().optional().default(''),
@@ -42,6 +43,12 @@ const Env = z.object({
   MERCURY_JWT: z.string().optional(),
   LAUNCHTUBE_URL: z.string().url().optional(),
   LAUNCHTUBE_JWT: z.string().optional(),
+  
+  // QR Events
+  QR_BASE_URL: z.string().url().default('http://localhost:5173'),
+  POSTER_SIGNING_KEY: z.string().default('dev-change-me'),
+  SPONSOR_SECRET: z.string().optional().default(''),
+  DISTRIBUTION_SECRET: z.string().optional().default(''),
 });
 
 // Parse base environment

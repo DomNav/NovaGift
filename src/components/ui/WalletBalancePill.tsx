@@ -54,7 +54,7 @@ export default function WalletBalancePill({ account }: WalletBalancePillProps) {
 
       {/* Expanded Balance Details */}
       {isExpanded && (
-        <div className="absolute top-full right-0 mt-2 w-72 bg-brand-surface/95 backdrop-blur-lg border border-brand-text/10 dark:border-white/10 rounded-lg shadow-xl z-50">
+        <div className="absolute top-full right-0 mt-2 w-72 bg-brand-surface/95 backdrop-blur-lg border border-brand-text/10 dark:border-white/10 rounded-lg shadow-xl z-[9999]">
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium text-brand-text">Wallet Balance</h3>

@@ -2,11 +2,12 @@ import { useEffect, useState, useMemo } from 'react';
 import { EnvelopeCard } from '@/components/ui/EnvelopeCard';
 import { useToast } from '@/hooks/useToast';
 import { useSkins, type SkinSide } from '@/store/skins';
-import { Check, Link, Unlink } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useRewards } from '@/store/rewards';
 import { progressForRule, ruleLabel } from '@/utils/rewards';
 import ProgressPills from '@/components/ui/ProgressPills';
 import StudioInsightsCard from '@/components/studio/StudioInsightsCard';
+import { LinkStylesToggle } from '@/components/ui/LinkStylesToggle';
 
 export const Studio = () => {
   const { addToast } = useToast();
@@ -96,28 +97,15 @@ export const Studio = () => {
         </p>
       </div>
 
+      {/* Link Styles Toggle */}
+      <LinkStylesToggle linked={linked} onChange={setLinked} />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Skin Selection */}
         <div>
           <div className="mb-4 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-medium">Choose Your Skin</h2>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="link-toggle"
-                  checked={linked}
-                  onChange={(e) => setLinked(e.target.checked)}
-                  className="rounded"
-                />
-                <label
-                  htmlFor="link-toggle"
-                  className="text-sm text-brand-text/70 flex items-center gap-1"
-                >
-                  {linked ? <Link className="w-3 h-3" /> : <Unlink className="w-3 h-3" />}
-                  Link styles
-                </label>
-              </div>
             </div>
 
             {/* Segmented Control */}
@@ -145,13 +133,6 @@ export const Studio = () => {
                   Open (Recipient)
                 </button>
               </div>
-
-              {linked && (
-                <div className="flex items-center gap-1 text-xs text-brand-text/50">
-                  <span className="text-blue-400">🔗</span>
-                  <span>Linked - selections apply to both sides</span>
-                </div>
-              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">

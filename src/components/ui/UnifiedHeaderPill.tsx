@@ -4,7 +4,7 @@ import { useRewards } from '@/store/rewards';
 import { usd } from '@/utils/rewards';
 import { useBalances } from '@/hooks/useBalances';
 import { useNotifications } from '@/hooks/useNotifications';
-import { usePrices, type PriceData } from '@/hooks/usePrices';
+import { usePrices } from '@/hooks/usePrices';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface UnifiedHeaderPillProps {
@@ -16,11 +16,12 @@ interface UnifiedHeaderPillProps {
 export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHeaderPillProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showDisconnectMenu, setShowDisconnectMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
+
   const [activeSection, setActiveSection] = useState<'prices' | 'balance' | 'notifications' | null>(null);
+  const [pillPosition, setPillPosition] = useState({ top: 0, left: 0, width: 0 });
   
   const pillRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+
   
   // Hooks
   const { theme } = useTheme();
@@ -35,7 +36,6 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
       if (pillRef.current && !pillRef.current.contains(event.target as Node)) {
         setIsExpanded(false);
         setActiveSection(null);
-        setShowNotifications(false);
         setShowDisconnectMenu(false);
       }
     };
@@ -46,26 +46,48 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
     };
   }, []);
 
+  // Update pill position when expanding
+  const updatePillPosition = () => {
+    if (pillRef.current) {
+      const rect = pillRef.current.getBoundingClientRect();
+      setPillPosition({
+        top: rect.bottom + 16, // 16px gap (mt-4)
+        left: rect.left,
+        width: rect.width
+      });
+    }
+  };
+
   const toggleSection = (section: 'prices' | 'balance' | 'notifications') => {
     if (activeSection === section) {
       setIsExpanded(false);
       setActiveSection(null);
     } else {
+      updatePillPosition();
       setIsExpanded(true);
       setActiveSection(section);
     }
   };
 
+  // Update position on window resize
+  useEffect(() => {
+    if (isExpanded) {
+      const handleResize = () => updatePillPosition();
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [isExpanded]);
+
   const currentPrice = priceData?.find(p => p.symbol === 'XLM')?.priceUsd || 0;
   const xlmBalance = parseFloat(xlm || '0');
 
   return (
-    <div className="relative mt-6" ref={pillRef}>
+    <div className="relative" ref={pillRef}>
              {/* Main Unified Pill */}
-       <div className={`relative flex items-center backdrop-blur-xl rounded-full px-6 py-3 transition-all duration-500 group before:absolute before:inset-0 before:rounded-full before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500 ${
+       <div className={`relative flex items-center backdrop-blur-xl rounded-full px-6 py-3 transition-all duration-500 group before:absolute before:inset-0 before:rounded-full before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500 shadow-lg hover:shadow-xl ${
          theme === 'dark' 
-           ? 'hover:from-amber-500/10 hover:via-transparent hover:to-amber-500/10 before:bg-gradient-to-r before:from-amber-500/10 before:via-transparent before:to-amber-500/10' 
-           : 'bg-gradient-to-r from-white/80 via-gray-50/90 to-white/80 hover:from-white/90 hover:via-gray-100/95 hover:to-white/90 before:bg-gradient-to-r before:from-amber-500/5 before:via-transparent before:to-amber-500/5 border border-gray-200/50'
+           ? 'bg-gradient-to-r from-gray-800/90 via-gray-900/95 to-gray-800/90 hover:from-gray-700/95 hover:via-gray-800/95 hover:to-gray-700/95 before:bg-gradient-to-r before:from-amber-500/10 before:via-transparent before:to-amber-500/10 hover:shadow-amber-500/20' 
+           : 'bg-gradient-to-r from-white/80 via-gray-50/90 to-white/80 hover:from-white/90 hover:via-gray-100/95 hover:to-white/90 before:bg-gradient-to-r before:from-amber-500/5 before:via-transparent before:to-amber-500/5 hover:shadow-amber-500/10'
        }`}>
         
         {/* Price Ticker Section */}
@@ -161,7 +183,7 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
 
                  {/* Notifications Section */}
          <div 
-           className={`relative flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 cursor-pointer group/notifications backdrop-blur-xl z-10 border border-brand-text/10 dark:border-white/10 shadow-lg hover:shadow-xl ${
+           className={`relative flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 cursor-pointer group/notifications backdrop-blur-xl z-10 border border-surface-border shadow-lg hover:shadow-xl ${
              theme === 'dark'
                ? 'hover:bg-gradient-to-r hover:from-amber-500/20 hover:to-yellow-500/20'
                : 'hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-yellow-500/10'
@@ -169,7 +191,7 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
            onClick={() => toggleSection('notifications')}
          >
            <div className="relative flex items-center">
-             <span className="text-lg filter drop-shadow-sm">🔔</span>
+             <span className="text-sm filter drop-shadow-sm">🔔</span>
             {summary.totalUnread > 0 && (
               <div className={`absolute -top-2 -right-2 min-w-[18px] h-[18px] text-white text-xs font-bold rounded-full flex items-center justify-center px-1 animate-pulse border ${
                 theme === 'dark' 
@@ -195,7 +217,12 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
         {wallet && wallet.connected && wallet.publicKey ? (
           <div className="relative">
             <div
-              onClick={() => setShowDisconnectMenu(!showDisconnectMenu)}
+              onClick={() => {
+                if (!showDisconnectMenu) {
+                  updatePillPosition();
+                }
+                setShowDisconnectMenu(!showDisconnectMenu);
+              }}
               className={`relative flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 cursor-pointer group/wallet backdrop-blur-sm z-10 ${
                 theme === 'dark'
                   ? 'hover:bg-gradient-to-r hover:from-slate-500/20 hover:to-gray-500/20'
@@ -230,11 +257,17 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
 
             {/* Disconnect Menu */}
             {showDisconnectMenu && (
-              <div className={`absolute top-full right-0 mt-2 w-56 backdrop-blur-xl border rounded-xl z-50 overflow-hidden ${
-                theme === 'dark'
-                  ? 'bg-gradient-to-br from-black/95 via-gray-900/95 to-black/95 border-amber-500/30'
-                  : 'bg-gradient-to-br from-white/95 via-gray-50/95 to-white/95 border-amber-500/20'
-              }`}>
+              <div 
+                className={`fixed w-56 backdrop-blur-xl border rounded-xl z-[9999] overflow-hidden shadow-2xl ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-br from-black/95 via-gray-900/95 to-black/95 border-amber-500/30'
+                    : 'bg-gradient-to-br from-white/95 via-gray-50/95 to-white/95 border-amber-500/20'
+                }`}
+                style={{
+                  top: pillPosition.top,
+                  left: pillPosition.left + pillPosition.width - 224, // 224px = w-56 (14rem * 16px)
+                }}
+              >
                 <div className="p-3">
                   <div className={`mb-3 p-3 rounded-lg border ${
                     theme === 'dark'
@@ -268,7 +301,7 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
         ) : (
           <button
             onClick={onConnect}
-            className={`relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/connect border border-brand-text/10 dark:border-white/10 shadow-lg hover:shadow-xl ${
+            className={`relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/connect border border-surface-border shadow-lg hover:shadow-xl ${
               theme === 'dark'
                 ? 'bg-gradient-to-r from-blue-600/80 to-indigo-600/80 hover:from-blue-500/90 hover:to-indigo-500/90'
                 : 'bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-400/90 hover:to-indigo-400/90'
@@ -291,11 +324,20 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
 
       {/* Expanded Details Panel */}
       {isExpanded && activeSection && (
-        <div className={`absolute top-full left-0 right-0 mt-4 backdrop-blur-xl border rounded-xl z-50 p-6 overflow-hidden ${
-          theme === 'dark'
-            ? 'bg-gradient-to-br from-black/95 via-gray-900/95 to-black/95 border-amber-500/30'
-            : 'bg-gradient-to-br from-white/95 via-gray-50/95 to-white/95 border-amber-500/20'
-        }`}>
+        <div 
+          className={`fixed backdrop-blur-xl border rounded-xl z-[9999] p-6 overflow-hidden shadow-2xl ${
+            theme === 'dark'
+              ? 'bg-gradient-to-br from-black/95 via-gray-900/95 to-black/95 border-amber-500/30'
+              : 'bg-gradient-to-br from-white/95 via-gray-50/95 to-white/95 border-amber-500/20'
+          }`}
+          style={{
+            top: pillPosition.top,
+            left: pillPosition.left,
+            width: pillPosition.width,
+            maxWidth: '500px',
+            minWidth: '400px'
+          }}
+        >
           <div className={`absolute inset-0 pointer-events-none ${
             theme === 'dark'
               ? 'bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5'
@@ -313,12 +355,14 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
                 }`}>Live Market Prices</h3>
               </div>
               <div className="space-y-3">
-                {priceData?.map((price, index) => (
-                  <div className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-300 ${
-                    theme === 'dark'
-                      ? 'bg-gradient-to-r from-slate-800/40 to-gray-800/40 border-slate-600/30 hover:border-cyan-400/30'
-                      : 'bg-gradient-to-r from-slate-100/40 to-gray-100/40 border-slate-300/30 hover:border-cyan-500/30'
-                  }`}>
+                {priceData?.map((price) => (
+                  <div 
+                    key={price.symbol}
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-300 ${
+                      theme === 'dark'
+                        ? 'bg-gradient-to-r from-slate-800/40 to-gray-800/40 border-slate-600/30 hover:border-cyan-400/30'
+                        : 'bg-gradient-to-r from-slate-100/40 to-gray-100/40 border-slate-300/30 hover:border-cyan-500/30'
+                    }`}>
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full animate-pulse ${
                         theme === 'dark' ? 'bg-gradient-to-r from-cyan-400 to-blue-400' : 'bg-gradient-to-r from-cyan-500 to-blue-500'
@@ -439,7 +483,7 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
                       onClick={() => markAsRead(notification.id)}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="text-lg filter drop-shadow-sm">{notification.type === 'envelope_received' ? '🎁' : '🔔'}</div>
+                        <div className="text-sm filter drop-shadow-sm">{notification.type === 'envelope_received' ? '🎁' : '🔔'}</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <p className={`text-sm font-semibold truncate ${

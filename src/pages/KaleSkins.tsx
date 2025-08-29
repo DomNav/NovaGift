@@ -30,7 +30,7 @@ export default function KaleSkins() {
           <button
             onClick={login}
             disabled={loading}
-            className="px-3 py-1.5 rounded-xl shadow bg-brand-primary text-white hover:bg-brand-secondary disabled:opacity-50"
+            className="btn-granite-primary rounded-full disabled:opacity-50"
           >
             {loading ? 'Connecting...' : 'Connect Freighter'}
           </button>
@@ -45,14 +45,14 @@ export default function KaleSkins() {
       {isLoggedIn ? (
         <SkinsGrid />
       ) : (
-        <div className="text-center py-12 bg-brand-surface/50 dark:bg-brand-surface/20 rounded-2xl border border-surface-border">
-          <p className="text-brand-text/70 dark:text-brand-text/80 mb-4">
+        <div className="glass-card text-center py-12">
+          <p className="text-brand-text/70 mb-4">
             Connect your Freighter wallet to view KALE-gated skins
           </p>
           <button
             onClick={login}
             disabled={loading}
-            className="px-6 py-2 rounded-xl bg-brand-primary text-white hover:bg-brand-secondary disabled:opacity-50"
+            className="btn-granite-primary rounded-full disabled:opacity-50"
           >
             {loading ? 'Connecting...' : 'Connect Wallet'}
           </button>

@@ -18,6 +18,30 @@ async function main() {
   });
 
   console.log({ demoProfile });
+
+  // === Mock contacts =========================================
+  await prisma.contact.createMany({
+    data: [
+      {
+        displayName: 'Alice Smith',
+        email: 'alice@example.com',
+        wallet: 'GAG6U5Q7VJ3JEXAMPLEEXAMPLEEXAMPLEEXAMPLEVIP',
+        tags: ['VIP', 'Team'],
+      },
+      {
+        displayName: 'Bob Chen',
+        wallet: 'GBB6U5Q7VJ3JEXAMPLEEXAMPLEEXAMPLEEXAMPLE123',
+        tags: ['Friends'],
+      },
+      {
+        displayName: 'Carla Diaz',
+        email: 'carla@example.com',
+        tags: ['Vendors'],
+      },
+    ],
+    skipDuplicates: true,
+  });
+  // ============================================================
 }
 
 main()

@@ -14,6 +14,10 @@ import { Projects } from '@/pages/Projects';
 import { ProjectDetail } from '@/pages/ProjectDetail';
 import ProjectsIndex from '@/pages/studio/projects/ProjectsIndex';
 import ProjectDetailsPage from '@/pages/studio/projects/ProjectDetails';
+import ContactsPage from '@/pages/ContactsPage';
+import { QrClaimPage } from '@/pages/QrClaimPage';
+import SkinStore from '@/pages/SkinStore';
+import KaleSkins from '@/pages/KaleSkins';
 
 // Create a React Query client
 const queryClient = new QueryClient({
@@ -35,19 +39,29 @@ function App() {
           <ToastProvider>
             <BrowserRouter>
               <Routes>
+                {/* Public QR claim route (no layout) */}
+                <Route path="/qr-claim" element={<QrClaimPage />} />
+                
                 <Route path="/" element={<AppLayout />}>
                   <Route index element={<Create />} />
                   <Route path="fund" element={<Fund />} />
                   <Route path="open" element={<Open />} />
+                  <Route path="open/:id" element={<Open />} />
                   <Route path="activity" element={<Activity />} />
                   <Route path="studio" element={<Studio />} />
                   {/* Legacy routes remain for now */}
                   <Route path="projects" element={<Projects />} />
                   <Route path="projects/:id" element={<ProjectDetail />} />
+                  <Route path="contacts" element={<ContactsPage />} />
 
                   {/* New Studio Projects module */}
                   <Route path="studio/projects" element={<ProjectsIndex />} />
                   <Route path="studio/projects/:id" element={<ProjectDetailsPage />} />
+                  
+                  {/* Studio sub-pages */}
+                  <Route path="skins" element={<SkinStore />} />
+                  <Route path="kale-skins" element={<KaleSkins />} />
+                  
                   <Route path="settings" element={<Settings />} />
                 </Route>
               </Routes>

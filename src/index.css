@@ -323,6 +323,21 @@
   .animate-shimmer {
     animation: shimmer 1.5s ease-in-out infinite;
   }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 }
 
 @keyframes waxPop {

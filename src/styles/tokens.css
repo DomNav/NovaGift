@@ -26,7 +26,8 @@
   /* Surface Variants */
   --surface-card: rgba(30, 35, 50, 0.8);
   --surface-overlay: rgba(14, 18, 32, 0.95);
-  --surface-border: rgba(248, 250, 255, 0.1);
+  /* Softer border for dark mode to avoid visible lines */
+  --surface-border: rgba(255, 255, 255, 0.08);
 
   /* Progress Indicators */
   --progress-active: #f8faff;
