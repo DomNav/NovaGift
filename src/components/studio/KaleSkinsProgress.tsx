@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useFreighter } from '@/hooks/useFreighter';
+import { useWallet } from '@/hooks/useWallet';
 
 interface KaleSkinsProgressProps {
   className?: string;
 }
 
 export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressProps) {
-  const { connected, publicKey, connect, connecting } = useFreighter();
+  const { connected, publicKey, connect, connecting } = useWallet();
   const [kaleBalance, setKaleBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,10 +24,10 @@ export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressP
 
   const fetchKaleBalance = async () => {
     if (!publicKey) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
       const response = await fetch(`${apiBase}/api/kale-public/balance/${publicKey}`, {
@@ -36,7 +36,7 @@ export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressP
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setKaleBalance(data.holdings || 0);
@@ -85,7 +85,10 @@ export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressP
         <div className="text-xs text-brand-text/70 mb-1">KALE Skins Progress</div>
         <div className="text-sm text-brand-text/60 mb-2">Loading KALE balance...</div>
         <div className="h-2 w-full bg-black/20 dark:bg-white/20 rounded overflow-hidden">
-          <div className="h-2 bg-gradient-to-r from-brand-primary to-brand-accent animate-pulse" style={{ width: '100%' }} />
+          <div
+            className="h-2 bg-gradient-to-r from-brand-primary to-brand-accent animate-pulse"
+            style={{ width: '100%' }}
+          />
         </div>
       </div>
     );
@@ -96,10 +99,7 @@ export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressP
       <div className={`rounded-xl bg-black/5 dark:bg-white/5 p-4 ${className}`}>
         <div className="text-xs text-brand-text/70 mb-1">KALE Skins Progress</div>
         <div className="text-sm text-red-500 mb-2">Error loading balance</div>
-        <button
-          onClick={fetchKaleBalance}
-          className="btn-secondary text-sm w-full"
-        >
+        <button onClick={fetchKaleBalance} className="btn-secondary text-sm w-full">
           Retry
         </button>
       </div>
@@ -108,12 +108,13 @@ export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressP
 
   const isUnlocked = kaleBalance !== null && kaleBalance >= KALE_UNLOCK_THRESHOLD;
   const progress = kaleBalance !== null ? Math.min(1, kaleBalance / KALE_UNLOCK_THRESHOLD) : 0;
-  const remaining = kaleBalance !== null ? Math.max(0, KALE_UNLOCK_THRESHOLD - kaleBalance) : KALE_UNLOCK_THRESHOLD;
+  const remaining =
+    kaleBalance !== null ? Math.max(0, KALE_UNLOCK_THRESHOLD - kaleBalance) : KALE_UNLOCK_THRESHOLD;
 
   return (
     <div className={`rounded-xl bg-black/5 dark:bg-white/5 p-4 ${className}`}>
       <div className="text-xs text-brand-text/70 mb-1">KALE Skins Progress</div>
-      
+
       {isUnlocked ? (
         <>
           <div className="text-sm font-medium text-green-600 dark:text-green-400 mb-2">
@@ -123,7 +124,10 @@ export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressP
             KALE Balance: {kaleBalance?.toLocaleString()} KALE
           </div>
           <div className="h-2 w-full bg-black/20 dark:bg-white/20 rounded overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-green-500 to-emerald-500" style={{ width: '100%' }} />
+            <div
+              className="h-2 bg-gradient-to-r from-green-500 to-emerald-500"
+              style={{ width: '100%' }}
+            />
           </div>
         </>
       ) : (
@@ -135,14 +139,14 @@ export default function KaleSkinsProgress({ className = '' }: KaleSkinsProgressP
             KALE needed for special skin: {remaining.toLocaleString()} KALE
           </div>
           <div className="h-2 w-full bg-black/20 dark:bg-white/20 rounded mt-2 overflow-hidden">
-            <div 
-              className="h-2 bg-gradient-to-r from-brand-primary to-brand-accent" 
-              style={{ width: `${Math.round(progress * 100)}%` }} 
+            <div
+              className="h-2 bg-gradient-to-r from-brand-primary to-brand-accent"
+              style={{ width: `${Math.round(progress * 100)}%` }}
             />
           </div>
         </>
       )}
-      
+
       <div className="text-xs text-brand-text/60 mt-2">
         Special edition skin unlocks at 2,000 KALE
       </div>

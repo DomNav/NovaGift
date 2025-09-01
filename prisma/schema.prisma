@@ -22,28 +22,70 @@ enum Asset {
   XLM
 }
 
+enum ProjectKind {
+  STANDARD
+  QR_EVENT
+}
+
+enum ProjectStatus {
+  DRAFT
+  FUNDED
+  ACTIVE
+  ENDED
+}
+
+enum QrEventType {
+  POOL
+  ASSIGNED
+  CHECKIN
+}
+
+enum QrCodeStatus {
+  ACTIVE
+  USED
+  EXPIRED
+}
+
 model Envelope {
   id              String         @id
   status          EnvelopeStatus
   asset           Asset
-  amount          Decimal
   decimals        Int
+  amount          Decimal
   sender          String
   hash            String
   expiryTs        Int
   message         String?
   fundedTxId      String?
   openedTxId      String?
+  canceledTxId    String?
   recipient       String?
   assetDelivered  Asset?
   amountDelivered Decimal?
-  canceledTxId    String?
   createdAt       DateTime       @default(now())
+  canceledAt      DateTime?
   fundedAt        DateTime?
   openedAt        DateTime?
-  canceledAt      DateTime?
 
+  // NEW for Claim API v1
+  contractId      String?        @unique
+  assetCode       String?
+  assetIssuer     String?
+  claimedAt       DateTime?
+  emailInviteId   String?
+  projectId       String?
+
+  @@index([status])
   @@index([sender])
+}
+
+model EmailInvite {
+  id         String   @id @default(cuid())
+  envelopeId String   @unique
+  email      String
+  inviteJwt  String
+  sentAt     DateTime
+  acceptedAt DateTime?
 }
 
 model Jti {
@@ -93,4 +135,65 @@ model UserSkin {
   User      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, skinId])
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  displayName String
+  email       String?  @unique
+  wallet      String?  @unique
+  tags        Json?    @default("[]")
+  lastUsedAt  DateTime?
+
+  @@index([displayName])
+  @@index([wallet])
+}
+
+model Project {
+  id        String        @id @default(cuid())
+  kind      ProjectKind   @default(STANDARD)
+  name      String
+  assetCode String        // USDC/XLM
+  budget    Decimal
+  status    ProjectStatus @default(DRAFT)
+  issueAt   DateTime?
+  qrEvent   QrEvent?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model QrEvent {
+  id            String      @id @default(cuid())
+  projectId     String      @unique
+  startAt       DateTime
+  endAt         DateTime
+  eventType     QrEventType
+  poolSize      Int
+  amountAtomic  BigInt      // store atomic (7dp)
+  generated     Int         @default(0)
+  redeemed      Int         @default(0)
+  spentAtomic   BigInt      @default(0)
+  codes         QrCode[]
+  project       Project     @relation(fields: [projectId], references: [id])
+
+  @@index([startAt, endAt])
+}
+
+model QrCode {
+  id              String       @id @default(cuid())
+  eventId         String
+  code            String       @unique // short base32 (7–9 chars)
+  status          QrCodeStatus @default(ACTIVE)
+  assignedContact String?      // contacts.id
+  claimedAt       DateTime?
+  claimTxHash     String?
+  expiresAt       DateTime?
+  qrEvent         QrEvent      @relation(fields: [eventId], references: [id])
+
+  @@index([eventId, status])
+  @@index([assignedContact])
 }

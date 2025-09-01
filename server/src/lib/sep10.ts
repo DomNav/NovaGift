@@ -61,7 +61,7 @@ export function verifySignedChallenge(signedXDR: string): { sub: string } {
   }
   
   // Must include server sig and client sig on the source account operation
-  const serverOK = tx.signatures.some(sig => {
+  const serverOK = tx.signatures.some((sig: any) => {
     try {
       return serverKP.verify(tx.hash(), sig.signature());
     } catch { 
@@ -77,7 +77,7 @@ export function verifySignedChallenge(signedXDR: string): { sub: string } {
   if (!client || !StrKey.isValidEd25519PublicKey(client)) throw new Error("bad_client");
 
   // Verify client signature present
-  const clientOK = tx.signatures.some(sig => {
+  const clientOK = tx.signatures.some((sig: any) => {
     try { 
       return Keypair.fromPublicKey(client).verify(tx.hash(), sig.signature()); 
     } catch { 

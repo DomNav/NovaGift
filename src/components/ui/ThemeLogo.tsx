@@ -1,68 +1,80 @@
-import { useTheme } from '@/contexts/ThemeContext'
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ThemeLogoProps {
-  className?: string
-  alt?: string
-  size?: 'sm' | 'md' | 'lg' | 'full'
+  className?: string;
+  alt?: string;
+  size?: 'sm' | 'md' | 'lg' | 'full';
   // Optional: specify different logos for each theme
-  lightModeLogo?: string
-  darkModeLogo?: string
+  lightModeLogo?: string;
+  darkModeLogo?: string;
   // Optional: use single transparent logo (default behavior)
-  transparentLogo?: string
+  transparentLogo?: string;
   // Optional: use the new JPG logo format
-  useJpgLogo?: boolean
+  useJpgLogo?: boolean;
 }
 
-export const ThemeLogo = ({ 
-  className = '', 
+export const ThemeLogo = ({
+  className = '',
   alt = 'NovaGift Logo',
   size = 'md',
   lightModeLogo,
   darkModeLogo,
-  transparentLogo
+  transparentLogo,
 }: ThemeLogoProps) => {
-  const { theme } = useTheme()
-  
+  const { theme } = useTheme();
+
   // Size variants
   const sizeClasses = {
     sm: 'w-8 h-8',
-    md: 'w-16 h-16', 
+    md: 'w-16 h-16',
     lg: 'w-24 h-24',
-    'full': 'w-full h-auto'
-  }
-  
+    full: 'w-full h-auto',
+  };
+
   // Determine which logo to use
   const getLogoSrc = () => {
     // If specific theme logos are provided, use them
     if (lightModeLogo && darkModeLogo) {
-      return theme === 'dark' ? darkModeLogo : lightModeLogo
+      return theme === 'dark' ? darkModeLogo : lightModeLogo;
     }
-    
+
     // If transparent logo is specified, use it
     if (transparentLogo) {
-      return transparentLogo
+      return transparentLogo;
     }
-    
+
     // Default: use the JPG logo
-    return '/assets/images/novagift-logo.jpg'
-  }
-  
+    return '/assets/images/novagift-logo.jpg';
+  };
+
   return (
-    <img 
+    <img
       src={getLogoSrc()}
       alt={alt}
       className={`
         ${sizeClasses[size]} 
         ${size === 'full' ? '' : 'mx-auto'}
-        opacity-90 
+        opacity-95 
         hover:opacity-100 
+        hover:scale-110
+        hover:rotate-2
+        hover:drop-shadow-2xl
+        hover:brightness-110
         transition-all 
-        duration-200 
-        drop-shadow-lg
+        duration-300 
+        ease-out
         object-contain
-        ${theme === 'dark' ? 'filter brightness-110 contrast-110 shadow-2xl shadow-blue-500/30' : 'filter brightness-95 contrast-105'}
+        bg-transparent
+        mix-blend-normal
+        cursor-pointer
+        transform-gpu
+        ${theme === 'dark' ? 'hover:drop-shadow-[0_20px_35px_rgba(59,130,246,0.3)]' : 'hover:drop-shadow-[0_20px_35px_rgba(37,99,235,0.2)]'}
         ${className}
       `}
+      style={{ 
+        imageRendering: 'crisp-edges',
+        backgroundColor: 'transparent'
+      }}
     />
-  )
-}
+  );
+};

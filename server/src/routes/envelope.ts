@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
+import { Decimal } from '@prisma/client/runtime/library';
 import * as envelopeRepo from '../db/envelopeRepo';
 import { withTx } from '../db/tx';
 import { prisma } from '../db/client';
@@ -61,7 +62,7 @@ const CancelEnvelopeSchema = z.object({
  * POST /api/envelope/create
  * Create a new envelope
  */
-router.post('/create', createLimiter, async (req: Request, res: Response) => {
+router.post('/create', createLimiter as any, async (req: Request, res: Response) => {
   try {
     // Validate input
     const input = CreateEnvelopeSchema.parse(req.body);
@@ -132,7 +133,7 @@ router.post('/create', createLimiter, async (req: Request, res: Response) => {
     // Sanitize error logs - never log sensitive data
     console.error('Create envelope error:', error instanceof Error ? error.message : 'Unknown error');
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res.status(400).json({ error: 'Invalid input', details: error.issues });
     }
     return res.status(500).json({ error: 'Failed to create envelope' });
   }
@@ -176,7 +177,7 @@ router.post('/fund', async (req: Request, res: Response) => {
     if (req.body.swapToAsset && config.enableReflector) {
       const swapParams = {
         payAsset: envelope.asset,
-        amount: envelope.amount,
+        amount: envelope.amount.toString(),
         toAsset: req.body.swapToAsset,
         address: envelope.sender,
       };
@@ -199,7 +200,7 @@ router.post('/fund', async (req: Request, res: Response) => {
     // Sanitize error logs
     console.error('Fund envelope error:', error instanceof Error ? error.message : 'Unknown error');
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res.status(400).json({ error: 'Invalid input', details: error.issues });
     }
     return res.status(500).json({ error: 'Failed to fund envelope' });
   }
@@ -209,7 +210,7 @@ router.post('/fund', async (req: Request, res: Response) => {
  * POST /api/envelope/open
  * Open an envelope with JWT validation and fee sponsorship
  */
-router.post('/open', openLimiter, async (req: Request, res: Response) => {
+router.post('/open', openLimiter as any, async (req: Request, res: Response) => {
   try {
     // Verify JWT token
     const token = req.query.t as string;
@@ -321,13 +322,13 @@ router.post('/open', openLimiter, async (req: Request, res: Response) => {
       const swapResult = await executeSwap({
         fromAsset: envelope.asset,
         toAsset: input.wantAsset,
-        amount: envelope.amount,
+        amount: envelope.amount.toString(),
         recipient: input.recipient,
       });
       
       if (swapResult.success && swapResult.deliveredAmount) {
         assetDelivered = input.wantAsset;
-        amountDelivered = swapResult.deliveredAmount;
+        amountDelivered = new Decimal(swapResult.deliveredAmount);
       }
     }
     
@@ -346,7 +347,7 @@ router.post('/open', openLimiter, async (req: Request, res: Response) => {
       status: 'OPENED',
       recipient: input.recipient,
       assetDelivered,
-      amount: formatAssetAmount(amountDelivered, assetDelivered as SupportedAsset),
+      amount: formatAssetAmount(amountDelivered.toString(), assetDelivered as SupportedAsset),
       txId: verifiedTxId,
       unsignedXDR: !txId ? finalTxXdr : undefined, // Include XDR if tx not yet submitted
       openedAt: new Date().toISOString(),
@@ -356,7 +357,7 @@ router.post('/open', openLimiter, async (req: Request, res: Response) => {
     // Sanitize error logs - never log preimage or sensitive data
     console.error('Open envelope error:', error instanceof Error ? error.message : 'Unknown error');
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res.status(400).json({ error: 'Invalid input', details: error.issues });
     }
     return res.status(500).json({ error: 'Failed to open envelope' });
   }
@@ -405,7 +406,7 @@ router.post('/cancel', async (req: Request, res: Response) => {
     // Sanitize error logs
     console.error('Cancel envelope error:', error instanceof Error ? error.message : 'Unknown error');
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res.status(400).json({ error: 'Invalid input', details: error.issues });
     }
     return res.status(500).json({ error: 'Failed to cancel envelope' });
   }

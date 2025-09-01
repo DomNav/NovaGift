@@ -1,0 +1,53 @@
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index bf137ba..cf1e3e3 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -47,27 +47,27 @@ enum QrCodeStatus {
+ }
+ 
+ model Envelope {
+-  id              String         @id
+-  status          EnvelopeStatus
+-  asset           Asset
+-  amount          Decimal
+-  decimals        Int
+-  sender          String
+-  hash            String
+-  expiryTs        Int
+-  message         String?
+-  fundedTxId      String?
+-  openedTxId      String?
+-  recipient       String?
+-  assetDelivered  Asset?
+-  amountDelivered Decimal?
+-  canceledTxId    String?
+-  createdAt       DateTime       @default(now())
+-  fundedAt        DateTime?
+-  openedAt        DateTime?
+-  canceledAt      DateTime?
+-
+-  @@index([sender])
++  id            String   @id @default(cuid())
++  contractId    String   @unique
++  assetCode     String
++  assetIssuer   String?  // null for XLM
++  amount        Decimal
++  status        String   // ACTIVE | CLAIMED | EXPIRED
++  createdAt     DateTime @default(now())
++  claimedAt     DateTime?
++  projectId     String?
++  emailInviteId String?
++
++  @@index([status])
++}
++
++model EmailInvite {
++  id         String   @id @default(cuid())
++  envelopeId String   @unique
++  email      String
++  inviteJwt  String
++  sentAt     DateTime
++  acceptedAt DateTime?
+ }
+ 
+ model Jti {

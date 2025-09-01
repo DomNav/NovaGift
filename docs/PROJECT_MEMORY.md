@@ -313,31 +313,61 @@ For questions or issues, refer to the project repository or contact the developm
   - Improved JTI idempotency using Prisma Jti model
 ## Recent Feature Additions
 
-### SEP-10 Auth & KALE Token Gating (2025-08-26)
-- **Decision:** Implemented real SEP-10 authentication replacing mock challenges
-- **Rationale:** Production-ready wallet authentication using industry standard
+### SEP-10 Auth & KALE Token Gating (2025-08-26 - 2025-08-27)
+- **Decision:** Implemented full SEP-10 authentication with KALE token gating system
+- **Rationale:** Production-ready wallet authentication using industry standards
 - **Implementation:**
   - Server issues and verifies SEP-10 challenges with Freighter
-  - JWT sessions tied to wallet public keys
+  - JWT sessions tied to wallet public keys with 15-minute expiry
   - KALE holdings checked via read-only Soroban calls
   - Server-authoritative skin gating prevents client bypass
+  - Complete notification system for wallet events
+  - Reflector oracle integration for price feeds
+  - Comprehensive test suites and CI/CD pipeline
 - **Files touched:**
   - `server/src/lib/sep10.ts` - SEP-10 challenge issuing and verification
-  - `server/src/lib/jwt.ts` - JWT minting and verification
+  - `server/src/lib/jwt.ts` - JWT minting and verification with secure algorithms
   - `server/src/middlewares/requireAuth.ts` - JWT authentication middleware
   - `server/src/routes/auth.ts` - SEP-10 challenge/verify endpoints
   - `server/src/lib/stellar-rpc-kale.ts` - KALE balance reading via Soroban
-  - `server/src/lib/soroban-kale.ts` - KALE holdings helper
+  - `server/src/lib/soroban-kale.ts` - KALE holdings helper with contract calls
+  - `server/src/lib/reflector-oracle.ts` - Reflector price feed integration
   - `server/src/routes/kale-gating.ts` - KALE eligibility and redemption routes
-  - `src/lib/auth.ts` - Frontend Freighter authentication
+  - `server/src/routes/kale-public.ts` - Public KALE-related endpoints
+  - `server/src/routes/notifications.ts` - Notification management endpoints
+  - `server/src/routes/wallet.ts` - Enhanced wallet balance and status endpoints
+  - `server/src/config/skins.ts` - Skin configuration and KALE requirements
+  - `src/lib/auth.ts` - Frontend Freighter authentication with SEP-10
   - `src/lib/session.ts` - Frontend JWT session management
   - `src/components/skins/SkinsGrid.tsx` - KALE skins UI component
+  - `src/components/ui/NotificationButton.tsx` - Notification UI component
+  - `src/components/ui/WalletBalancePill.tsx` - Wallet balance display
+  - `src/components/ui/PaymentToggle.tsx` - Payment method selector
+  - `src/hooks/useBalances.ts` - Enhanced balance hook with multi-asset support
+  - `src/hooks/useNotifications.ts` - Notification management hook
   - `src/pages/KaleSkins.tsx` - Updated with real auth and skins grid
+  - `server/tests/auth-sep10.test.ts` - Comprehensive SEP-10 auth tests
+  - `server/tests/kale-gating.test.ts` - KALE gating logic tests
+  - `.github/workflows/ci.yml` - CI/CD pipeline configuration
+- **New Components:**
+  - PriceTicker system with live updates from Reflector oracle
+  - LuxuryLivePrices component for premium price displays
+  - ExpandedTickerView for detailed price information
+  - AuraPointsChip for rewards display
+  - EnvelopeOpeningDemo for testing envelope animations
 - **Configuration:**
   - `KALE_FAKE_BALANCE=true` for deterministic testing
   - Thresholds: 1/5/25/100 KALE for Common/Rare/Epic/Legendary
   - 15-minute JWT expiry for security
+  - Reflector oracle integration for XLM/USD price feeds
+  - Multiple notification channels supported
+- **Testing:**
+  - Full test coverage for SEP-10 authentication flow
+  - KALE gating unit tests with threshold validation
+  - Smoke tests for critical endpoints
+  - CI/CD pipeline with automated testing
 - **Future Considerations:**
   - Add hold duration requirements (e.g., must hold 7+ days)
   - Include staked KALE in balance calculations
   - Support multi-token requirements
+  - Implement tiered rewards based on KALE holdings

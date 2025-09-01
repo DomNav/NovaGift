@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import PriceTicker from "../components/PriceTicker";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import PriceTicker from '../components/PriceTicker';
 
 // Test assets
 const TEST_ASSETS = [
-  { code: "XLM", display: "XLM", decimals: 7 },
-  { code: "USDC", display: "USDC", decimals: 7 },
-  { code: "AQUA", display: "AQUA", decimals: 7 },
-  { code: "SHX", display: "SHX", decimals: 5 },
-  { code: "yXLM", display: "yXLM", decimals: 7 },
+  { code: 'XLM', display: 'XLM', decimals: 7 },
+  { code: 'USDC', display: 'USDC', decimals: 7 },
+  { code: 'AQUA', display: 'AQUA', decimals: 7 },
+  { code: 'SHX', display: 'SHX', decimals: 5 },
+  { code: 'yXLM', display: 'yXLM', decimals: 7 },
 ];
 
 // Mock price fetcher
 const mockFetchPrices = async (assets: any[]) => {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  return assets.map(asset => ({
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  return assets.map((asset) => ({
     asset,
     priceUsd: Math.random() * 100 + 0.1,
     ts: Date.now() - Math.random() * 60000,
@@ -27,15 +27,13 @@ export default function TickerTest() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-bg via-brand-surface to-brand-bg p-8">
       <div className="max-w-4xl mx-auto">
-        <motion.div 
+        <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl font-bold text-brand-text mb-4">
-            Ticker Test Page
-          </h1>
+          <h1 className="text-4xl font-bold text-brand-text mb-4">Ticker Test Page</h1>
           <p className="text-lg text-brand-text/70">
             Test the enhanced price ticker without modal conflicts
           </p>
@@ -43,7 +41,7 @@ export default function TickerTest() {
 
         {/* Test Ticker */}
         <div className="flex justify-center mb-12">
-          <PriceTicker 
+          <PriceTicker
             assets={TEST_ASSETS}
             demoMode={true}
             health="ok"
@@ -92,7 +90,7 @@ export default function TickerTest() {
               initial={{ opacity: 0, scale: 0.8, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 50 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-4xl mb-4">🎁</div>

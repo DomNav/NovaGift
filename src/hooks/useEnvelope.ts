@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { 
-  createEnvelope as createEnvelopeOnChain, 
+import {
+  createEnvelope as createEnvelopeOnChain,
   openEnvelope as openEnvelopeOnChain,
   approveToken,
   ENVELOPE_CONTRACT,
   USDC_CONTRACT,
-  WXLM_CONTRACT
+  WXLM_CONTRACT,
 } from '../lib/wallet';
 import { toast } from 'sonner';
 
@@ -29,35 +29,35 @@ export function useEnvelope() {
   });
 
   const createEnvelope = async (params: CreateEnvelopeParams) => {
-    setState(prev => ({ ...prev, isCreating: true, error: null }));
-    
+    setState((prev) => ({ ...prev, isCreating: true, error: null }));
+
     try {
       const assetContract = params.asset === 'USDC' ? USDC_CONTRACT : WXLM_CONTRACT;
       const amountInStroops = BigInt(Math.floor(parseFloat(params.amount) * 1_000_000));
-      
+
       if (!ENVELOPE_CONTRACT) {
         throw new Error('Envelope contract not configured. Please deploy the contract first.');
       }
-      
+
       const approvalTxId = await approveToken(
         assetContract,
         ENVELOPE_CONTRACT,
         amountInStroops.toString()
       );
-      
+
       if (!approvalTxId) {
         throw new Error('Failed to approve token');
       }
-      
+
       const envelopeId = await createEnvelopeOnChain(
         params.recipient,
         amountInStroops.toString(),
         assetContract
       );
-      
+
       if (envelopeId) {
         toast.success(`Envelope created with ID: ${envelopeId}`);
-        
+
         const address = await window.localStorage.getItem('wallet_address');
         if (address) {
           await fetch('http://localhost:4000/api/km/award', {
@@ -68,11 +68,11 @@ export function useEnvelope() {
               deltaKm: 10,
               deltaUsd: Math.floor(parseFloat(params.amount)),
               action: 'envelope_created',
-              envelopeId: envelopeId
-            })
+              envelopeId: envelopeId,
+            }),
           });
         }
-        
+
         await fetch('http://localhost:4000/api/envelopes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -80,11 +80,11 @@ export function useEnvelope() {
             id: envelopeId.toString(),
             creatorAddress: address,
             recipientAddress: params.recipient,
-            amountUsd: Math.floor(parseFloat(params.amount))
-          })
+            amountUsd: Math.floor(parseFloat(params.amount)),
+          }),
         });
-        
-        setState(prev => ({ ...prev, isCreating: false }));
+
+        setState((prev) => ({ ...prev, isCreating: false }));
         return { success: true, envelopeId };
       } else {
         throw new Error('Failed to create envelope');
@@ -93,25 +93,25 @@ export function useEnvelope() {
       console.error('Create envelope error:', error);
       const errorMessage = error.message || 'Failed to create envelope';
       toast.error(errorMessage);
-      setState(prev => ({ 
-        ...prev, 
-        isCreating: false, 
-        error: errorMessage 
+      setState((prev) => ({
+        ...prev,
+        isCreating: false,
+        error: errorMessage,
       }));
       return { success: false, error: errorMessage };
     }
   };
 
   const openEnvelope = async (envelopeId: number) => {
-    setState(prev => ({ ...prev, isOpening: true, error: null }));
-    
+    setState((prev) => ({ ...prev, isOpening: true, error: null }));
+
     try {
       const result = await openEnvelopeOnChain(envelopeId.toString(), 'password123');
-      
+
       if (result) {
         const usdValue = 100; // Mock value for demo
         toast.success(`Envelope opened! USD value: $${usdValue.toFixed(2)}`);
-        
+
         const address = await window.localStorage.getItem('wallet_address');
         if (address) {
           await fetch('http://localhost:4000/api/km/award', {
@@ -122,21 +122,21 @@ export function useEnvelope() {
               deltaKm: 1,
               deltaUsd: Math.floor(usdValue),
               action: 'envelope_opened',
-              envelopeId
-            })
+              envelopeId,
+            }),
           });
-          
+
           await fetch(`http://localhost:4000/api/envelopes/${envelopeId}/open`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               recipientAddress: address,
-              amountUsd: Math.floor(usdValue)
-            })
+              amountUsd: Math.floor(usdValue),
+            }),
           });
         }
-        
-        setState(prev => ({ ...prev, isOpening: false }));
+
+        setState((prev) => ({ ...prev, isOpening: false }));
         return { success: true, usdAmount: usdValue };
       } else {
         throw new Error('Failed to open envelope');
@@ -145,10 +145,10 @@ export function useEnvelope() {
       console.error('Open envelope error:', error);
       const errorMessage = error.message || 'Failed to open envelope';
       toast.error(errorMessage);
-      setState(prev => ({ 
-        ...prev, 
-        isOpening: false, 
-        error: errorMessage 
+      setState((prev) => ({
+        ...prev,
+        isOpening: false,
+        error: errorMessage,
       }));
       return { success: false, error: errorMessage };
     }

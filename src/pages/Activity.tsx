@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import clsx from 'clsx'
-import { EnvelopeCard } from '@/components/ui/EnvelopeCard'
+import { useState } from 'react';
+import clsx from 'clsx';
+import { EnvelopeCard } from '@/components/ui/EnvelopeCard';
 
 interface ActivityItem {
-  id: string
-  type: 'sent' | 'received' | 'created'
-  amount: string
-  currency: string
-  status: 'completed' | 'pending' | 'expired'
-  date: string
-  from: string
-  to: string
+  id: string;
+  type: 'sent' | 'received' | 'created';
+  amount: string;
+  currency: string;
+  status: 'completed' | 'pending' | 'expired';
+  date: string;
+  from: string;
+  to: string;
 }
 
 const mockData: ActivityItem[] = [
@@ -44,88 +44,154 @@ const mockData: ActivityItem[] = [
     from: 'GDEMO...WALLET',
     to: 'GDEMO...CHARLIE',
   },
-]
+];
 
 export const Activity = () => {
-  const [filter, setFilter] = useState<'all' | 'sent' | 'received'>('all')
-  const [selectedItem, setSelectedItem] = useState<ActivityItem | null>(null)
-  
+  const [filter, setFilter] = useState<'all' | 'sent' | 'received'>('all');
+  const [selectedItem, setSelectedItem] = useState<ActivityItem | null>(null);
+
   const filteredData = mockData.filter((item) => {
-    if (filter === 'all') return true
-    if (filter === 'sent') return item.type === 'sent' || item.type === 'created'
-    return item.type === 'received'
-  })
-  
+    if (filter === 'all') return true;
+    if (filter === 'sent') return item.type === 'sent' || item.type === 'created';
+    return item.type === 'received';
+  });
+
   const getStatusColor = (status: ActivityItem['status']) => {
     switch (status) {
       case 'completed':
-        return 'text-green-400'
+        return 'text-green-400';
       case 'pending':
-        return 'text-yellow-400'
+        return 'text-yellow-400';
       case 'expired':
-        return 'text-red-400'
+        return 'text-red-400';
       default:
-        return 'text-brand-text/60'
+        return 'text-brand-text/60';
     }
-  }
-  
+  };
+
   const getTypeIcon = (type: ActivityItem['type']) => {
     switch (type) {
       case 'sent':
-        return '↗'
+        return '↗';
       case 'received':
-        return '↙'
+        return '↙';
       case 'created':
-        return '✉'
+        return '✉';
       default:
-        return '•'
+        return '•';
     }
-  }
-  
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-antonio gradient-text mb-2">Activity</h1>
         <p className="text-brand-text/60">Track all your envelope transactions</p>
       </div>
-      
+
       {/* Filters */}
       <div className="mb-6 flex gap-2">
         <button
           onClick={() => setFilter('all')}
           className={clsx(
-            'px-4 py-2 rounded-lg transition-all duration-200',
+            'relative px-4 py-2 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden',
             filter === 'all'
-              ? 'bg-brand-primary text-white'
-              : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10',
+              ? 'text-white'
+              : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10'
           )}
+          style={filter === 'all' ? {
+            background: `linear-gradient(
+              135deg,
+              #1d2bff 0%,
+              #4a5fff 15%,
+              #6366f1 25%,
+              #8b5cf6 35%,
+              #64748b 45%,
+              #475569 55%,
+              #7c3aed 65%,
+              #3b82f6 75%,
+              #1e40af 85%,
+              #1d2bff 100%
+            )`,
+            backgroundSize: '200% 200%',
+            animation: 'granite-shift 4s ease-in-out infinite',
+            boxShadow: `
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 4px 12px rgba(29, 43, 255, 0.3),
+              0 2px 4px rgba(0, 0, 0, 0.2)
+            `
+          } : {}}
         >
-          All
+          <span className="font-semibold tracking-wide">All</span>
         </button>
         <button
           onClick={() => setFilter('sent')}
           className={clsx(
-            'px-4 py-2 rounded-lg transition-all duration-200',
+            'relative px-4 py-2 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden',
             filter === 'sent'
-              ? 'bg-brand-primary text-white'
-              : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10',
+              ? 'text-white'
+              : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10'
           )}
+          style={filter === 'sent' ? {
+            background: `linear-gradient(
+              135deg,
+              #1d2bff 0%,
+              #4a5fff 15%,
+              #6366f1 25%,
+              #8b5cf6 35%,
+              #64748b 45%,
+              #475569 55%,
+              #7c3aed 65%,
+              #3b82f6 75%,
+              #1e40af 85%,
+              #1d2bff 100%
+            )`,
+            backgroundSize: '200% 200%',
+            animation: 'granite-shift 4s ease-in-out infinite',
+            boxShadow: `
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 4px 12px rgba(29, 43, 255, 0.3),
+              0 2px 4px rgba(0, 0, 0, 0.2)
+            `
+          } : {}}
         >
-          Sent
+          <span className="font-semibold tracking-wide">Sent</span>
         </button>
         <button
           onClick={() => setFilter('received')}
           className={clsx(
-            'px-4 py-2 rounded-lg transition-all duration-200',
+            'relative px-4 py-2 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden',
             filter === 'received'
-              ? 'bg-brand-primary text-white'
-              : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10',
+              ? 'text-white'
+              : 'bg-brand-surface text-brand-text/60 hover:bg-brand-text/10'
           )}
+          style={filter === 'received' ? {
+            background: `linear-gradient(
+              135deg,
+              #1d2bff 0%,
+              #4a5fff 15%,
+              #6366f1 25%,
+              #8b5cf6 35%,
+              #64748b 45%,
+              #475569 55%,
+              #7c3aed 65%,
+              #3b82f6 75%,
+              #1e40af 85%,
+              #1d2bff 100%
+            )`,
+            backgroundSize: '200% 200%',
+            animation: 'granite-shift 4s ease-in-out infinite',
+            boxShadow: `
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 4px 12px rgba(29, 43, 255, 0.3),
+              0 2px 4px rgba(0, 0, 0, 0.2)
+            `
+          } : {}}
         >
-          Received
+          <span className="font-semibold tracking-wide">Received</span>
         </button>
       </div>
-      
+
       {/* Table */}
       <div className="glass-card overflow-hidden">
         <table className="w-full">
@@ -163,9 +229,7 @@ export const Activity = () => {
                   </div>
                 </td>
                 <td className="p-4">
-                  <span
-                    className={clsx('text-sm capitalize', getStatusColor(item.status))}
-                  >
+                  <span className={clsx('text-sm capitalize', getStatusColor(item.status))}>
                     {item.status}
                   </span>
                 </td>
@@ -185,7 +249,7 @@ export const Activity = () => {
           </tbody>
         </table>
       </div>
-      
+
       {/* Modal */}
       {selectedItem && (
         <div
@@ -205,7 +269,7 @@ export const Activity = () => {
                 ×
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
                 <EnvelopeCard
@@ -215,7 +279,7 @@ export const Activity = () => {
                   recipient={selectedItem.to}
                 />
               </div>
-              
+
               <div className="space-y-4 pl-4">
                 <div>
                   <label className="text-xs text-brand-text/60">Transaction ID</label>
@@ -247,5 +311,5 @@ export const Activity = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};

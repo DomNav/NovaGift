@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { quoteAndSwap } from './reflector';
 import { config } from '../config';
-import prisma from '../db/client';
+import { prisma } from '../db/client';
 
 vi.mock('../config', () => ({
   config: {

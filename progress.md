@@ -9,6 +9,8 @@
 - [x] JWT-based secure open links (30-min TTL)
 - [x] Rate limiting middleware (20/60/100 req/min)
 - [x] Fee sponsorship wrapper functions
+- [x] Reflector price service with caching and validation
+- [x] React Query integration for efficient data fetching
 
 ### API Endpoints
 - [x] POST /api/envelope/create - Generate HTLC envelope
@@ -16,6 +18,9 @@
 - [x] POST /api/envelope/open - Claim with preimage
 - [x] POST /api/envelope/cancel - Refund expired envelopes
 - [x] GET /api/health - Service health check
+- [x] GET /api/prices - Fetch USD prices with caching
+- [x] GET /api/prices/single/:symbol - Single asset price
+- [x] GET /api/prices/health - Price service status
 
 ### Security
 - [x] Preimage/hash HTLC mechanism
@@ -87,6 +92,15 @@
 - Created in-memory store (SQLite ready)
 - Added comprehensive API documentation
 - Setup acceptance tests with Vitest
+
+### 2024-08-27
+- feat: XLM send (client-signed via Freighter) on Testnet
+  - Endpoint: POST /api/wallet/build-xlm-payment
+  - Frontend: sendXlmWithFreighter()
+  - Test accounts:
+    - GBTWWBOHCFT6MCJYDYRDCOU5XIK4WTLS6ETSWWZSKDH7LOQRR3UBCZLW
+    - GDGPNWY6BTX2OXGEOEJRF7EJ3MSAFHADYTNLGZK6N6GJZYFSFN56VBKO
+  - Record first two tx hashes here after smoke test.
 
 ## Known Issues
 

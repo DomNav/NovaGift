@@ -1,4 +1,4 @@
-import * as Freighter from "@stellar/freighter-api";
+import * as Freighter from '@stellar/freighter-api';
 
 // Contract addresses (testnet)
 export const ENVELOPE_CONTRACT = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHBCASH';
@@ -35,20 +35,20 @@ export function detectFreighter(): boolean {
     console.log('Window is undefined (SSR)');
     return false;
   }
-  
+
   try {
     // Check multiple ways Freighter might be available
     const hasFreighterWindow = 'freighter' in window && window.freighter !== undefined;
     const hasFreighterApi = typeof Freighter !== 'undefined';
-    
+
     console.log('Freighter detection:', {
       windowFreighter: window.freighter,
       hasFreighterWindow,
       hasFreighterApi,
       freighterKeys: window.freighter ? Object.keys(window.freighter) : [],
-      freighterApiKeys: Freighter ? Object.keys(Freighter) : []
+      freighterApiKeys: Freighter ? Object.keys(Freighter) : [],
     });
-    
+
     // Return true if either method detects Freighter
     return hasFreighterWindow || hasFreighterApi;
   } catch (error) {
@@ -64,40 +64,41 @@ export const isFreighterInstalled = detectFreighter;
 export async function connect(): Promise<WalletConnection> {
   try {
     console.log('🔗 Attempting to connect wallet...');
-    
+
     // Direct Freighter API check and call
     console.log('🔍 Direct API test:', {
       freighterImported: !!Freighter,
       requestAccessExists: typeof Freighter?.requestAccess === 'function',
     });
-    
+
     if (!Freighter || typeof Freighter.requestAccess !== 'function') {
       console.log('❌ Freighter API not available');
-      throw new Error('Freighter wallet extension not found. Please install Freighter and refresh the page.');
+      throw new Error(
+        'Freighter wallet extension not found. Please install Freighter and refresh the page.'
+      );
     }
-    
+
     console.log('✅ Calling Freighter.requestAccess() directly...');
     const result = await Freighter.requestAccess();
     console.log('📋 Raw Freighter response:', JSON.stringify(result, null, 2));
-    
+
     // Handle different response formats
     if (result?.address) {
       console.log('🎉 Successfully connected with address:', result.address);
       return { publicKey: result.address, connected: true };
     }
-    
+
     if (result?.error) {
       console.log('⚠️ Freighter returned error:', result.error);
       throw new Error(`Freighter error: ${result.error}`);
     }
-    
+
     // Handle case where result is empty or user cancelled
     console.log('❌ No address received - user likely cancelled or Freighter is locked');
     throw new Error('Connection cancelled. Please unlock Freighter and try again.');
-    
   } catch (error) {
     console.error('💥 Failed to connect wallet:', error);
-    
+
     // Return more specific error messages
     if (error instanceof Error) {
       if (error.message.includes('User rejected')) {
@@ -107,12 +108,12 @@ export async function connect(): Promise<WalletConnection> {
         return { publicKey: '', connected: false, error: 'Freighter wallet not installed' };
       }
     }
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown connection error';
-    return { 
-      publicKey: '', 
-      connected: false, 
-      error: errorMessage 
+    return {
+      publicKey: '',
+      connected: false,
+      error: errorMessage,
     };
   }
 }
@@ -129,7 +130,7 @@ export async function signAndSubmit(
       showToast?.(error, 'error');
       return {
         success: false,
-        error
+        error,
       };
     }
 
@@ -138,7 +139,7 @@ export async function signAndSubmit(
     // Sign the transaction
     const signedXDR = await Freighter.signTransaction(xdr, {
       networkPassphrase,
-      address: undefined // Let Freighter use the connected account
+      address: undefined, // Let Freighter use the connected account
     });
 
     if (!signedXDR || signedXDR.error) {
@@ -146,7 +147,7 @@ export async function signAndSubmit(
       showToast?.(error, 'error');
       return {
         success: false,
-        error
+        error,
       };
     }
 
@@ -156,27 +157,27 @@ export async function signAndSubmit(
     const response = await fetch('/api/stellar/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         signedXDR: signedXDR.signedTxXdr,
-        networkPassphrase 
-      })
+        networkPassphrase,
+      }),
     });
 
     const result = await response.json();
-    
+
     if (!response.ok) {
       const error = result.error || 'Failed to submit transaction';
       showToast?.(error, 'error');
       return {
         success: false,
-        error
+        error,
       };
     }
 
     showToast?.('Transaction submitted successfully!', 'success');
     return {
       success: true,
-      txId: result.txId
+      txId: result.txId,
     };
   } catch (error) {
     console.error('Transaction failed:', error);
@@ -184,7 +185,7 @@ export async function signAndSubmit(
     showToast?.(errorMessage, 'error');
     return {
       success: false,
-      error: errorMessage
+      error: errorMessage,
     };
   }
 }
@@ -220,7 +221,7 @@ export async function signXDR(xdr: string, networkPassphrase: string) {
 export const formatAddress = (address: string): string => {
   if (!address || address.length < 10) return address;
   return `${address.slice(0, 4)}...${address.slice(-4)}`;
-}
+};
 
 // Envelope-related functions
 export async function createEnvelope(
@@ -235,10 +236,7 @@ export async function createEnvelope(
   return 'mock-tx-id-' + Date.now();
 }
 
-export async function openEnvelope(
-  envelopeId: string,
-  password: string
-): Promise<boolean> {
+export async function openEnvelope(envelopeId: string, password: string): Promise<boolean> {
   // This would integrate with the Soroban contract
   console.log('Opening envelope:', { envelopeId, password });
   // Return success for demo

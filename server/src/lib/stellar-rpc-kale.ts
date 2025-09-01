@@ -1,5 +1,15 @@
 // TODO: consolidate with server/src/lib/rpc.ts when a generic view helper exists
-import { Address, SorobanRpc, xdr, scValToNative } from "@stellar/stellar-sdk";
+import { 
+  Address, 
+  xdr, 
+  scValToNative, 
+  Contract,
+  TransactionBuilder,
+  BASE_FEE,
+  Networks,
+  Account
+} from "@stellar/stellar-sdk";
+import { Server, Api } from "@stellar/stellar-sdk/rpc";
 import { config } from "../config";
 
 const KALE_ID = process.env.KALE_CONTRACT_ID ?? "";
@@ -10,66 +20,39 @@ async function readContractView(
   method: string, 
   args: xdr.ScVal[]
 ): Promise<any> {
-  const server = new SorobanRpc.Server(config.sorobanRpcUrl);
+  const server = new Server(config.sorobanRpcUrl);
   
-  // Build the contract call
-  const contractAddress = Address.fromString(contractId);
-  const fn = xdr.ScSymbol.fromString(method);
+  // Create a dummy source account for simulation
+  const sourceAccount = new Account(
+    "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+    "0"
+  );
   
-  // Create the invoke contract host function
-  const invokeContractArgs = xdr.ScVal.scvVec([
-    contractAddress.toScVal(),
-    xdr.ScVal.scvSymbol(fn.toString()),
-    xdr.ScVal.scvVec(args)
-  ]);
+  // Build the contract and operation
+  const contract = new Contract(contractId);
+  const operation = contract.call(method, ...args);
+  
+  // Build transaction for simulation
+  const transaction = new TransactionBuilder(sourceAccount, {
+    fee: BASE_FEE,
+    networkPassphrase: Networks.TESTNET,
+  })
+    .addOperation(operation)
+    .setTimeout(30)
+    .build();
   
   try {
     // Simulate the contract call
-    const response = await server.simulateTransaction(
-      new SorobanRpc.Transaction(
-        xdr.TransactionEnvelope.envelopeTypeTx(
-          new xdr.TransactionV1Envelope({
-            tx: new xdr.Transaction({
-              sourceAccount: xdr.MuxedAccount.keyTypeEd25519(
-                Buffer.alloc(32) // dummy source
-              ),
-              fee: xdr.Uint32.fromNumber(100),
-              seqNum: xdr.SequenceNumber.fromString("0"),
-              timeBounds: null,
-              memo: xdr.Memo.memoNone(),
-              operations: [
-                new xdr.Operation({
-                  sourceAccount: null,
-                  body: xdr.OperationBody.invokeHostFunction(
-                    new xdr.InvokeHostFunctionOp({
-                      hostFunction: xdr.HostFunction.hostFunctionTypeInvokeContract(
-                        invokeContractArgs
-                      ),
-                      auth: []
-                    })
-                  )
-                })
-              ],
-              ext: xdr.TransactionExt.fromXDR(Buffer.alloc(0))
-            }),
-            signatures: []
-          })
-        ).toXDR()
-      )
-    );
+    const response = await server.simulateTransaction(transaction);
     
-    if (response.error) {
+    if (Api.isSimulationError(response)) {
       console.error("Simulation error:", response.error);
       throw new Error(response.error);
     }
     
     // Extract the result
-    if (response.results && response.results.length > 0) {
-      const result = response.results[0];
-      if ('xdr' in result) {
-        const scVal = xdr.ScVal.fromXDR(result.xdr, 'base64');
-        return scValToNative(scVal);
-      }
+    if (response.result && response.result.retval) {
+      return scValToNative(response.result.retval);
     }
     
     return 0;
@@ -86,17 +69,15 @@ export async function getKaleBalanceFor(pubkey: string): Promise<number> {
   const args = [Address.fromString(pubkey).toScVal()];
   
   try {
-    const res = await readContractView(KALE_ID, "balance_of", args);
-    const n = typeof res === "string" ? Number(res) : Number(res ?? 0);
-    return Number.isFinite(n) ? Math.max(0, n) : 0;
-  } catch (error) {
-    console.error("Failed to read KALE balance:", error);
+    const balance = await readContractView(KALE_ID, "balance_of", args);
+    return Number(balance ?? 0);
+  } catch (err) {
+    console.error("Failed to get KALE balance:", err);
     return 0;
   }
 }
 
-function fakeBalance(pk: string): number {
-  let h = 0; 
-  for (const c of pk) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return (h % 13); // 0..12
+function fakeBalance(pubkey: string): number {
+  const base = parseInt(pubkey.slice(-4), 16) % 100;
+  return 10000000 + (base * 7919);
 }
