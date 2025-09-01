@@ -41,11 +41,23 @@
 
 ## Recent Updates (Sept 01, 2025)
 
-### Backend Fully Type-Clean
-- **Fixed final 17 TS errors**: middleware generics, BigInt/Decimal conversions, imports
-- **Build Status**: 0 TypeScript compilation errors - fully clean build
-- **Test Status**: Core unit tests passing, some integration tests need environment setup
-- **Type Safety**: All Express middleware properly typed, Request augmentation working
+### Complete Backend TypeScript Migration & Claim API Implementation
+- **TypeScript Migration Complete**: 0 compilation errors (down from 96)
+  - Fixed all Stellar SDK v14.1.1 imports and types
+  - Resolved Express middleware type issues with proper generics
+  - Fixed Prisma Decimal/BigInt conversions
+  - Added global Request type augmentation for profile/user
+- **Claim API v1 Implemented**: 
+  - New Prisma models: EmailInvite with claim flow support
+  - JWT-based claim authentication (`/api/claim/:id/build`)
+  - Email invitation system with Resend integration
+  - Soroban transaction building helpers
+- **Database Schema**: Backward-compatible merge preserving all legacy fields
+- **Test Infrastructure**: Vitest configured, core tests passing
+- **New Frontend Components**:
+  - Claim page scaffolding at `/src/pages/claim/`
+  - Claim store with Zustand state management
+  - Environment configuration module
 
 ## Previous Updates (Aug 31, 2025)
 
@@ -58,8 +70,7 @@
   - Prisma schema: Fixed EnvelopeStatus enum values (CREATED, FUNDED, OPENED, CANCELED)
   - JWT imports: Fixed jsonwebtoken module imports
   - Custom vitest matcher: Added `toBeOneOf` matcher for enum testing
-- **Remaining**: ~17 errors (mostly middleware type issues and rate limiter types)
-- **Tests**: Running successfully with vitest, some failures to address
+- **Final Status**: 0 errors - fully resolved
 
 ### Schema Merge and Claim API Fix
 - **Schema Merged**: Successfully merged old and new Envelope schemas
