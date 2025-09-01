@@ -65,7 +65,7 @@ describe('QR Code Generation', () => {
 describe('QR Code API Validation', () => {
   it('should validate proper code format', () => {
     const validCodes = ['ABC123XY', 'XYZ789AB', 'DEF456GH'];
-    const invalidCodes = ['abc123xy', '123456', 'ABCDEFGHIJK', ''];
+    const invalidCodes = ['abc123xy', '12345', 'ABCDEFGHIJK', ''];
 
     for (const code of validCodes) {
       expect(code).toMatch(/^[A-Z0-9]{6,10}$/);

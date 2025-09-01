@@ -1,5 +1,5 @@
 import { config } from '../config';
-import prisma from '../db/client';
+import { prisma } from '../db/client';
 
 interface SwapParams {
   payAsset: string;

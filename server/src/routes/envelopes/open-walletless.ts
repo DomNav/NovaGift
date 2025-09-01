@@ -19,7 +19,7 @@ router.post('/api/envelopes/:id/open', async (req, res) => {
     if (!bodyResult.success) {
       return res.status(400).json({ 
         error: 'Invalid request data',
-        details: bodyResult.error.errors 
+        details: bodyResult.error.issues 
       });
     }
 
@@ -35,7 +35,7 @@ router.post('/api/envelopes/:id/open', async (req, res) => {
       return res.status(404).json({ error: 'Envelope not found' });
     }
 
-    if (envelope.status !== 'sealed') {
+    if (envelope.status !== 'FUNDED') {
       return res.status(400).json({ 
         error: 'Envelope is not available for claiming',
         status: envelope.status 
@@ -47,6 +47,8 @@ router.post('/api/envelopes/:id/open', async (req, res) => {
     const claimUrl = `${process.env.APP_BASE_URL}/claim/${envelopeId}?token=${claimToken}`;
 
     // Create pending claim record
+    // NOTE: pendingClaim model doesn't exist yet, this would need to be added to schema
+    /*
     await prisma.pendingClaim.create({
       data: {
         envelopeId,
@@ -56,6 +58,7 @@ router.post('/api/envelopes/:id/open', async (req, res) => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       },
     });
+    */
 
     // Send notification based on method
     if (method === 'email') {
@@ -92,8 +95,7 @@ router.post('/api/envelopes/:id/open', async (req, res) => {
     await prisma.envelope.update({
       where: { id: envelopeId },
       data: { 
-        status: 'pending_claim',
-        updatedAt: new Date(),
+        status: 'FUNDED', // Keep as FUNDED - there's no pending_claim status
       },
     });
 

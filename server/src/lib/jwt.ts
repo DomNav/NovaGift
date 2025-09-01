@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 
 const SECRET = process.env.JWT_SECRET || "default-dev-secret";
 const EXPIRES = process.env.JWT_EXPIRES_IN ?? "900s";

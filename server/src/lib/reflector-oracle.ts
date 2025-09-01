@@ -1,4 +1,5 @@
-import { Address, Contract, Keypair, Networks, Operation, rpc, TransactionBuilder, scValToNative, xdr, nativeToScVal } from "@stellar/stellar-sdk";
+import { Address, Contract, Keypair, Networks, Operation, TransactionBuilder, scValToNative, xdr, nativeToScVal } from "@stellar/stellar-sdk";
+import { Server, Api } from "@stellar/stellar-sdk/rpc";
 
 // Reflector Oracle Contract Addresses
 const TESTNET_ORACLE_CONTRACT = "CAVLP5DH2GJPZMVO7IJY4CVOD5MWEFTJFVPD2YY2FQXOQHRGHK4D6HLP";
@@ -77,7 +78,7 @@ const REFLECTOR_ABI = {
 };
 
 export class ReflectorOracle {
-  private rpc: rpc.Server;
+  private rpc: Server;
   private contractAddress: string;
   private network: Networks;
   private networkType: 'testnet' | 'pubnet';
@@ -86,7 +87,7 @@ export class ReflectorOracle {
     this.networkType = network;
     this.network = network === 'testnet' ? Networks.TESTNET : Networks.PUBLIC;
     this.contractAddress = network === 'testnet' ? TESTNET_ORACLE_CONTRACT : PUBNET_ORACLE_CONTRACT;
-    this.rpc = new rpc.Server(
+    this.rpc = new Server(
       network === 'testnet' 
         ? 'https://soroban-testnet.stellar.org'
         : 'https://soroban.stellar.org'
@@ -176,7 +177,7 @@ export class ReflectorOracle {
       
       const simResult = await this.rpc.simulateTransaction(transaction);
       
-      if (simResult && simResult.result && simResult.result.retval) {
+      if (!Api.isSimulationError(simResult) && simResult.result && simResult.result.retval) {
         const price = scValToNative(simResult.result.retval);
         if (typeof price === 'number') {
           return price / Math.pow(10, 7); // Assuming 7 decimals
@@ -215,11 +216,11 @@ export class ReflectorOracle {
       
       const simResult = await this.rpc.simulateTransaction(transaction);
       
-      if (!simResult || simResult.error || !simResult.result) {
+      if (!simResult || Api.isSimulationError(simResult) || !simResult.result) {
         return null;
       }
 
-      const twapValue = scValToNative(simResult.result.retval);
+      const twapValue = scValToNative(simResult.result!.retval!);
       if (typeof twapValue === 'number') {
         return twapValue / Math.pow(10, 7); // Assuming 7 decimals
       }
@@ -251,11 +252,11 @@ export class ReflectorOracle {
       
       const simResult = await this.rpc.simulateTransaction(transaction);
       
-      if (!simResult || simResult.error || !simResult.result) {
+      if (!simResult || Api.isSimulationError(simResult) || !simResult.result) {
         return null;
       }
 
-      const priceData = scValToNative(simResult.result.retval);
+      const priceData = scValToNative(simResult.result!.retval!);
       if (!priceData) return null;
 
       // Get decimals
@@ -269,7 +270,9 @@ export class ReflectorOracle {
         .build();
       
       const decimalsResult = await this.rpc.simulateTransaction(decimalsTransaction);
-      const decimals = decimalsResult.result ? scValToNative(decimalsResult.result.retval) : 14;
+      const decimals = !Api.isSimulationError(decimalsResult) && decimalsResult.result?.retval 
+        ? scValToNative(decimalsResult.result.retval) 
+        : 14;
       
       const price = Number(priceData.price) / Math.pow(10, decimals);
       

@@ -7,7 +7,7 @@ import { requireAuth } from '../../middleware/auth';
 const router = Router();
 
 const ExportQuerySchema = z.object({
-  type: z.enum(['all', 'sent', 'received', 'created', 'returned', 'expired']).optional(),
+  type: z.enum(['all', 'sent', 'received', 'created', 'opened', 'canceled']).optional(),
   from: z.string().optional(),
   to: z.string().optional(),
   projectId: z.string().optional(),
@@ -20,7 +20,7 @@ router.get('/export', requireAuth, async (req, res) => {
     if (!queryResult.success) {
       return res.status(400).json({ 
         error: 'Invalid query parameters',
-        details: queryResult.error.errors 
+        details: queryResult.error.issues 
       });
     }
 
@@ -30,8 +30,8 @@ router.get('/export', requireAuth, async (req, res) => {
     // Build Prisma query
     const where: any = {
       OR: [
-        { senderId: userId },
-        { recipientId: userId },
+        { sender: userId },
+        { recipient: userId },
       ],
     };
 
@@ -39,21 +39,21 @@ router.get('/export', requireAuth, async (req, res) => {
     if (type && type !== 'all') {
       switch (type) {
         case 'sent':
-          where.senderId = userId;
+          where.sender = userId;
           delete where.OR;
           break;
         case 'received':
-          where.recipientId = userId;
+          where.recipient = userId;
           delete where.OR;
           break;
         case 'created':
-          where.status = 'sealed';
+          where.status = 'FUNDED';
           break;
-        case 'returned':
-          where.status = 'returned';
+        case 'opened':
+          where.status = 'OPENED';
           break;
-        case 'expired':
-          where.status = 'expired';
+        case 'canceled':
+          where.status = 'CANCELED';
           break;
       }
     }
@@ -79,25 +79,7 @@ router.get('/export', requireAuth, async (req, res) => {
     // Fetch activity data
     const activities = await prisma.envelope.findMany({
       where,
-      include: {
-        sender: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        recipient: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        project: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      // Note: sender and recipient are strings, not relations
       orderBy: {
         createdAt: 'desc',
       },
@@ -117,17 +99,17 @@ router.get('/export', requireAuth, async (req, res) => {
     for (const activity of activities) {
       csvStream.write({
         id: activity.id,
-        type: activity.senderId === userId ? 'sent' : 'received',
+        type: activity.sender === userId ? 'sent' : 'received',
         status: activity.status,
         amount: activity.amount,
         asset: activity.asset,
-        sender: activity.sender?.name || activity.sender?.email || 'Unknown',
-        recipient: activity.recipient?.name || activity.recipient?.email || 'Unknown',
-        project: activity.project?.name || '',
+        sender: activity.sender || 'Unknown',
+        recipient: activity.recipient || 'Unknown',
+        project: activity.projectId || '',
         message: activity.message || '',
         created: activity.createdAt.toISOString(),
         opened: activity.openedAt?.toISOString() || '',
-        expires: activity.expiresAt?.toISOString() || '',
+        expires: activity.expiryTs ? new Date(activity.expiryTs * 1000).toISOString() : '',
       });
     }
 
@@ -151,7 +133,7 @@ router.post('/:id/resend', requireAuth, async (req, res) => {
     const envelope = await prisma.envelope.findFirst({
       where: {
         id,
-        senderId: userId,
+        sender: userId,
       },
     });
 
@@ -184,8 +166,8 @@ router.post('/:id/return', requireAuth, async (req, res) => {
     const envelope = await prisma.envelope.findFirst({
       where: {
         id,
-        senderId: userId,
-        status: { in: ['sealed', 'expired'] },
+        sender: userId,
+        status: { in: ['FUNDED', 'CANCELED'] },
       },
     });
 
@@ -202,8 +184,8 @@ router.post('/:id/return', requireAuth, async (req, res) => {
     await prisma.envelope.update({
       where: { id },
       data: {
-        status: 'returned',
-        returnedAt: new Date(),
+        status: 'CANCELED',
+        canceledAt: new Date(),
       },
     });
 

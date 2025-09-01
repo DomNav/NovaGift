@@ -3,6 +3,7 @@
 
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
+// @ts-ignore - PasskeyServer may not be exported yet
 import { PasskeyServer } from 'passkey-kit';
 import { env } from '../config/env';
 
@@ -45,7 +46,7 @@ if (env.ENABLE_PASSKEYS) {
         return res.status(400).json({
           success: false,
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         });
       }
 
@@ -85,7 +86,7 @@ if (env.ENABLE_PASSKEYS) {
         return res.status(400).json({
           success: false,
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         });
       }
 

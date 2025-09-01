@@ -52,7 +52,7 @@ interface ErrorRow extends ParsedContact {
   row: number;
 }
 
-router.post('/import', upload.single('csv'), async (req, res) => {
+router.post('/import', upload.single('csv') as any, async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -90,7 +90,7 @@ router.post('/import', upload.single('csv'), async (req, res) => {
             } else {
               errorRows.push({
                 ...contact,
-                error: result.error.errors[0]?.message || 'Validation failed',
+                error: result.error.issues[0]?.message || 'Validation failed',
                 row: rowNumber,
               });
             }
@@ -119,9 +119,8 @@ router.post('/import', upload.single('csv'), async (req, res) => {
           batch.map(contact => 
             prisma.contact.create({
               data: {
-                name: contact.name,
+                displayName: contact.name,
                 email: contact.contact.includes('@') ? contact.contact : null,
-                phone: !contact.contact.includes('@') ? contact.contact : null,
                 wallet: contact.wallet,
                 tags: contact.tags || [],
               },

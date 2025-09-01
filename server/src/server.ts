@@ -19,6 +19,7 @@ import passkeyRoutes from './routes/passkey';
 import contactsRoutes from './routes/contacts';
 import qrRoutes from './routes/qr';
 import oracleRoutes from './routes/oracle';
+import claimRoutes from '../routes/claim';
 import { apiLimiter } from './middlewares/rate';
 import { requireConsent, checkConsent } from './middlewares/consent';
 
@@ -38,7 +39,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(httpLogger); // request logging
-app.use(apiLimiter); // Global rate limiting
+app.use(apiLimiter as any); // Global rate limiting
 
 // Routes
 app.use('/auth', authRoutes);
@@ -56,6 +57,7 @@ app.use('/api/passkey', passkeyRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/qr', qrRoutes);
 app.use('/api/oracle', oracleRoutes);
+app.use('/api', claimRoutes);
 
 // Health check
 app.use('/api/health', healthRoutes);

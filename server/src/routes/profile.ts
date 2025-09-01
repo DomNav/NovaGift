@@ -79,7 +79,7 @@ router.post('/consent', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Update consent error:', error);
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res.status(400).json({ error: 'Invalid input', details: error.issues });
     }
     return res.status(500).json({ error: 'Failed to update consent' });
   }
@@ -114,7 +114,7 @@ router.put('/', requireConsent, async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Update profile error:', error);
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res.status(400).json({ error: 'Invalid input', details: error.issues });
     }
     return res.status(500).json({ error: 'Failed to update profile' });
   }

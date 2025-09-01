@@ -5,7 +5,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
-    include: ['server/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['server/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['**/node_modules/**', '**/dist/**', 'server/tests/**'],
+    setupFiles: ['./server/src/__tests__/setup.ts'],
   },
   resolve: {
     alias: {

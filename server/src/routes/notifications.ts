@@ -132,7 +132,7 @@ router.get('/:walletAddress', async (req: Request, res: Response) => {
       return res.status(400).json({ 
         ok: false,
         error: 'Invalid input', 
-        details: error.errors 
+        details: error.issues 
       });
     }
     

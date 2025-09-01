@@ -93,8 +93,7 @@ r.post("/import", async (req, res, next) => {
       toCreate.push(parsed);
     }
     const created = await prisma.$transaction(
-      toCreate.map((data) => prisma.contact.create({ data: { ...data, tags: data.tags } })),
-      { timeout: 15_000 }
+      toCreate.map((data) => prisma.contact.create({ data: { ...data, tags: data.tags } }))
     );
     res.json({ created: created.length });
   } catch (e) {

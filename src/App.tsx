@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ToastProvider } from '@/hooks/useToast';
@@ -16,6 +16,8 @@ import ProjectsIndex from '@/pages/studio/projects/ProjectsIndex';
 import ProjectDetailsPage from '@/pages/studio/projects/ProjectDetails';
 import ContactsPage from '@/pages/ContactsPage';
 import { QrClaimPage } from '@/pages/QrClaimPage';
+import { ClaimPage } from '@/pages/claim/ClaimPage';
+import { ClaimSuccess } from '@/pages/claim/ClaimSuccess';
 import SkinStore from '@/pages/SkinStore';
 import KaleSkins from '@/pages/KaleSkins';
 
@@ -39,7 +41,9 @@ function App() {
           <ToastProvider>
             <BrowserRouter>
               <Routes>
-                {/* Public QR claim route (no layout) */}
+                {/* Public claim routes (no layout) */}
+                <Route path="/claim/:id" element={<ClaimPage />} />
+                <Route path="/claim/:id/success" element={<ClaimSuccess />} />
                 <Route path="/qr-claim" element={<QrClaimPage />} />
                 
                 <Route path="/" element={<AppLayout />}>

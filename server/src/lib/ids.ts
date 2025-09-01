@@ -27,7 +27,7 @@ export function shortCode(length: number = 8): string {
  * @param atomic - Amount in atomic units (BigInt)
  * @returns Human readable amount string
  */
-export function fromAtomic(atomic: BigInt): string {
+export function fromAtomic(atomic: bigint): string {
   const divisor = BigInt(10000000); // 10^7
   const whole = atomic / divisor;
   const fraction = atomic % divisor;
@@ -44,7 +44,7 @@ export function fromAtomic(atomic: BigInt): string {
  * @param amount - Human readable amount string
  * @returns Amount in atomic units (BigInt)
  */
-export function toAtomic(amount: string): BigInt {
+export function toAtomic(amount: string): bigint {
   const [whole, fraction = "0"] = amount.split(".");
   const paddedFraction = fraction.padEnd(7, "0").slice(0, 7);
   return BigInt(whole) * BigInt(10000000) + BigInt(paddedFraction);

@@ -79,7 +79,7 @@ async function generateUniqueCode(): Promise<string> {
  * Create a new project
  * POST /api/qr/projects
  */
-router.post('/projects', eventCreateLimiter, async (req: Request, res: Response) => {
+router.post('/projects', eventCreateLimiter as any, async (req: Request, res: Response) => {
   try {
     const body = CreateProjectSchema.parse(req.body);
     
@@ -96,7 +96,7 @@ router.post('/projects', eventCreateLimiter, async (req: Request, res: Response)
     res.json({ project });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'validation_failed', details: error.errors });
+      res.status(400).json({ error: 'validation_failed', details: error.issues });
       return;
     }
     console.error('Project creation error:', error);
@@ -108,7 +108,7 @@ router.post('/projects', eventCreateLimiter, async (req: Request, res: Response)
  * Create or update QR event for a project
  * POST /api/qr/events
  */
-router.post('/events', eventCreateLimiter, async (req: Request, res: Response) => {
+router.post('/events', eventCreateLimiter as any, async (req: Request, res: Response) => {
   try {
     const body = CreateEventSchema.parse(req.body);
     
@@ -157,7 +157,7 @@ router.post('/events', eventCreateLimiter, async (req: Request, res: Response) =
     res.json({ event });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'validation_failed', details: error.errors });
+      res.status(400).json({ error: 'validation_failed', details: error.issues });
       return;
     }
     console.error('Event creation error:', error);
@@ -169,7 +169,7 @@ router.post('/events', eventCreateLimiter, async (req: Request, res: Response) =
  * Generate QR codes for an event
  * POST /api/qr/events/:id/codes
  */
-router.post('/events/:id/codes', codeGenerateLimiter, async (req: Request, res: Response) => {
+router.post('/events/:id/codes', codeGenerateLimiter as any, async (req: Request, res: Response) => {
   try {
     const eventId = req.params.id;
     const body = GenerateCodesSchema.parse(req.body);
@@ -218,7 +218,7 @@ router.post('/events/:id/codes', codeGenerateLimiter, async (req: Request, res: 
     res.json({ created: codes.length, codes: codes.map(c => c.code) });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'validation_failed', details: error.errors });
+      res.status(400).json({ error: 'validation_failed', details: error.issues });
       return;
     }
     console.error('Code generation error:', error);
@@ -276,7 +276,7 @@ router.get('/:code', async (req: Request, res: Response) => {
  * Claim a QR code
  * POST /api/qr/claim
  */
-router.post('/claim', claimLimiter, async (req: Request, res: Response) => {
+router.post('/claim', claimLimiter as any, async (req: Request, res: Response) => {
   try {
     const body = ClaimCodeSchema.parse(req.body);
 
@@ -362,7 +362,7 @@ router.post('/claim', claimLimiter, async (req: Request, res: Response) => {
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'validation_failed', details: error.errors });
+      res.status(400).json({ error: 'validation_failed', details: error.issues });
       return;
     }
 
@@ -434,7 +434,7 @@ router.get('/projects/:id', async (req: Request, res: Response) => {
         qrEvent: {
           include: {
             codes: {
-              orderBy: { createdAt: 'desc' }
+              orderBy: { id: 'desc' }
             }
           }
         }

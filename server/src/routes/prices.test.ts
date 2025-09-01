@@ -55,7 +55,7 @@ describe('Prices API Routes', () => {
     });
 
     it('should handle empty symbols gracefully', async () => {
-      const mockPrices = [];
+      const mockPrices: any[] = [];
       vi.mocked(reflectorPrices.fetchReflectorPrices).mockResolvedValue(mockPrices);
 
       const response = await request(app)

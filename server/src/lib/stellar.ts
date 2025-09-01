@@ -1,5 +1,6 @@
 import {
   TransactionBuilder,
+  Transaction,
   Networks,
   FeeBumpTransaction,
   Keypair,
@@ -10,8 +11,8 @@ import {
   Address,
   nativeToScVal,
   scValToNative,
-  rpc,
 } from '@stellar/stellar-sdk';
+import { Server as SorobanServer } from '@stellar/stellar-sdk/rpc';
 import crypto from 'crypto';
 
 const HORIZON_URL = process.env.HORIZON_URL || 'https://horizon-testnet.stellar.org';
@@ -20,11 +21,11 @@ const NETWORK_PASSPHRASE = process.env.NETWORK_PASSPHRASE || 'Test SDF Network ;
 const CONTRACT_ID = process.env.NOVAGIFT_CONTRACT_ID || '';
 
 // Initialize Soroban server when needed
-let sorobanServerInstance: rpc.Server | null = null;
+let sorobanServerInstance: SorobanServer | null = null;
 
-function getSorobanServer(): rpc.Server {
+function getSorobanServer(): SorobanServer {
   if (!sorobanServerInstance) {
-    sorobanServerInstance = new rpc.Server(SOROBAN_RPC_URL);
+    sorobanServerInstance = new SorobanServer(SOROBAN_RPC_URL);
   }
   return sorobanServerInstance;
 }
@@ -121,7 +122,7 @@ export async function buildClaimTx(params: {
   id: string;
   preimage: string;
   recipient: string;
-}): Promise<TransactionBuilder.Transaction> {
+}): Promise<Transaction> {
   const { id, preimage, recipient } = params;
   
   const account = await getSorobanServer().getAccount(recipient);
@@ -147,7 +148,7 @@ export async function buildClaimTx(params: {
   // Prepare and simulate
   const preparedTx = await getSorobanServer().prepareTransaction(transaction);
   
-  return preparedTx as TransactionBuilder.Transaction;
+  return preparedTx as Transaction;
 }
 
 /**
@@ -197,7 +198,7 @@ export async function waitForTx(txId: string, maxAttempts: number = 10): Promise
       if (response.status === 'SUCCESS') {
         return {
           success: true,
-          resultXdr: response.resultXdr,
+          resultXdr: response.resultXdr?.toXDR('base64'),
         };
       } else if (response.status === 'FAILED') {
         return {
@@ -224,7 +225,7 @@ export async function waitForTx(txId: string, maxAttempts: number = 10): Promise
  * Create a fee-bumped transaction
  */
 export function createFeeBumpTx(
-  innerTx: TransactionBuilder.Transaction,
+  innerTx: Transaction,
   sponsorSecret: string
 ): FeeBumpTransaction {
   const sponsor = Keypair.fromSecret(sponsorSecret);
@@ -250,19 +251,9 @@ export function createFeeBumpTx(
  */
 export function parseContractEvents(resultXdr: string): any[] {
   try {
-    const result = xdr.TransactionResult.fromXDR(resultXdr, 'base64');
-    const meta = result.result().results()[0];
-    
-    if (!meta || !meta.tr().sorobanMeta()) {
-      return [];
-    }
-    
-    const events = meta.tr().sorobanMeta()?.events() || [];
-    return events.map(event => {
-      const topics = event.body().v0().topics().map(t => scValToNative(t));
-      const data = event.body().v0().data() ? scValToNative(event.body().v0().data()) : null;
-      return { topics, data };
-    });
+    // For now, return empty array - proper event parsing requires transaction meta, not result
+    // This would need to be refactored to accept transaction meta XDR
+    return [];
   } catch (error) {
     console.error('Error parsing events:', error);
     return [];

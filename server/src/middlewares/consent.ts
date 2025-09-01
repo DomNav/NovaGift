@@ -2,24 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../db/client';
 
 /**
- * Express types extension to include profile
- */
-declare module 'express-serve-static-core' {
-  interface Request {
-    profile?: {
-      wallet: string;
-      km: number;
-      usdEarned: number;
-      language: string;
-      consentGiven: boolean;
-      consentTimestamp: Date | null;
-      dataRetentionUntil: Date | null;
-      createdAt: Date;
-    };
-  }
-}
-
-/**
  * PIPEDA-lite consent middleware
  * Enforces consent requirements for routes accessing personal data (Profile)
  * 

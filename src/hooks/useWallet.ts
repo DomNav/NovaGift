@@ -7,6 +7,7 @@ import {
   restoreConnection,
 } from '../lib/wallet/kit';
 import { useToast } from './useToast';
+import { RPC_URL } from '../config/env';
 
 interface UseWalletReturn {
   publicKey: string;
@@ -16,6 +17,7 @@ interface UseWalletReturn {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   signAndSubmit: (xdr: string, networkPassphrase?: string) => Promise<TransactionResult>;
+  signAndSend: (xdr: string) => Promise<string>;
 }
 
 interface TransactionResult {
@@ -146,6 +148,48 @@ export function useWallet(): UseWalletReturn {
     [connected, publicKey, addToast]
   );
 
+  const signAndSend = useCallback(
+    async (xdr: string): Promise<string> => {
+      if (!connected) {
+        throw new Error('Wallet not connected');
+      }
+
+      try {
+        // Sign the transaction with the wallet
+        const signedXDR = await signXdr(xdr, publicKey);
+
+        // Submit directly to Soroban RPC
+        const response = await fetch(`${RPC_URL}/transactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tx: signedXDR,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to submit transaction: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        // Extract transaction ID from response
+        if (result.hash) {
+          return result.hash;
+        } else if (result.id) {
+          return result.id;
+        } else {
+          throw new Error('Transaction submitted but no ID returned');
+        }
+      } catch (error) {
+        console.error('signAndSend failed:', error);
+        throw error instanceof Error ? error : new Error('Failed to sign and send transaction');
+      }
+    },
+    [connected, publicKey]
+  );
+
   return {
     publicKey,
     connected,
@@ -154,6 +198,7 @@ export function useWallet(): UseWalletReturn {
     connect,
     disconnect,
     signAndSubmit,
+    signAndSend,
   };
 }
 

@@ -50,24 +50,42 @@ model Envelope {
   id              String         @id
   status          EnvelopeStatus
   asset           Asset
-  amount          Decimal
   decimals        Int
+  amount          Decimal
   sender          String
   hash            String
   expiryTs        Int
   message         String?
   fundedTxId      String?
   openedTxId      String?
+  canceledTxId    String?
   recipient       String?
   assetDelivered  Asset?
   amountDelivered Decimal?
-  canceledTxId    String?
   createdAt       DateTime       @default(now())
+  canceledAt      DateTime?
   fundedAt        DateTime?
   openedAt        DateTime?
-  canceledAt      DateTime?
 
+  // NEW for Claim API v1
+  contractId      String?        @unique
+  assetCode       String?
+  assetIssuer     String?
+  claimedAt       DateTime?
+  emailInviteId   String?
+  projectId       String?
+
+  @@index([status])
   @@index([sender])
+}
+
+model EmailInvite {
+  id         String   @id @default(cuid())
+  envelopeId String   @unique
+  email      String
+  inviteJwt  String
+  sentAt     DateTime
+  acceptedAt DateTime?
 }
 
 model Jti {

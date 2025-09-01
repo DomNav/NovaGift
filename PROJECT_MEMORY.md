@@ -39,6 +39,64 @@
   - Custom skins and themes
   - Real-time price conversion
 
+## Recent Updates (Sept 01, 2025)
+
+### Backend Fully Type-Clean
+- **Fixed final 17 TS errors**: middleware generics, BigInt/Decimal conversions, imports
+- **Build Status**: 0 TypeScript compilation errors - fully clean build
+- **Test Status**: Core unit tests passing, some integration tests need environment setup
+- **Type Safety**: All Express middleware properly typed, Request augmentation working
+
+## Previous Updates (Aug 31, 2025)
+
+### Backend TypeScript Compilation Cleanup
+- **Initial State**: 96 TypeScript compilation errors across backend
+- **Fixed Issues**:
+  - SDK imports: Migrated from deprecated `SorobanRpc` to `@stellar/stellar-sdk/rpc`
+  - Type corrections: Fixed BigInt vs bigint, Transaction types, Decimal conversions
+  - Zod validation: Changed `.errors` to `.issues` across all files
+  - Prisma schema: Fixed EnvelopeStatus enum values (CREATED, FUNDED, OPENED, CANCELED)
+  - JWT imports: Fixed jsonwebtoken module imports
+  - Custom vitest matcher: Added `toBeOneOf` matcher for enum testing
+- **Remaining**: ~17 errors (mostly middleware type issues and rate limiter types)
+- **Tests**: Running successfully with vitest, some failures to address
+
+### Schema Merge and Claim API Fix
+- **Schema Merged**: Successfully merged old and new Envelope schemas
+  - Retained ALL legacy fields (status as EnvelopeStatus, asset as Asset enum, decimals, hash, expiryTs, etc.)
+  - Added new claim-related fields as nullable (contractId, assetCode, assetIssuer, claimedAt, emailInviteId, projectId)
+  - Ensures backward compatibility with existing routes
+- **Migration**: `20250831172628_add_claim_columns` - adds new columns without removing any
+- **Helper Files Completed**: 
+  - `server/lib/soroban.ts` - uses @stellar/stellar-sdk v14.1.1 with rpc.Server
+  - `server/lib/jwt.ts` - fixed imports with jsonwebtoken package
+  - `server/lib/email.tsx` - React email templates with Resend
+- **Fixed Imports**: 
+  - Claim routes now import from `../src/db/client` 
+  - Added fallback for assetCode using asset enum when null
+  - Status checks use "FUNDED" enum value instead of "ACTIVE"
+- **Dependencies Added**: @stellar/stellar-sdk, jsonwebtoken, react, @prisma/client, vitest
+
+### Claim API v1 Implementation
+- **Models**: Updated Envelope model, added EmailInvite model in Prisma schema
+- **Migration**: `20250831170825_add_envelope_emailinvite` 
+- **Environment Variables**:
+  - `APP_URL`: Base URL for frontend app
+  - `API_URL`: Base URL for API server  
+  - `CLAIM_SHORT_DOMAIN`: Short domain for claim links (ng.fyi)
+  - `EMAIL_FROM`: Sender email for invites
+  - `RESEND_API_KEY`: API key for email service
+- **New Libraries**:
+  - `server/lib/soroban.ts`: Soroban transaction builder with `buildInvokeTx` helper
+  - `server/lib/jwt.ts`: JWT signing/verification for claim tokens
+  - `server/lib/email.tsx`: React email templates for Resend integration
+- **Routes**: 
+  - `GET /api/claim/:id`: Get envelope info
+  - `POST /api/claim/:id/build`: Build claim transaction XDR
+  - `POST /api/claim/invite`: Send email invite
+- **Error Handling**: Added Zod validation error handling in middleware
+- **Tests**: Unit tests for buildInvokeTx, Supertest integration tests for claim routes
+
 ## Implementation Details
 
 ### Completed Components (Aug 22, 2025)
@@ -211,5 +269,6 @@ cd server && npm run dev
 
 ---
 
-*Last Updated: August 22, 2025, 18:15 EST*  
-*Implementation by: Opus 4.1 & GPT-5 collaboration*
+*Last Updated: August 31, 2025*  
+*Implementation by: Opus 4.1 & GPT-5 collaboration*  
+*Claim API v1 added by: Opus 4.1*

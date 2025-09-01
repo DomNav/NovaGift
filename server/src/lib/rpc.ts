@@ -1,4 +1,5 @@
-import { SorobanRpc } from '@stellar/stellar-sdk';
+import { Transaction, Networks } from '@stellar/stellar-sdk';
+import { Server, Api } from '@stellar/stellar-sdk/rpc';
 
 interface WaitForTxOptions {
   rpcUrl: string;
@@ -31,7 +32,7 @@ export async function waitForTx(
     retries = 3 
   } = options;
 
-  const server = new SorobanRpc.Server(rpcUrl);
+  const server = new Server(rpcUrl);
   const startTime = Date.now();
   let attempt = 0;
 
@@ -51,23 +52,23 @@ export async function waitForTx(
       
       // Check transaction status
       switch (response.status) {
-        case SorobanRpc.Api.GetTransactionStatus.SUCCESS:
+        case Api.GetTransactionStatus.SUCCESS:
           return {
             success: true,
             status: 'SUCCESS',
             ledger: response.ledger,
-            createdAt: response.createdAt,
-            applicationOrder: response.applicationOrder
+            createdAt: response.createdAt ? String(response.createdAt) : undefined,
+            applicationOrder: response.applicationOrder ?? undefined
           };
           
-        case SorobanRpc.Api.GetTransactionStatus.FAILED:
+        case Api.GetTransactionStatus.FAILED:
           return {
             success: false,
             status: 'FAILED',
             error: 'Transaction failed on the network'
           };
           
-        case SorobanRpc.Api.GetTransactionStatus.NOT_FOUND:
+        case Api.GetTransactionStatus.NOT_FOUND:
           // Transaction not found yet, wait and retry
           await new Promise(resolve => setTimeout(resolve, 1000));
           attempt++;
@@ -115,11 +116,11 @@ export async function submitTransaction(
   rpcUrl: string
 ): Promise<{ success: boolean; txId?: string; error?: string }> {
   try {
-    const server = new SorobanRpc.Server(rpcUrl);
+    const server = new Server(rpcUrl);
     
     // Submit the transaction
     const response = await server.sendTransaction(
-      new SorobanRpc.Api.Transaction(signedXDR)
+      new Transaction(signedXDR, Networks.TESTNET)
     );
     
     if (response.status === 'PENDING') {
