@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import GradientShader, { ShaderSettings } from '../skins/GradientShader';
 import EnvelopeOpenFX from '@/components/effects/EnvelopeOpenFX';
 import CountUp from '@/components/effects/CountUp';
+import novaGiftLogo from '/new1-nova--gift-high-resolution-logo-transparent.png';
 
 export type EnvelopeSkin = {
   id: string;
@@ -85,8 +86,16 @@ export const EnvelopeCard = ({
         {isCardSealed ? (
           <>
             {/* Sealed state */}
-            <div className="flex items-center justify-between">
-              <span className="text-3xl drop-shadow-md">✉</span>
+            <div className="flex items-start justify-between">
+              <img 
+                src={novaGiftLogo} 
+                alt="Nova Gift Logo" 
+                className="h-8 w-auto drop-shadow-2xl shadow-black/30 transform hover:scale-105 transition-transform duration-200 -mt-2 -ml-2"
+                style={{
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}
+              />
               <span className="text-xs text-white/90 font-medium uppercase tracking-wider drop-shadow-md">
                 Sealed
               </span>
@@ -107,8 +116,16 @@ export const EnvelopeCard = ({
         ) : (
           <>
             {/* Revealed state */}
-            <div className="flex items-center justify-between">
-              <span className="text-3xl animate-pulse drop-shadow-md">💰</span>
+            <div className="flex items-start justify-between">
+              <img 
+                src={novaGiftLogo} 
+                alt="Nova Gift Logo" 
+                className="h-8 w-auto drop-shadow-2xl shadow-black/30 transform hover:scale-105 transition-transform duration-200 -mt-2 -ml-2"
+                style={{
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}
+              />
               <span className="text-xs text-white/90 font-medium uppercase tracking-wider drop-shadow-md">
                 Opened
               </span>

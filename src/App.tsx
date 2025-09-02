@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ConsentProvider } from '@/contexts/ConsentContext';
 import { ToastProvider } from '@/hooks/useToast';
 import { Toast } from '@/components/ui/Toast';
+import { ConsentBanner } from '@/components/ConsentBanner';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Create } from '@/pages/Create';
 import { Fund } from '@/pages/Fund';
@@ -18,8 +20,9 @@ import ContactsPage from '@/pages/ContactsPage';
 import { QrClaimPage } from '@/pages/QrClaimPage';
 import { ClaimPage } from '@/pages/claim/ClaimPage';
 import { ClaimSuccess } from '@/pages/claim/ClaimSuccess';
-import SkinStore from '@/pages/SkinStore';
+import SkinStudio from '@/components/SkinStudio/SkinStudio';
 import KaleSkins from '@/pages/KaleSkins';
+import Guide from '@/pages/Guide';
 
 // Create a React Query client
 const queryClient = new QueryClient({
@@ -37,8 +40,9 @@ function App() {
     console.log('NovaGift App: Initializing...');
     return (
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <ToastProvider>
+        <ConsentProvider>
+          <ThemeProvider>
+            <ToastProvider>
             <BrowserRouter>
               <Routes>
                 {/* Public claim routes (no layout) */}
@@ -63,16 +67,19 @@ function App() {
                   <Route path="studio/projects/:id" element={<ProjectDetailsPage />} />
                   
                   {/* Studio sub-pages */}
-                  <Route path="skins" element={<SkinStore />} />
+                  <Route path="skins" element={<SkinStudio />} />
                   <Route path="kale-skins" element={<KaleSkins />} />
                   
                   <Route path="settings" element={<Settings />} />
+                  <Route path="guide" element={<Guide />} />
                 </Route>
               </Routes>
               <Toast />
+              <ConsentBanner />
             </BrowserRouter>
-          </ToastProvider>
-        </ThemeProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </ConsentProvider>
       </QueryClientProvider>
     );
   } catch (error) {
