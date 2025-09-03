@@ -15,7 +15,7 @@ export function ClaimSuccess() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+      <div className="min-h-dvh bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mx-auto"></div>
           <p className="mt-4 text-slate-600 dark:text-slate-400">Loading...</p>
@@ -25,7 +25,7 @@ export function ClaimSuccess() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+    <div className="min-h-dvh bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
       <div className="text-center max-w-md mx-4">
         <div className="text-6xl mb-4">🎉</div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">

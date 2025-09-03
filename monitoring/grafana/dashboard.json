@@ -1,0 +1,353 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "novagift-main",
+    "title": "NovaGift Platform Dashboard",
+    "tags": ["novagift", "stellar", "blockchain"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "type": "graph",
+        "title": "Gift Creation Rate",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(gifts_created_total[5m])",
+            "legendFormat": "{{mode}} - {{theme}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "ops", "show": true },
+          { "format": "short", "show": false }
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "type": "graph",
+        "title": "API Response Time (P95)",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 - {{route}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P99 - {{route}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          { "format": "s", "show": true },
+          { "format": "short", "show": false }
+        ],
+        "alert": {
+          "name": "High API Response Time",
+          "conditions": [
+            {
+              "evaluator": { "params": [1], "type": "gt" },
+              "operator": { "type": "and" },
+              "query": { "model": "A", "params": ["A", "5m", "now"] },
+              "reducer": { "params": [], "type": "avg" },
+              "type": "query"
+            }
+          ],
+          "frequency": "60s",
+          "handler": 1,
+          "message": "API response time P95 exceeds 1 second",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "h": 6, "w": 8, "x": 0, "y": 8 },
+        "type": "stat",
+        "title": "Outbox Queue Status",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(outbox_queued_total)",
+            "legendFormat": "Queued",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(outbox_in_flight_total)",
+            "legendFormat": "In Flight",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(outbox_processed_total[1h]))",
+            "legendFormat": "Processed/hr",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 100 },
+                { "color": "red", "value": 500 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "h": 6, "w": 8, "x": 8, "y": 8 },
+        "type": "stat",
+        "title": "Outbox Failed Messages",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(increase(outbox_failed_total[1h]))",
+            "legendFormat": "Failed (1hr)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          }
+        },
+        "alert": {
+          "name": "Outbox Processing Failures",
+          "conditions": [
+            {
+              "evaluator": { "params": [0], "type": "gt" },
+              "operator": { "type": "and" },
+              "query": { "model": "A", "params": ["A", "5m", "now"] },
+              "reducer": { "params": [], "type": "last" },
+              "type": "query"
+            }
+          ],
+          "frequency": "60s",
+          "handler": 1,
+          "message": "Outbox messages are failing to process",
+          "noDataState": "no_data",
+          "notifications": [
+            {
+              "uid": "slack-webhook"
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": { "h": 6, "w": 8, "x": 16, "y": 8 },
+        "type": "graph",
+        "title": "Outbox Retry Distribution",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, rate(outbox_retry_count_bucket[5m]))",
+            "legendFormat": "P50 Retries",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(outbox_retry_count_bucket[5m]))",
+            "legendFormat": "P95 Retries",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+        "type": "graph",
+        "title": "Gift Claim Rate",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(gifts_claimed_total[5m])",
+            "legendFormat": "{{mode}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(gifts_expired_total[5m])",
+            "legendFormat": "Expired {{mode}}",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+        "type": "heatmap",
+        "title": "Gift Claim Duration Heatmap",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(rate(gift_claim_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "dataFormat": "timeseries",
+        "yAxis": {
+          "format": "s",
+          "decimals": 0
+        }
+      },
+      {
+        "id": 8,
+        "gridPos": { "h": 6, "w": 8, "x": 0, "y": 22 },
+        "type": "stat",
+        "title": "Gift Value Distribution",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, rate(gift_value_usd_bucket[1h]))",
+            "legendFormat": "Median Value",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(gift_value_usd_bucket[1h]))",
+            "legendFormat": "P95 Value",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 9,
+        "gridPos": { "h": 6, "w": 8, "x": 8, "y": 22 },
+        "type": "graph",
+        "title": "HTTP Request Rate",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m])) by (status_code)",
+            "legendFormat": "{{status_code}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "reqps", "show": true },
+          { "format": "short", "show": false }
+        ]
+      },
+      {
+        "id": 10,
+        "gridPos": { "h": 6, "w": 8, "x": 16, "y": 22 },
+        "type": "stat",
+        "title": "System Health",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "up{job=\"novagift\"}",
+            "legendFormat": "Service Up",
+            "refId": "A"
+          },
+          {
+            "expr": "process_cpu_seconds_total",
+            "legendFormat": "CPU Usage",
+            "refId": "B"
+          },
+          {
+            "expr": "process_resident_memory_bytes / 1024 / 1024",
+            "legendFormat": "Memory (MB)",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 28 },
+        "type": "graph",
+        "title": "Wallet Transactions",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(wallet_transactions_total[5m])",
+            "legendFormat": "{{type}} - {{status}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 28 },
+        "type": "table",
+        "title": "Top Errors (Last Hour)",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "topk(10, sum by (route, status_code) (increase(http_requests_total{status_code=~\"4..|5..\"}[1h])))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "datasource",
+          "type": "datasource",
+          "query": "prometheus",
+          "current": {
+            "text": "Prometheus",
+            "value": "Prometheus"
+          }
+        },
+        {
+          "name": "interval",
+          "type": "interval",
+          "current": {
+            "text": "5m",
+            "value": "5m"
+          },
+          "options": [
+            { "text": "1m", "value": "1m" },
+            { "text": "5m", "value": "5m" },
+            { "text": "10m", "value": "10m" },
+            { "text": "30m", "value": "30m" },
+            { "text": "1h", "value": "1h" }
+          ]
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "changes(novagift_deployment_info[5m]) > 0",
+          "name": "Deployments",
+          "tagKeys": "version",
+          "textFormat": "New deployment: {{version}}"
+        }
+      ]
+    }
+  },
+  "overwrite": true
+}

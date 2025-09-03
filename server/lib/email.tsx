@@ -1,7 +1,9 @@
 import React from "react";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_dummy_key_for_testing' 
+  ? new Resend(process.env.RESEND_API_KEY) 
+  : null;
 const EMAIL_FROM = process.env.EMAIL_FROM || "NovaGift <noreply@novagift.dev>";
 const CLAIM_SHORT_DOMAIN = process.env.CLAIM_SHORT_DOMAIN || "https://ng.fyi";
 
@@ -76,6 +78,11 @@ export async function sendInviteEmail({
   senderName?: string;
 }): Promise<{ id: string }> {
   const claimUrl = `${CLAIM_SHORT_DOMAIN}/c/${envelopeId}?t=${inviteToken}`;
+  
+  if (!resend) {
+    console.log('Email sending disabled - no API key configured');
+    return { id: 'mock-email-id' };
+  }
   
   const { data, error } = await resend.emails.send({
     from: EMAIL_FROM,

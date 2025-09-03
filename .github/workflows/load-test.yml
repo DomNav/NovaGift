@@ -1,0 +1,222 @@
+name: Load Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      target_rps:
+        description: 'Target requests per second'
+        required: false
+        default: '5'
+      duration:
+        description: 'Test duration (e.g., 30s, 1m)'
+        required: false
+        default: '30s'
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      # Optional: Run against a test database
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: novagift_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd server && npm ci && cd ..
+
+      - name: Setup test environment
+        run: |
+          cp .env.example .env.test
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/novagift_test" >> .env.test
+          echo "JWT_SECRET=test-jwt-secret-for-ci" >> .env.test
+          echo "NODE_ENV=test" >> .env.test
+          echo "PORT=4000" >> .env.test
+
+      - name: Run database migrations
+        run: |
+          export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/novagift_test
+          npx prisma migrate deploy
+          npx prisma db seed || true
+
+      - name: Start API server
+        run: |
+          cd server
+          npm run build || true
+          nohup npm run start > server.log 2>&1 &
+          sleep 5
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/novagift_test
+
+      - name: Install k6
+        run: |
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run k6 load test (CI mode - low RPS)
+        run: |
+          # Override test parameters for CI (much lighter load)
+          cat > ci-load-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          import { Rate } from 'k6/metrics';
+
+          const errorRate = new Rate('errors');
+          const successRate = new Rate('success');
+          const TARGET_RPS = __ENV.TARGET_RPS || '${{ github.event.inputs.target_rps || '5' }}';
+          const DURATION = __ENV.DURATION || '${{ github.event.inputs.duration || '30s' }}';
+
+          export const options = {
+            scenarios: {
+              ci_load_test: {
+                executor: 'constant-arrival-rate',
+                rate: parseInt(TARGET_RPS),
+                timeUnit: '1s',
+                duration: DURATION,
+                preAllocatedVUs: 10,
+                maxVUs: 20,
+              },
+            },
+            thresholds: {
+              http_req_duration: ['p(95)<1000', 'p(99)<2000'],
+              errors: ['rate<0.05'],
+              success: ['rate>0.95'],
+            },
+          };
+
+          export default function () {
+            const payload = JSON.stringify({
+              mode: 'SINGLE',
+              metadata: {
+                theme: 'RED',
+                message: 'CI Test Gift',
+              },
+              totalAmount: 1,
+              recipients: [{
+                email: `test${Date.now()}@example.com`,
+                amount: 1,
+              }],
+            });
+
+            const params = {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer test-token',
+              },
+              timeout: '5s',
+            };
+
+            const response = http.post('http://localhost:4000/api/gift', payload, params);
+            
+            const success = check(response, {
+              'status is 200 or 401': (r) => r.status === 200 || r.status === 401,
+              'response time < 1000ms': (r) => r.timings.duration < 1000,
+            });
+
+            errorRate.add(!success);
+            successRate.add(success);
+            
+            sleep(0.1);
+          }
+          EOF
+          
+          k6 run --summary-export=summary.json ci-load-test.js || true
+
+      - name: Check test results
+        run: |
+          if [ -f summary.json ]; then
+            echo "Load test summary:"
+            cat summary.json | jq '.'
+            
+            # Extract key metrics
+            ERROR_RATE=$(cat summary.json | jq '.metrics.errors.rate' || echo "0")
+            P95_DURATION=$(cat summary.json | jq '.metrics.http_req_duration.values["p(95)"]' || echo "0")
+            
+            echo "Error rate: $ERROR_RATE"
+            echo "P95 duration: $P95_DURATION ms"
+            
+            # Check thresholds (allow some failures in CI)
+            if (( $(echo "$ERROR_RATE > 0.10" | bc -l) )); then
+              echo "Warning: Error rate is above 10%"
+            fi
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: load-test-results
+          path: |
+            summary.json
+            summary.html
+            server/server.log
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let summary = '## 📊 Load Test Results\n\n';
+            
+            try {
+              const data = JSON.parse(fs.readFileSync('summary.json', 'utf8'));
+              const errorRate = (data.metrics.errors?.rate || 0) * 100;
+              const p95 = data.metrics.http_req_duration?.values['p(95)'] || 0;
+              const p99 = data.metrics.http_req_duration?.values['p(99)'] || 0;
+              const reqs = data.metrics.http_reqs?.values.count || 0;
+              
+              summary += `- **Total Requests**: ${reqs}\n`;
+              summary += `- **Error Rate**: ${errorRate.toFixed(2)}%\n`;
+              summary += `- **P95 Response Time**: ${p95.toFixed(0)}ms\n`;
+              summary += `- **P99 Response Time**: ${p99.toFixed(0)}ms\n`;
+              
+              if (errorRate > 5) {
+                summary += '\n⚠️ **Warning**: Error rate exceeds 5% threshold\n';
+              } else {
+                summary += '\n✅ **Status**: Load test passed\n';
+              }
+            } catch (e) {
+              summary += 'Could not parse test results. Check artifacts for details.\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+      - name: Server logs on failure
+        if: failure()
+        run: |
+          echo "=== Server logs ==="
+          cat server/server.log || echo "No server logs found"

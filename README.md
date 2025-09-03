@@ -125,8 +125,12 @@ cd server && npm install && cd ..
 # Set environment variable for Reflector oracle
 export REFLECTOR_FX_CONTRACT=CBWH7BWBMWGGWWVPC7K5P4H3PXVQS2EZAGTQYJJW4IDDQGOAJVDMVUVN
 
-# Deploy envelope contract
+# Deploy envelope contract (legacy)
 ./scripts/deploy_envelope.sh
+
+# Deploy escrow contract (new)
+tsx scripts/deploy_escrow.ts
+# This will automatically update your .env with ESCROW_CONTRACT_ID
 
 # Fund test accounts
 ./scripts/fund_testnet.sh
@@ -158,7 +162,10 @@ cp .env.example .env
 npm run migrate
 npm run dev
 
-# Terminal 2: Start frontend
+# Terminal 2: Start Outbox worker (for async jobs)
+npm run outbox-worker
+
+# Terminal 3: Start frontend
 npm run dev
 ```
 
@@ -168,7 +175,21 @@ Visit http://localhost:5173
 
 ### Contract Tests
 ```bash
+# Test envelope contract
 cargo test -p envelope
+
+# Test escrow contract
+npm run test:contracts
+```
+
+### Backend Tests
+```bash
+# Run all backend tests
+npm run test:server
+
+# Run specific test suites
+npm test gift.test.ts
+npm test escrow.integration.test.ts
 ```
 
 ### Frontend Tests
@@ -187,10 +208,16 @@ npm run smoke:endpoints
 
 ## API Endpoints
 
-### Envelope Management
-- `POST /api/envelope/create` - Create new envelope with HTLC
+### Gift Management (NEW - Unified API)
+- `POST /api/gift` - Create gifts in SINGLE, MULTI, or POOL mode
+- `GET /api/gift/:id` - Get gift details (envelope, pool, or QR code)
+- `GET /api/gift/pool/:qrCodeId/claim` - Claim from a pool
+
+### Envelope Management (Legacy)
+- `POST /api/envelope/create` - Create new envelope (deprecated - use /api/gift)
 - `POST /api/envelope/fund` - Confirm on-chain funding
 - `POST /api/envelope/open` - Claim with preimage (fee-sponsored)
+- `POST /api/envelope/:id/refund` - Manually trigger refund for escrow
 
 ### Price Feeds (Reflector Network)
 - `GET /api/prices` - Get current USD prices for assets
@@ -214,6 +241,8 @@ npm run smoke:endpoints
 ### Webhooks
 - `POST /hooks/reflector` - Reflector oracle callbacks
 - `POST /notify/envelope-funded` - Email notification trigger
+- `POST /api/webhooks/escrow` - Soroban event listener for escrow claims/refunds
+- `GET /api/webhooks/escrow/health` - Webhook listener health check
 
 ### Health
 - `GET /api/health` - Health check with service status (DB/Horizon/RPC)

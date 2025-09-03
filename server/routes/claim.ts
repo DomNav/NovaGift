@@ -3,7 +3,6 @@ import { z } from "zod";
 import { prisma } from "../src/db/client.js";
 import { buildInvokeTx, scAddress } from "../lib/soroban";
 import jwt from "../lib/jwt";
-import { sendInviteEmail } from "../lib/email";
 import { xdr } from "@stellar/stellar-sdk";
 import { logger } from "../src/lib/log";
 
@@ -195,15 +194,7 @@ router.post("/claim/invite", async (req, res, next) => {
       email
     });
     
-    const emailResult = await sendInviteEmail({
-      recipientEmail: email,
-      amount: envelope.amount.toString(),
-      assetCode: envelope.assetCode || envelope.asset,
-      envelopeId: envelope.id,
-      inviteToken,
-      senderName
-    });
-    
+    // Create email invite record first
     const invite = await prisma.emailInvite.create({
       data: {
         envelopeId: envelope.id,
@@ -213,15 +204,35 @@ router.post("/claim/invite", async (req, res, next) => {
       }
     });
     
+    // Update envelope with invite ID
     await prisma.envelope.update({
       where: { id: envelopeId },
       data: { emailInviteId: invite.id }
     });
     
+    // Queue email send to Outbox for durable delivery
+    await prisma.outbox.create({
+      data: {
+        type: 'EMAIL_SEND',
+        payload: {
+          template: 'invite',
+          to: email,
+          data: {
+            recipientEmail: email,
+            amount: envelope.amount.toString(),
+            assetCode: envelope.assetCode || envelope.asset,
+            envelopeId: envelope.id,
+            inviteToken,
+            senderName
+          }
+        }
+      }
+    });
+    
     return res.json({
       ok: true,
       inviteId: invite.id,
-      emailId: emailResult.id
+      message: "Invite created and email queued for delivery"
     });
   } catch (error) {
     next(error);

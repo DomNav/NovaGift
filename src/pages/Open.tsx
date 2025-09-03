@@ -4,6 +4,7 @@ import { EnvelopeCard } from '@/components/ui/EnvelopeCard';
 import { useToast } from '@/hooks/useToast';
 import { useSkins } from '@/store/skins';
 import { isPasskeySupported, claimWithPasskey, ensurePasskeyWallet } from '@/passkey/client';
+import { AppShell } from '@/components/layout/AppShell';
 
 export const Open = () => {
   const { addToast } = useToast();
@@ -97,7 +98,8 @@ export const Open = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <AppShell>
+      <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-antonio gradient-text mb-2">Open Gift Envelope</h1>
         <p className="text-brand-text/60">Enter the envelope ID to reveal your gift</p>
@@ -253,6 +255,7 @@ export const Open = () => {
           <li>• Contact the sender if you can't find it</li>
         </ul>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 };

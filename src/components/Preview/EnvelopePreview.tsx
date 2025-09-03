@@ -32,7 +32,7 @@ export const EnvelopePreview = memo(({
   return (
     <div
       className={clsx(
-        'relative w-64 h-40 rounded-xl overflow-hidden shadow-lg border border-surface-border',
+        'relative w-64 h-40 rounded-xl overflow-hidden shadow-lg',
         className
       )}
     >

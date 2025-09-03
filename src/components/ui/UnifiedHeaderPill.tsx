@@ -183,7 +183,7 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
 
                  {/* Notifications Section */}
          <div 
-           className={`relative flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 cursor-pointer group/notifications backdrop-blur-xl z-10 border border-surface-border shadow-lg hover:shadow-xl ${
+           className={`relative flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 cursor-pointer group/notifications backdrop-blur-xl z-10 border border-surface-border dark:border-transparent shadow-lg hover:shadow-xl ${
              theme === 'dark'
                ? 'hover:bg-gradient-to-r hover:from-amber-500/20 hover:to-yellow-500/20'
                : 'hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-yellow-500/10'
@@ -301,7 +301,7 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
         ) : (
           <button
             onClick={onConnect}
-            className={`relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/connect border border-surface-border shadow-lg hover:shadow-xl ${
+            className={`relative flex items-center gap-3 px-6 py-2 rounded-full transition-all duration-300 backdrop-blur-xl group/connect border border-surface-border dark:border-transparent shadow-lg hover:shadow-xl ${
               theme === 'dark'
                 ? 'bg-gradient-to-r from-blue-600/80 to-indigo-600/80 hover:from-blue-500/90 hover:to-indigo-500/90'
                 : 'bg-gradient-to-r from-blue-500/80 to-indigo-500/80 hover:from-blue-400/90 hover:to-indigo-400/90'
@@ -408,7 +408,7 @@ export const UnifiedHeaderPill = ({ wallet, onConnect, onDisconnect }: UnifiedHe
                     theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
                   }`}>{xlmBalance.toFixed(7)}</span>
                 </div>
-                {balances.map((balance) => (
+                {balances.filter(b => b.code !== 'XLM').map((balance) => (
                   <div className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-300 ${
                     theme === 'dark'
                       ? 'bg-gradient-to-r from-slate-800/40 to-gray-800/40 border-slate-600/30 hover:border-emerald-400/30'

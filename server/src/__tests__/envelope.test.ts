@@ -138,6 +138,53 @@ describe('NovaGift API', () => {
     });
   });
 
+  describe('GET /api/envelope/:id', () => {
+    it('should retrieve envelope details by ID', async () => {
+      const response = await request(app)
+        .get(`/api/envelope/${envelopeId}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        id: envelopeId,
+        status: 'CREATED',
+        asset: 'USDC',
+        amount: '10.50',
+        decimals: 7,
+        sender: testSender,
+        recipient: null,
+        memo: `NOVAGIFT:${envelopeId.slice(0, 8)}`,
+      });
+      expect(response.body).toHaveProperty('expiryTs');
+    });
+
+    it('should return 404 for non-existent envelope', async () => {
+      const fakeId = '0'.repeat(64);
+      const response = await request(app)
+        .get(`/api/envelope/${fakeId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('error', 'Envelope not found');
+    });
+
+    it('should reject invalid ID format', async () => {
+      const invalidId = 'invalid-id';
+      const response = await request(app)
+        .get(`/api/envelope/${invalidId}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Invalid envelope ID format');
+    });
+
+    it('should reject ID with wrong length', async () => {
+      const shortId = 'abc123';
+      const response = await request(app)
+        .get(`/api/envelope/${shortId}`);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Invalid envelope ID format');
+    });
+  });
+
   describe('POST /api/envelope/fund', () => {
     it('should mark envelope as funded with valid transaction', async () => {
       const response = await request(app)

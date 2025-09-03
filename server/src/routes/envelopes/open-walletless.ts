@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../../lib/prisma';
-import { sendEmail } from '../../lib/email';
 import { sendSMS } from '../../lib/sms';
 import crypto from 'crypto';
 
@@ -60,31 +59,41 @@ router.post('/api/envelopes/:id/open', async (req, res) => {
     });
     */
 
-    // Send notification based on method
+    // Queue notification to Outbox based on method
     if (method === 'email') {
-      await sendEmail({
-        to: contact,
-        subject: 'Your NovaGift is waiting!',
-        html: `
-          <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>You have received a gift! 🎁</h2>
-            <p>Someone has sent you a digital gift through NovaGift.</p>
-            <p>To claim your gift, you'll need to set up a Stellar wallet first, then click the link below:</p>
-            <div style="margin: 30px 0;">
-              <a href="${claimUrl}" 
-                 style="background: #3b82f6; color: white; padding: 12px 24px; 
-                        text-decoration: none; border-radius: 8px; display: inline-block;">
-                Claim Your Gift
-              </a>
-            </div>
-            <p style="color: #666; font-size: 14px;">
-              This link expires in 7 days. If you're new to Stellar, we recommend using 
-              <a href="https://www.freighter.app/">Freighter wallet</a>.
-            </p>
-          </div>
-        `,
+      await prisma.outbox.create({
+        data: {
+          type: 'EMAIL_SEND',
+          payload: {
+            template: 'walletless_claim',
+            to: contact,
+            data: {
+              subject: 'Your NovaGift is waiting!',
+              claimUrl,
+              html: `
+                <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2>You have received a gift! 🎁</h2>
+                  <p>Someone has sent you a digital gift through NovaGift.</p>
+                  <p>To claim your gift, you'll need to set up a Stellar wallet first, then click the link below:</p>
+                  <div style="margin: 30px 0;">
+                    <a href="${claimUrl}" 
+                       style="background: #3b82f6; color: white; padding: 12px 24px; 
+                              text-decoration: none; border-radius: 8px; display: inline-block;">
+                      Claim Your Gift
+                    </a>
+                  </div>
+                  <p style="color: #666; font-size: 14px;">
+                    This link expires in 7 days. If you're new to Stellar, we recommend using 
+                    <a href="https://www.freighter.app/">Freighter wallet</a>.
+                  </p>
+                </div>
+              `,
+            }
+          }
+        }
       });
     } else if (method === 'sms') {
+      // TODO: Migrate SMS to Outbox when push/SMS service is available
       await sendSMS({
         to: contact,
         message: `You've received a NovaGift! 🎁 Set up a Stellar wallet, then claim here: ${claimUrl}`,

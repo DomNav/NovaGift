@@ -112,7 +112,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-20 bg-brand-surface/30 backdrop-blur-lg px-6 flex items-center justify-between z-40 border-b border-surface-border">
+    <header className="fixed top-0 left-64 right-0 h-20 bg-brand-surface/30 backdrop-blur-lg px-6 flex items-center justify-between z-40">
       <div className="flex items-center gap-4">
         <h2 className="text-lg font-medium text-brand-text/80">{getPageTitle(location.pathname)}</h2>
       </div>

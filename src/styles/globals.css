@@ -1,0 +1,3 @@
+html, body, #root { height: 100%; }
+body { overflow-x: hidden; }
+:root { --vh: 1dvh; }

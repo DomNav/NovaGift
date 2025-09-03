@@ -20,6 +20,10 @@ import contactsRoutes from './routes/contacts';
 import qrRoutes from './routes/qr';
 import oracleRoutes from './routes/oracle';
 import claimRoutes from '../routes/claim';
+import escrowWebhookRoutes from './routes/webhooks/escrow';
+import giftRoutes from './routes/gift';
+import metricsRoutes, { metricsMiddleware } from './routes/metrics';
+import featureFlagsRoutes from './routes/feature-flags';
 import { apiLimiter } from './middlewares/rate';
 import { requireConsent, checkConsent } from './middlewares/consent';
 
@@ -39,6 +43,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(httpLogger); // request logging
+app.use(metricsMiddleware); // Prometheus metrics collection
 app.use(apiLimiter as any); // Global rate limiting
 
 // Routes
@@ -58,9 +63,15 @@ app.use('/api/contacts', contactsRoutes);
 app.use('/api/qr', qrRoutes);
 app.use('/api/oracle', oracleRoutes);
 app.use('/api', claimRoutes);
+app.use('/api/webhooks', escrowWebhookRoutes);
+app.use('/api/gift', giftRoutes);
+app.use('/api/feature-flags', featureFlagsRoutes);
 
 // Health check
 app.use('/api/health', healthRoutes);
+
+// Metrics endpoint (Prometheus format)
+app.use('/', metricsRoutes);
 
 // Error handler (must be last)
 app.use(errorMiddleware);

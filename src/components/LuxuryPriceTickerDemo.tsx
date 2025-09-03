@@ -42,7 +42,7 @@ export default function LuxuryPriceTickerDemo() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-bg via-brand-surface to-brand-bg p-8">
+    <div className="min-h-dvh bg-gradient-to-br from-brand-bg via-brand-surface to-brand-bg p-8">
       <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
         <motion.div

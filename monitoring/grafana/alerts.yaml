@@ -1,0 +1,236 @@
+apiVersion: 1
+
+groups:
+  - name: novagift_critical
+    interval: 1m
+    rules:
+      - uid: outbox-failed-messages
+        title: Outbox Failed Messages Alert
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(increase(outbox_failed_total[5m]))'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'Outbox has {{ $value }} failed messages in the last 5 minutes'
+          runbook_url: 'https://docs.novagift.com/runbooks/outbox-failures'
+          summary: 'Outbox message processing failures detected'
+        labels:
+          severity: critical
+          team: backend
+          component: outbox
+        
+      - uid: high-api-latency
+        title: High API Response Time
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'P95 API response time is {{ $value }} seconds'
+          runbook_url: 'https://docs.novagift.com/runbooks/high-latency'
+          summary: 'API response time exceeds SLA threshold'
+        labels:
+          severity: warning
+          team: backend
+          component: api
+
+      - uid: gift-claim-rate-drop
+        title: Gift Claim Rate Drop
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'rate(gifts_claimed_total[1h]) < 0.5 * avg_over_time(rate(gifts_claimed_total[1h])[24h:1h])'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: NoData
+        for: 15m
+        annotations:
+          description: 'Gift claim rate dropped by more than 50% compared to 24h average'
+          runbook_url: 'https://docs.novagift.com/runbooks/claim-rate-drop'
+          summary: 'Significant drop in gift claim rate detected'
+        labels:
+          severity: warning
+          team: product
+          component: gifts
+
+      - uid: error-rate-spike
+        title: High Error Rate
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: 'Error rate is {{ $value | humanizePercentage }}'
+          runbook_url: 'https://docs.novagift.com/runbooks/error-rate'
+          summary: 'HTTP 5xx error rate exceeds 5%'
+        labels:
+          severity: critical
+          team: backend
+          component: api
+
+      - uid: outbox-queue-backlog
+        title: Outbox Queue Backlog
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(outbox_queued_total) > 1000'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: NoData
+        for: 10m
+        annotations:
+          description: 'Outbox queue has {{ $value }} messages waiting'
+          runbook_url: 'https://docs.novagift.com/runbooks/outbox-backlog'
+          summary: 'Large backlog in outbox queue'
+        labels:
+          severity: warning
+          team: backend
+          component: outbox
+
+  - name: novagift_business
+    interval: 5m
+    rules:
+      - uid: low-gift-creation
+        title: Low Gift Creation Rate
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(rate(gifts_created_total[1h])) < 10'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: NoData
+        for: 30m
+        annotations:
+          description: 'Only {{ $value }} gifts created per hour'
+          summary: 'Gift creation rate unusually low'
+        labels:
+          severity: info
+          team: product
+          component: business
+
+      - uid: high-expiry-rate
+        title: High Gift Expiry Rate
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 86400
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(rate(gifts_expired_total[24h])) / sum(rate(gifts_created_total[24h])) > 0.2'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+        noDataState: NoData
+        execErrState: NoData
+        for: 1h
+        annotations:
+          description: '{{ $value | humanizePercentage }} of gifts are expiring'
+          summary: 'More than 20% of gifts are expiring unclaimed'
+        labels:
+          severity: warning
+          team: product
+          component: business
+
+contactPoints:
+  - name: slack-webhook
+    receivers:
+      - uid: slack-critical
+        type: slack
+        settings:
+          url: '${SLACK_WEBHOOK_URL}'
+          title: 'NovaGift Alert'
+          text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        disableResolveMessage: false
+
+  - name: email-oncall
+    receivers:
+      - uid: email-critical
+        type: email
+        settings:
+          addresses: 'oncall@novagift.com'
+          singleEmail: true
+        disableResolveMessage: false
+
+notificationPolicies:
+  - receiver: slack-webhook
+    group_by: ['alertname', 'cluster', 'service']
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+    matchers:
+      - label: severity
+        match: =
+        value: critical
+
+  - receiver: email-oncall
+    group_by: ['alertname']
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 1h
+    matchers:
+      - label: severity
+        match: =
+        value: warning

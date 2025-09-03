@@ -46,6 +46,12 @@ enum QrCodeStatus {
   EXPIRED
 }
 
+enum WalletType {
+  HOT
+  HARDWARE
+  CONTRACT
+}
+
 model Envelope {
   id              String         @id
   status          EnvelopeStatus
@@ -124,6 +130,7 @@ model User {
   publicKey String     @unique
   credits   Int        @default(0)
   skins     UserSkin[]
+  wallets   Wallet[]
 }
 
 model UserSkin {
@@ -135,6 +142,15 @@ model UserSkin {
   User      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, skinId])
+}
+
+model Wallet {
+  id         String      @id @default(cuid())
+  userId     String      @map("user_id")
+  user       User        @relation(fields: [userId], references: [id])
+  publicKey  String      @unique
+  type       WalletType  @default(HOT)
+  createdAt  DateTime    @default(now())
 }
 
 model Contact {
@@ -196,4 +212,47 @@ model QrCode {
 
   @@index([eventId, status])
   @@index([assignedContact])
+}
+
+model Outbox {
+  id          String    @id @default(cuid())
+  type        String
+  payload     Json
+  runAfter    DateTime  @default(now())
+  attempts    Int       @default(0)
+  lockedBy    String?
+  lockedAt    DateTime?
+  processedAt DateTime?
+  failedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([type, runAfter])
+}
+
+model FeatureFlag {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  name        String
+  description String?
+  enabled     Boolean   @default(false)
+  rollout     Int       @default(0)    // Percentage rollout (0-100)
+  metadata    Json?                    // Additional configuration
+  conditions  Json?                    // Targeting rules (e.g., user segments)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([key, enabled])
+}
+
+model FeatureFlagLog {
+  id         String   @id @default(cuid())
+  flagKey    String
+  userId     String?
+  evaluated  Boolean  // Result of evaluation
+  reason     String?  // Why flag was enabled/disabled
+  metadata   Json?    // Context data
+  createdAt  DateTime @default(now())
+  
+  @@index([flagKey, createdAt])
+  @@index([userId, createdAt])
 }

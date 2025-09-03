@@ -16,5 +16,6 @@ export default defineConfig({
   },
   define: {
     __API_BASE__: JSON.stringify(process.env.VITE_API_BASE || 'http://localhost:4000'),
+    'import.meta.env.VITE_ENABLE_AMM': JSON.stringify(process.env.VITE_ENABLE_AMM || 'false'),
   },
 })

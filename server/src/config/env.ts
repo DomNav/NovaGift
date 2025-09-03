@@ -49,6 +49,15 @@ const Env = z.object({
   POSTER_SIGNING_KEY: z.string().default('dev-change-me'),
   SPONSOR_SECRET: z.string().optional().default(''),
   DISTRIBUTION_SECRET: z.string().optional().default(''),
+  
+  // Swap Feature
+  ENABLE_AMM: z.coerce.boolean().default(false),
+  SOROSWAP_ROUTER_ID: z.string().optional().default(''),
+  WXLM_CONTRACT_ID: z.string().optional().default(''),
+  USDC_CONTRACT_ID: z.string().optional().default(''),
+  USDC_ISSUER: z.string().min(1).optional(),
+  EURC_ISSUER: z.string().min(1).optional(),
+  AQUA_ISSUER: z.string().min(1).optional(),
 });
 
 // Parse base environment

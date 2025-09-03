@@ -62,7 +62,7 @@ export const NotificationButton = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative glass-card px-3 py-1.5 hover:bg-brand-text/5 transition-colors rounded-full"
+        className="relative glass-card px-3 py-1.5 hover:bg-brand-text/5 transition-colors rounded-full border-0"
         disabled={isLoading}
       >
         <span className="text-sm">🔔</span>

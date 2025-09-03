@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import clsx from 'clsx';
 import { EnvelopeCard } from '@/components/ui/EnvelopeCard';
+import { AppShell } from '@/components/layout/AppShell';
 
 interface ActivityItem {
   id: string;
   type: 'sent' | 'received' | 'created';
   amount: string;
   currency: string;
+  fundingAsset?: string; // The asset used to fund the envelope
+  fundingAmount?: string; // The amount in funding asset
   status: 'completed' | 'pending' | 'expired';
   date: string;
   from: string;
@@ -19,6 +22,8 @@ const mockData: ActivityItem[] = [
     type: 'sent',
     amount: '100',
     currency: 'USDC',
+    fundingAsset: 'XLM',
+    fundingAmount: '222.22',
     status: 'completed',
     date: '2024-01-20',
     from: 'GDEMO...WALLET',
@@ -39,6 +44,8 @@ const mockData: ActivityItem[] = [
     type: 'created',
     amount: '50',
     currency: 'USDC',
+    fundingAsset: 'AQUA',
+    fundingAmount: '11905',
     status: 'pending',
     date: '2024-01-18',
     from: 'GDEMO...WALLET',
@@ -83,7 +90,8 @@ export const Activity = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <AppShell>
+      <div className="max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-antonio gradient-text mb-2">Activity</h1>
         <p className="text-brand-text/60">Track all your envelope transactions</p>
@@ -218,8 +226,17 @@ export const Activity = () => {
                   </div>
                 </td>
                 <td className="p-4">
-                  <span className="font-medium">${item.amount}</span>
-                  <span className="text-sm text-brand-text/60 ml-1">{item.currency}</span>
+                  <div className="space-y-1">
+                    <div>
+                      <span className="font-medium">${item.amount}</span>
+                      <span className="text-sm text-brand-text/60 ml-1">{item.currency}</span>
+                    </div>
+                    {item.fundingAsset && item.fundingAmount && (
+                      <div className="text-xs text-brand-text/60">
+                        via {item.fundingAmount} {item.fundingAsset}
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="p-4">
                   <div className="text-sm">
@@ -310,6 +327,7 @@ export const Activity = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppShell>
   );
 };

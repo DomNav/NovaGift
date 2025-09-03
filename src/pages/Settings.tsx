@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/useToast';
 import { useTheme } from '@/contexts/ThemeContext';
-import { PaymentToggle } from '@/components/ui/PaymentToggle';
 import clsx from 'clsx';
+import { AppShell } from '@/components/layout/AppShell';
 
 export const Settings = () => {
   const { addToast } = useToast();
@@ -11,9 +11,10 @@ export const Settings = () => {
     defaultExpiry: '7',
     autoReturn: true,
     notifications: true,
-    currency: 'USDC',
+    defaultFundingAsset: 'XLM' as 'XLM' | 'AQUA' | 'EURC' | 'USDC',
+    defaultVenue: 'best' as 'best' | 'dex' | 'amm',
     network: 'testnet',
-    slippage: '0.5',
+    slippage: '50', // basis points
   });
 
   const handleSave = () => {
@@ -27,16 +28,18 @@ export const Settings = () => {
       defaultExpiry: '7',
       autoReturn: true,
       notifications: true,
-      currency: 'USDC',
+      defaultFundingAsset: 'XLM' as 'XLM' | 'AQUA' | 'EURC' | 'USDC',
+      defaultVenue: 'best' as 'best' | 'dex' | 'amm',
       network: 'testnet',
-      slippage: '0.5',
+      slippage: '50',
     };
     setSettings(defaultSettings);
     addToast('Settings reset to defaults', 'info');
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <AppShell>
+      <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-antonio gradient-text mb-2">Settings</h1>
         <p className="text-brand-text/60">Configure your NovaGift preferences</p>
@@ -137,18 +140,76 @@ export const Settings = () => {
           </div>
         </div>
 
+        {/* Funding Defaults */}
+        <div className="glass-card p-6">
+          <h2 className="text-lg font-medium mb-4">Funding Defaults</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Default Funding Asset</label>
+              <div className="grid grid-cols-4 gap-2">
+                {(['XLM', 'AQUA', 'EURC', 'USDC'] as const).map((asset) => (
+                  <button
+                    key={asset}
+                    onClick={() => setSettings({ ...settings, defaultFundingAsset: asset })}
+                    className={clsx(
+                      'p-3 rounded-lg font-medium text-sm transition-all duration-200',
+                      settings.defaultFundingAsset === asset
+                        ? 'bg-brand-primary text-white shadow-lg'
+                        : 'bg-brand-surface/30 text-brand-text/80 hover:bg-brand-surface/50'
+                    )}
+                  >
+                    {asset}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-brand-text/50 mt-1">Asset to pre-select when creating envelopes</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Default Venue</label>
+              <div className="flex gap-2">
+                {(['best', 'dex', 'amm'] as const).map((venue) => (
+                  <button
+                    key={venue}
+                    onClick={() => setSettings({ ...settings, defaultVenue: venue })}
+                    disabled={venue === 'amm' && import.meta.env.VITE_ENABLE_AMM !== 'true'}
+                    className={clsx(
+                      'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 capitalize',
+                      'disabled:opacity-50 disabled:cursor-not-allowed',
+                      settings.defaultVenue === venue
+                        ? 'bg-brand-primary text-white shadow-lg'
+                        : 'bg-brand-surface/30 text-brand-text/80 hover:bg-brand-surface/50'
+                    )}
+                  >
+                    {venue}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-brand-text/50 mt-1">Default routing preference for swaps</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Max Slippage (basis points)</label>
+              <input
+                type="number"
+                value={settings.slippage}
+                onChange={(e) => setSettings({ ...settings, slippage: e.target.value })}
+                className="input-base"
+                min="1"
+                max="1000"
+                step="1"
+              />
+              <p className="text-xs text-brand-text/50 mt-1">
+                Default: 50 bps (0.5%). Higher values allow more price movement.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Network Settings */}
         <div className="glass-card p-6">
           <h2 className="text-lg font-medium mb-4">Network</h2>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Default Currency</label>
-              <PaymentToggle
-                value={settings.currency as 'USDC' | 'XLM'}
-                onChange={(currency) => setSettings({ ...settings, currency })}
-              />
-            </div>
-
             <div>
               <label className="block text-sm font-medium mb-2">Network</label>
               <select
@@ -159,20 +220,6 @@ export const Settings = () => {
                 <option value="testnet">Testnet</option>
                 <option value="mainnet">Mainnet (Coming Soon)</option>
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Max Slippage (%)</label>
-              <input
-                type="number"
-                value={settings.slippage}
-                onChange={(e) => setSettings({ ...settings, slippage: e.target.value })}
-                className="input-base"
-                min="0.1"
-                max="5"
-                step="0.1"
-              />
-              <p className="text-xs text-brand-text/50 mt-1">Maximum price slippage for swaps</p>
             </div>
           </div>
         </div>
@@ -255,6 +302,7 @@ export const Settings = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 };

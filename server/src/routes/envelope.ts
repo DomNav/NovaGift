@@ -61,6 +61,7 @@ const CancelEnvelopeSchema = z.object({
 /**
  * POST /api/envelope/create
  * Create a new envelope
+ * @deprecated Use POST /api/gift instead
  */
 router.post('/create', createLimiter as any, async (req: Request, res: Response) => {
   try {
@@ -409,6 +410,170 @@ router.post('/cancel', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid input', details: error.issues });
     }
     return res.status(500).json({ error: 'Failed to cancel envelope' });
+  }
+});
+
+/**
+ * GET /api/envelope/:id
+ * Get envelope details by ID
+ */
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Validate ID format (64 hex characters)
+    if (!id || !/^[a-fA-F0-9]{64}$/.test(id)) {
+      return res.status(400).json({ error: 'Invalid envelope ID format' });
+    }
+    
+    // Get envelope from database
+    const envelope = await envelopeRepo.getEnvelope(id);
+    
+    if (!envelope) {
+      return res.status(404).json({ error: 'Envelope not found' });
+    }
+    
+    // Format response
+    const response = {
+      id: envelope.id,
+      status: envelope.status,
+      asset: envelope.asset,
+      amount: envelope.amount.toString(),
+      decimals: envelope.decimals,
+      sender: envelope.sender,
+      recipient: envelope.recipient || null,
+      expiryTs: envelope.expiryTs,
+      memo: `NOVAGIFT:${envelope.id.slice(0, 8)}`,
+    };
+    
+    return res.json(response);
+  } catch (error) {
+    // Sanitize error logs
+    console.error('Get envelope error:', error instanceof Error ? error.message : 'Unknown error');
+    return res.status(500).json({ error: 'Failed to retrieve envelope' });
+  }
+});
+
+/**
+ * POST /api/envelope/:id/refund
+ * Manually trigger refund for an envelope (edge cases)
+ */
+router.post('/:id/refund', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Validate ID format (64 hex characters)
+    if (!id || !/^[a-fA-F0-9]{64}$/.test(id)) {
+      return res.status(400).json({ error: 'Invalid envelope ID format' });
+    }
+    
+    // Get envelope from database
+    const envelope = await envelopeRepo.getEnvelope(id);
+    
+    if (!envelope) {
+      return res.status(404).json({ error: 'Envelope not found' });
+    }
+    
+    // Check if envelope can be refunded
+    if (envelope.status === 'OPENED') {
+      return res.status(400).json({ error: 'Cannot refund opened envelope' });
+    }
+    
+    if (envelope.status === 'CANCELED') {
+      return res.status(400).json({ error: 'Envelope already canceled' });
+    }
+    
+    if (envelope.status !== 'FUNDED') {
+      return res.status(400).json({ error: 'Only funded envelopes can be refunded' });
+    }
+    
+    // Check if expired (optional - can refund even if not expired in emergency)
+    const now = Date.now() / 1000;
+    const isExpired = now > envelope.expiryTs;
+    
+    // Build refund transaction
+    const ESCROW_CONTRACT_ID = process.env.ESCROW_CONTRACT_ID;
+    const FUNDING_SECRET_KEY = process.env.FUNDING_SECRET_KEY || process.env.SOROBAN_ACCOUNT;
+    
+    if (!ESCROW_CONTRACT_ID) {
+      return res.status(500).json({ error: 'Escrow contract not configured' });
+    }
+    
+    if (!FUNDING_SECRET_KEY) {
+      return res.status(500).json({ error: 'Funding account not configured' });
+    }
+    
+    // Import Stellar SDK functions at top of handler
+    const { Keypair, TransactionBuilder, Operation, Address, nativeToScVal, BASE_FEE, Networks } = await import('@stellar/stellar-sdk');
+    const { Server: SorobanServer } = await import('@stellar/stellar-sdk/rpc');
+    const crypto = await import('crypto');
+    
+    const sorobanServer = new SorobanServer(process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org');
+    const fundingKeypair = Keypair.fromSecret(FUNDING_SECRET_KEY);
+    const fundingAccount = await sorobanServer.getAccount(fundingKeypair.publicKey());
+    
+    // Generate escrow ID from envelope ID
+    const escrowId = crypto.createHash('sha256').update(id).digest();
+    
+    // Build refund transaction
+    const tx = new TransactionBuilder(fundingAccount, {
+      fee: BASE_FEE,
+      networkPassphrase: process.env.NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
+    })
+      .addOperation(
+        Operation.invokeContractFunction({
+          contract: ESCROW_CONTRACT_ID,
+          function: isExpired ? 'refund' : 'admin_refund',
+          args: [
+            nativeToScVal(escrowId, { type: 'bytes' }), // escrow_id
+          ],
+        })
+      )
+      .setTimeout(180)
+      .build();
+    
+    // Prepare and submit transaction
+    const preparedTx = await sorobanServer.prepareTransaction(tx);
+    preparedTx.sign(fundingKeypair);
+    
+    const submitResult = await sorobanServer.sendTransaction(preparedTx);
+    
+    // Wait for confirmation
+    let getTransactionResponse = await sorobanServer.getTransaction(submitResult.hash);
+    let retries = 0;
+    const maxRetries = 20;
+    
+    while (getTransactionResponse.status === 'NOT_FOUND' && retries < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      getTransactionResponse = await sorobanServer.getTransaction(submitResult.hash);
+      retries++;
+    }
+    
+    if (getTransactionResponse.status === 'SUCCESS') {
+      // Update envelope status
+      await prisma.envelope.update({
+        where: { id },
+        data: {
+          status: 'CANCELED',
+          canceledAt: new Date(),
+          cancelReason: 'Manual refund triggered',
+        }
+      });
+      
+      return res.json({
+        ok: true,
+        message: 'Refund successful',
+        txHash: submitResult.hash,
+        envelopeId: id,
+        status: 'CANCELED',
+      });
+    } else {
+      throw new Error(`Refund transaction failed with status: ${getTransactionResponse.status}`);
+    }
+    
+  } catch (error) {
+    console.error('Refund envelope error:', error instanceof Error ? error.message : 'Unknown error');
+    return res.status(500).json({ error: 'Failed to refund envelope' });
   }
 });
 

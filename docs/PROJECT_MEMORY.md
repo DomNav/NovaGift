@@ -1,5 +1,16 @@
 # NovaGift Project Memory
 
+## Change Log (for Claude bullets only)
+- (2025-09-03) Added Wallet model & WalletType enum; backfilled Profile.wallet into Wallet; helper getPrimaryWallet(); tests green.
+- (2025-09-04) Outbox table + worker added, retries = 5, tested locally.
+
+---
+
+## Project Overview
+NovaGift is a crypto gifting application that allows users to create, send, and receive digital envelopes...
+
+
+
 ## Project Overview
 NovaGift is a crypto gifting application that allows users to create, send, and receive digital envelopes containing cryptocurrency. The application features gamified elements, customizable skins, and a reward system.
 

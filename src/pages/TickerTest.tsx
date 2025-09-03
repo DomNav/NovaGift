@@ -25,7 +25,7 @@ export default function TickerTest() {
   const [showGiftModal, setShowGiftModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-bg via-brand-surface to-brand-bg p-8">
+    <div className="min-h-dvh bg-gradient-to-br from-brand-bg via-brand-surface to-brand-bg p-8">
       <div className="max-w-4xl mx-auto">
         <motion.div
           className="text-center mb-12"

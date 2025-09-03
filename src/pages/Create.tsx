@@ -4,9 +4,8 @@ import { EnvelopeCard } from '@/components/ui/EnvelopeCard';
 import { EnvelopeOpeningDemo } from '@/components/ui/EnvelopeOpeningDemo';
 import { useToast } from '@/hooks/useToast';
 import { useSkins } from '@/store/skins';
-import { sendXlmWithFreighter } from '@/services/xlm';
-import { CurrencyToggle } from '@/components/ui/CurrencyToggle';
-import { CurrencyInput } from '@/components/ui/CurrencyInput';
+import { CreateWithSwap } from '@/components/fund/CreateWithSwap';
+import { AppShell } from '@/components/layout/AppShell';
 
 export const Create = () => {
   const { addToast } = useToast();
@@ -15,7 +14,7 @@ export const Create = () => {
   const [amount, setAmount] = useState('100');
   const [expiry, setExpiry] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [asset, setAsset] = useState<'USDC' | 'XLM'>('USDC');
+  const [asset, setAsset] = useState<'XLM' | 'AQUA' | 'EURC' | 'USDC'>('XLM');
 
   const { selectedSealedId, selectedOpenedId, hydrate, getById } = useSkins();
 
@@ -29,7 +28,12 @@ export const Create = () => {
   const sealedSkin = getById(selectedSealedId);
   const openedSkin = getById(selectedOpenedId);
 
-  const handleCreate = async () => {
+  const handleCreate = async (fundingDetails?: {
+    asset: 'XLM' | 'AQUA' | 'EURC' | 'USDC';
+    venue: 'best' | 'dex' | 'amm';
+    slippageBps: number;
+    estimatedUsd: string;
+  }) => {
     if (!recipient) {
       addToast('Please enter a recipient address', 'error');
       return;
@@ -42,21 +46,39 @@ export const Create = () => {
 
     setIsCreating(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // In a real implementation, this would create the envelope with funding details
+      const envelopeData = {
+        recipient,
+        recipientEmail,
+        amount,
+        expiry,
+        fundingAsset: asset,
+        fundingVenue: fundingDetails?.venue || 'best',
+        slippageBps: fundingDetails?.slippageBps || 50,
+        estimatedUsd: fundingDetails?.estimatedUsd || amount,
+      };
 
-    setIsCreating(false);
-    addToast('Envelope created successfully!', 'success');
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Reset form
-    setRecipient('');
-    setRecipientEmail('');
-    setAmount('100');
-    setExpiry('');
+      addToast(`Envelope created successfully! Fund with ${asset} when ready.`, 'success');
+
+      // Reset form
+      setRecipient('');
+      setRecipientEmail('');
+      setAmount('100');
+      setExpiry('');
+    } catch (error) {
+      addToast('Failed to create envelope. Please try again.', 'error');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <AppShell>
+      <div className="max-w-6xl mx-auto">
       <motion.div 
         className="mb-8"
         initial={{ opacity: 0, y: -20 }}
@@ -80,15 +102,15 @@ export const Create = () => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            Send {asset} gifts that can be opened later
+Send gifts in any asset that recipients can claim as USDC
           </motion.p>
         </AnimatePresence>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid gap-8 lg:grid-cols-[1fr,380px]">
         {/* Form */}
         <motion.div 
-          className="space-y-6"
+          className="min-w-0 space-y-6"
           key={asset}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -139,43 +161,7 @@ export const Create = () => {
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.3 }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <motion.label 
-                  className="block text-sm font-medium"
-                  key={asset}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  Amount ({asset})
-                </motion.label>
-                <CurrencyToggle value={asset} onChange={setAsset} />
-              </div>
 
-              <CurrencyInput
-                value={amount}
-                onChange={setAmount}
-                asset={asset}
-                placeholder={asset === 'USDC' ? '100' : '2'}
-                className="mb-2"
-              />
-              
-              {asset === 'XLM' && (
-                <motion.p
-                  className="mt-2 text-xs text-brand-text/60"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.2 }}
-                >
-                  Unfunded recipients are auto-created. For demos, send ≥ 2 XLM.
-                </motion.p>
-              )}
-            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -198,141 +184,16 @@ export const Create = () => {
             </motion.div>
           </motion.div>
 
-          <AnimatePresence mode="wait">
-            {asset === 'USDC' ? (
-              <motion.button
-                key="usdc-button"
-                onClick={handleCreate}
-                disabled={isCreating || !recipient || !amount}
-                className="w-full relative flex items-center justify-center gap-3 px-6 py-3 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden text-white disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:animate-none"
-                style={{
-                  background: `linear-gradient(
-                    135deg,
-                    #1d2bff 0%,
-                    #4a5fff 15%,
-                    #6366f1 25%,
-                    #8b5cf6 35%,
-                    #64748b 45%,
-                    #475569 55%,
-                    #7c3aed 65%,
-                    #3b82f6 75%,
-                    #1e40af 85%,
-                    #1d2bff 100%
-                  )`,
-                  backgroundSize: isCreating || !recipient || !amount ? '100% 100%' : '200% 200%',
-                  animation: isCreating || !recipient || !amount ? 'none' : 'granite-shift 4s ease-in-out infinite',
-                  boxShadow: `
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    0 4px 12px rgba(29, 43, 255, 0.3),
-                    0 2px 4px rgba(0, 0, 0, 0.2)
-                  `
-                }}
-                initial={{ opacity: 0, x: -20, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
-              >
-                {isCreating ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span className="font-semibold tracking-wide">Creating...</span>
-                  </>
-                ) : (
-                  <>
-                    <motion.span
-                      initial={{ rotate: 0 }}
-                      animate={{ rotate: [0, 5] }}
-                      transition={{ 
-                        duration: 0.3, 
-                        repeat: Infinity, 
-                        repeatType: "reverse",
-                        repeatDelay: 2,
-                        ease: "easeInOut"
-                      }}
-                      className="text-white"
-                    >
-                      ✉
-                    </motion.span>
-                    <span className="font-semibold tracking-wide">Create USDC Envelope</span>
-                  </>
-                )}
-              </motion.button>
-            ) : (
-              <motion.button
-                key="xlm-button"
-                type="button"
-                onClick={async () => {
-                  try {
-                    if (!isG(recipient)) throw new Error('Destination must start with G…');
-                    if (!isValidXlmAmount(amount)) throw new Error('Amount must have ≤ 7 decimals');
-                    // @ts-ignore
-                    const network = await window.freighterApi.getNetwork?.();
-                    if (network && network.toUpperCase().includes('PUBLIC')) {
-                      throw new Error('Freighter is on Public. Switch to Testnet.');
-                    }
-                    // @ts-ignore
-                    const sourcePublicKey = await window.freighterApi.getPublicKey();
-                    const { hash } = await sendXlmWithFreighter({
-                      sourcePublicKey,
-                      destination: recipient.trim().toUpperCase(),
-                      amount: amount.trim(),
-                      memo: 'NovaGift ✉️',
-                    });
-                    addToast(`Sent ${amount} XLM — ${hash}`, 'success');
-                  } catch (e: any) {
-                    addToast(e?.message ?? 'Send failed', 'error');
-                  }
-                }}
-                disabled={!recipient || !amount}
-                className="w-full relative flex items-center justify-center gap-3 px-6 py-3 rounded-full font-medium transition-all duration-300 active:scale-95 transform overflow-hidden text-white disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:animate-none"
-                style={{
-                  background: `linear-gradient(
-                    135deg,
-                    #f59e0b 0%,
-                    #fb923c 12%,
-                    #f97316 25%,
-                    #ea580c 37%,
-                    #dc2626 50%,
-                    #ea580c 62%,
-                    #f97316 75%,
-                    #fb923c 87%,
-                    #f59e0b 100%
-                  )`,
-                  backgroundSize: (!recipient || !amount) ? '100% 100%' : '200% 200%',
-                  animation: (!recipient || !amount) ? 'none' : 'granite-shift 4s ease-in-out infinite',
-                  boxShadow: `
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    0 4px 12px rgba(245, 158, 11, 0.4),
-                    0 2px 4px rgba(0, 0, 0, 0.2)
-                  `
-                }}
-                initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
-              >
-                <motion.span
-                  initial={{ rotate: 0 }}
-                  animate={{ rotate: [0, -5] }}
-                  transition={{ 
-                    duration: 0.3, 
-                    repeat: Infinity, 
-                    repeatType: "reverse",
-                    repeatDelay: 2,
-                    ease: "easeInOut"
-                  }}
-                  className="text-white"
-                >
-                  ☄
-                </motion.span>
-                <span className="font-semibold tracking-wide">Send XLM (Testnet)</span>
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {/* Funding Selection */}
+          <CreateWithSwap
+            amount={amount}
+            selectedAsset={asset}
+            onAmountChange={setAmount}
+            onAssetChange={setAsset}
+            onCreateEnvelope={handleCreate}
+            disabled={!recipient || !amount}
+            isCreating={isCreating}
+          />
 
           <motion.div 
             className="glass-card p-4 space-y-2"
@@ -366,7 +227,7 @@ export const Create = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.9, duration: 0.2 }}
               >
-                • Create a sealed envelope with {asset}
+                • Create a sealed envelope funded with {asset}
               </motion.li>
               <motion.li
                 initial={{ opacity: 0, x: -10 }}
@@ -380,7 +241,7 @@ export const Create = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1.1, duration: 0.2 }}
               >
-                • Recipient opens to receive funds instantly
+                • Recipient opens to receive USDC instantly
               </motion.li>
               <motion.li
                 initial={{ opacity: 0, x: -10 }}
@@ -395,7 +256,7 @@ export const Create = () => {
 
         {/* Preview */}
         <motion.div 
-          className="space-y-8"
+          className="min-w-0 space-y-8"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4, duration: 0.4, type: 'spring', stiffness: 300 }}
@@ -470,6 +331,7 @@ export const Create = () => {
           </motion.div>
         </motion.div>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 };

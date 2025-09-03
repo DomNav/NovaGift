@@ -39,6 +39,19 @@ export const config = {
 export function validateConfig(): void {
   const errors: string[] = [];
   
+  // Validate Stellar network configuration
+  if (!config.horizonUrl) {
+    errors.push('HORIZON_URL is required. Expected: https://horizon-testnet.stellar.org');
+  }
+  
+  if (!config.sorobanRpcUrl) {
+    errors.push('SOROBAN_RPC_URL is required. Expected: https://soroban-testnet.stellar.org');
+  }
+  
+  if (!config.networkPassphrase) {
+    errors.push('NETWORK_PASSPHRASE is required. Expected: Test SDF Network ; September 2015');
+  }
+  
   if (!config.novaGiftContractId && config.nodeEnv === 'production') {
     errors.push('NOVAGIFT_CONTRACT_ID is required in production');
   }

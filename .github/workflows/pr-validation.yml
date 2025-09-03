@@ -1,0 +1,198 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  validate-documentation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history to check changes
+      
+      - name: Check documentation updates
+        id: check-docs
+        run: |
+          # Get the list of changed files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          
+          # Check flags
+          CODE_CHANGED=false
+          CHANGELOG_UPDATED=false
+          PROJECT_MEMORY_UPDATED=false
+          FEATURE_ADDED=false
+          
+          for file in $CHANGED_FILES; do
+            # Check for code changes
+            if [[ $file == *.ts || $file == *.tsx || $file == *.js || $file == *.jsx || $file == *.sol || $file == *.rs ]]; then
+              CODE_CHANGED=true
+            fi
+            
+            # Check for new features
+            if [[ $file == */routes/* || $file == */services/* || $file == */components/* ]]; then
+              FEATURE_ADDED=true
+            fi
+            
+            # Check documentation updates
+            if [[ $file == "CHANGELOG.md" ]]; then
+              CHANGELOG_UPDATED=true
+            fi
+            
+            if [[ $file == "PROJECT_MEMORY.md" ]]; then
+              PROJECT_MEMORY_UPDATED=true
+            fi
+          done
+          
+          # Output for next steps
+          echo "code_changed=$CODE_CHANGED" >> $GITHUB_OUTPUT
+          echo "changelog_updated=$CHANGELOG_UPDATED" >> $GITHUB_OUTPUT
+          echo "project_memory_updated=$PROJECT_MEMORY_UPDATED" >> $GITHUB_OUTPUT
+          echo "feature_added=$FEATURE_ADDED" >> $GITHUB_OUTPUT
+
+      - name: Comment PR status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const code_changed = '${{ steps.check-docs.outputs.code_changed }}' === 'true';
+            const changelog_updated = '${{ steps.check-docs.outputs.changelog_updated }}' === 'true';
+            const project_memory_updated = '${{ steps.check-docs.outputs.project_memory_updated }}' === 'true';
+            const feature_added = '${{ steps.check-docs.outputs.feature_added }}' === 'true';
+            
+            let comment = '## 📋 PR Documentation Check\n\n';
+            let checksPass = true;
+            
+            // Build status table
+            comment += '| Requirement | Status |\n';
+            comment += '|------------|--------|\n';
+            
+            if (code_changed) {
+              if (changelog_updated) {
+                comment += '| CHANGELOG.md | ✅ Updated |\n';
+              } else {
+                comment += '| CHANGELOG.md | ❌ **Required** - Code changed but CHANGELOG not updated |\n';
+                checksPass = false;
+              }
+            } else {
+              comment += '| CHANGELOG.md | ⚪ Not required (no code changes) |\n';
+            }
+            
+            if (feature_added) {
+              if (project_memory_updated) {
+                comment += '| PROJECT_MEMORY.md | ✅ Updated |\n';
+              } else {
+                comment += '| PROJECT_MEMORY.md | ⚠️ **Recommended** - New feature but PROJECT_MEMORY not updated |\n';
+              }
+            } else {
+              comment += '| PROJECT_MEMORY.md | ⚪ Not required (no new features) |\n';
+            }
+            
+            // Add helpful message
+            if (!checksPass) {
+              comment += '\n### ❌ Action Required\n\n';
+              comment += 'Please update the required documentation files before merging:\n\n';
+              
+              if (code_changed && !changelog_updated) {
+                comment += '1. **CHANGELOG.md**: Add an entry describing your changes\n';
+              }
+              
+              if (feature_added && !project_memory_updated) {
+                comment += '2. **PROJECT_MEMORY.md**: Document any new features or architectural changes\n';
+              }
+              
+              comment += '\n```bash\n';
+              comment += '# Update the files, then:\n';
+              comment += 'git add CHANGELOG.md PROJECT_MEMORY.md\n';
+              comment += 'git commit --amend\n';
+              comment += 'git push --force-with-lease\n';
+              comment += '```\n';
+            } else {
+              comment += '\n### ✅ All documentation requirements met!\n';
+            }
+            
+            // Find and update existing comment or create new one
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user?.type === 'Bot' && 
+              comment.body?.includes('PR Documentation Check')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }
+            
+            // Fail the check if requirements not met
+            if (!checksPass && code_changed) {
+              core.setFailed('Documentation requirements not met. Please update CHANGELOG.md');
+            }
+
+  check-console-logs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check for console.log statements
+        run: |
+          # Check for console.log (excluding tests and commented lines)
+          CONSOLE_LOGS=$(grep -r "console\.log" \
+            --include="*.ts" \
+            --include="*.tsx" \
+            --include="*.js" \
+            --include="*.jsx" \
+            --exclude-dir="node_modules" \
+            --exclude-dir="dist" \
+            --exclude-dir="build" \
+            --exclude="*.test.*" \
+            --exclude="*.spec.*" \
+            . 2>/dev/null | \
+            grep -v "^\s*//" | \
+            grep -v "eslint-disable" || true)
+          
+          if [ ! -z "$CONSOLE_LOGS" ]; then
+            echo "::warning::Found console.log statements that should be removed:"
+            echo "$CONSOLE_LOGS"
+          fi
+
+  check-dependencies:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Check for security vulnerabilities
+        continue-on-error: true
+        run: |
+          npm audit --audit-level=high
+      
+      - name: Check for unused dependencies
+        continue-on-error: true
+        run: |
+          npx depcheck --ignore-patterns=dist,build

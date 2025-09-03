@@ -9,7 +9,6 @@ import {
   Settings,
   Folder,
   Paintbrush,
-  Store,
   Crown
 } from 'lucide-react';
 
@@ -80,16 +79,9 @@ export const NAV: NavItem[] = [
       { 
         id: "studio-skins", 
         label: "Skins", 
-        path: "/studio", 
+        path: "/skins", 
         icon: React.createElement(Paintbrush, { className: "w-4 h-4" }), 
         weights: { sender: 62 }
-      },
-      { 
-        id: "skin-store", 
-        label: "Skin Store", 
-        path: "/skins", 
-        icon: React.createElement(Store, { className: "w-4 h-4" }), 
-        weights: { sender: 63 }
       },
       { 
         id: "kale-skins", 

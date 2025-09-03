@@ -103,7 +103,7 @@ export function ClaimPage({}: ClaimPageProps) {
   // Render loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+      <div className="min-h-dvh bg-gradient-to-br from-sky-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mx-auto"></div>
           <p className="mt-4 text-slate-600 dark:text-slate-400">Loading gift...</p>
@@ -115,7 +115,7 @@ export function ClaimPage({}: ClaimPageProps) {
   // Render error state
   if (fetchError || !envelope) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+      <div className="min-h-dvh bg-gradient-to-br from-red-50 to-orange-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
         <div className="text-center max-w-md mx-4">
           <div className="text-6xl mb-4">😞</div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -209,7 +209,7 @@ export function ClaimPage({}: ClaimPageProps) {
     }[envelope.status] || 'from-gray-50 to-gray-100';
 
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${bgColorClass} dark:from-slate-900 dark:to-slate-800 flex items-center justify-center`}>
+      <div className={`min-h-dvh bg-gradient-to-br ${bgColorClass} dark:from-slate-900 dark:to-slate-800 flex items-center justify-center`}>
         {renderStatusContent(envelope.status)}
       </div>
     );
@@ -218,7 +218,7 @@ export function ClaimPage({}: ClaimPageProps) {
   // Show success state if already claimed
   if (claimed) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+      <div className="min-h-dvh bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
         <div className="text-center max-w-md mx-4">
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -251,7 +251,7 @@ export function ClaimPage({}: ClaimPageProps) {
 
   // Main claim interface for funded envelopes
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+    <div className="min-h-dvh bg-gradient-to-br from-sky-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
       <div className="max-w-md mx-4 bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-6">
         {/* Header */}
         <div className="text-center mb-6">

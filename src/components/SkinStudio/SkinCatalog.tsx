@@ -6,6 +6,7 @@ import ProgressPills from '@/components/ui/ProgressPills';
 import { useSkins, type Skin } from '@/store/skins';
 import { useRewards } from '@/store/rewards';
 import { progressForRule } from '@/utils/rewards';
+import novaGiftLogo from '/new1-nova--gift-high-resolution-logo-transparent.png';
 
 interface SkinCatalogProps {
   onSelectSkin: (skinId: string) => void;
@@ -28,15 +29,15 @@ function SkinThumbnail({
 
   return (
     <motion.div
-      className={`relative rounded-xl cursor-pointer border-2 transition-all ${
-        isSelected ? 'border-surface-border' : 'border-transparent hover:border-surface-border/50'
+      className={`relative rounded-xl cursor-pointer transition-all ${
+        isSelected ? 'ring-2 ring-brand-primary/50' : ''
       }`}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
     >
       <div className="p-3">
-        <div className="relative h-24 w-32 rounded-xl overflow-hidden shadow-lg border border-surface-border">
+        <div className="relative h-24 w-32 rounded-xl overflow-hidden shadow-lg">
           <GradientShader
             settings={skin.settings}
             animation={!isUnlocked ? 'none' : skin.animation}
@@ -45,7 +46,15 @@ function SkinThumbnail({
 
           <div className="absolute inset-0 p-3 flex flex-col justify-between text-white">
             <div className="flex justify-between items-start">
-              <span className="text-xs opacity-80">✉</span>
+              <img 
+                src={novaGiftLogo} 
+                alt="Nova Gift Logo" 
+                className="h-4 w-auto drop-shadow-2xl shadow-black/30 transform hover:scale-105 transition-transform duration-200"
+                style={{
+                  filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.3)) drop-shadow(0 1px 3px rgba(0,0,0,0.2))',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                }}
+              />
               <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
                 <span className="text-[8px]">🎁</span>
               </div>

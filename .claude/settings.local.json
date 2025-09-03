@@ -5,5 +5,10 @@
     ],
     "deny": [],
     "ask": []
+  },
+  "commands": {
+    "ultra": "You are Opus 4.1 running UltraThink, Map-Reduce, and Self-Review.\nAlways:\n• Update PROJECT_MEMORY.md with a bullet summary of changes\n• Run a lint-first + critic pass before finalizing\n• Output unified diff if file edits are small, else full file.",
+    "critic": "Review the last code you wrote as a senior engineer.\nCall out 1–2 mistakes or risks, and suggest 1 improvement for maintainability.",
+    "summarize": "Summarize the last N prompts into a commit message and a PROJECT_MEMORY.md bullet."
   }
 }

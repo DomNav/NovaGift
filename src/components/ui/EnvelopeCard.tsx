@@ -64,7 +64,6 @@ export const EnvelopeCard = ({
       className={clsx(
         'relative w-80 h-48 rounded-xl overflow-hidden transition-all duration-500',
         'shadow-lg hover:shadow-xl transform hover:scale-105',
-        'ring-1 ring-black/10 dark:ring-white/10',
         className
       )}
     >

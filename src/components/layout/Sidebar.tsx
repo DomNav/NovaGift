@@ -2,6 +2,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import clsx from 'clsx';
 import { ChevronDown, Folder, Sparkles, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ThemeLogo } from '@/components/ui/ThemeLogo';
 
@@ -133,9 +134,8 @@ export const Sidebar = () => {
 
 
   return (
-    <aside className="w-64 h-screen bg-brand-surface flex flex-col relative z-10 
+    <aside className="fixed left-0 top-0 w-64 h-dvh bg-brand-surface flex flex-col z-10 
                      shadow-[8px_0_30px_-8px_rgba(0,0,0,0.1)] dark:shadow-[8px_0_30px_-8px_rgba(0,0,0,0.4)]
-                     border-r border-surface-border
                      backdrop-blur-sm
                      before:absolute before:inset-y-0 before:right-0 before:w-px 
                      before:bg-gradient-to-b before:from-transparent before:via-brand-primary/20 before:to-transparent
@@ -162,9 +162,9 @@ export const Sidebar = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               className="w-full pl-10 pr-4 py-2 bg-brand-bg/50 dark:bg-gray-800/50 
-                         border border-surface-border rounded-lg
+                         border border-surface-border dark:border-transparent rounded-lg
                          text-brand-text dark:text-white placeholder-brand-text/40 dark:placeholder-white/40
-                         focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary
+                         focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary dark:focus:border-brand-primary
                          transition-all duration-200"
             />
           </div>
@@ -244,42 +244,200 @@ export const Sidebar = () => {
                   </div>
                   
                   {/* Studio sub-navigation */}
-                  {studioOpen && (
-                    <div className="pl-4 mt-2 space-y-1">
-                      {item.children.map((child) => (
-                        <NavLink
-                          key={child.id}
-                          to={child.path || '#'}
-                          className={({ isActive }) =>
-                            clsx(
-                              'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300',
-                              'hover:bg-white/10 dark:hover:bg-gray-800/50',
-                              isActive
-                                ? 'bg-brand-primary/10 text-brand-text dark:bg-brand-primary/20'
-                                : 'text-brand-text/70 dark:text-white'
-                            )
+                  <AnimatePresence>
+                    {studioOpen && (
+                      <motion.div 
+                        className="pl-4 mt-2 space-y-1"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      >
+                        {item.children.map((child, index) => {
+                          // Special treatment for KALE Skins
+                          if (child.id === 'kale-skins') {
+                            return (
+                              <motion.div
+                                key={child.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ 
+                                  delay: index * 0.1,
+                                  type: 'spring',
+                                  stiffness: 400,
+                                  damping: 25
+                                }}
+                              >
+                                <NavLink
+                                  to={child.path || '#'}
+                                  className={({ isActive }) =>
+                                    clsx(
+                                      'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden',
+                                      'hover:bg-white/10 dark:hover:bg-gray-800/50',
+                                      isActive
+                                        ? 'bg-brand-primary/10 text-brand-text dark:bg-brand-primary/20'
+                                        : 'text-brand-text/70 dark:text-white'
+                                    )
+                                  }
+                                >
+                                  {/* Animated background gradient for KALE Skins */}
+                                  <motion.div
+                                    className="absolute inset-0 opacity-20"
+                                    style={{
+                                      background: `linear-gradient(
+                                        45deg,
+                                        #ff6b6b 0%,
+                                        #ff8e53 25%,
+                                        #45b7d1 50%,
+                                        #a78bfa 75%,
+                                        #feca57 100%
+                                      )`,
+                                      backgroundSize: '400% 400%',
+                                    }}
+                                    animate={{
+                                      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                                    }}
+                                    transition={{
+                                      duration: 3,
+                                      repeat: Infinity,
+                                      ease: 'easeInOut',
+                                    }}
+                                  />
+                                  
+                                  {/* Icon with special animation */}
+                                  <motion.span 
+                                    className="text-brand-text dark:text-white relative z-10"
+                                    animate={{
+                                      rotate: [0, 5, -5, 0],
+                                      scale: [1, 1.1, 1],
+                                    }}
+                                    transition={{
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      repeatDelay: 3,
+                                      ease: 'easeInOut',
+                                    }}
+                                  >
+                                    {child.icon}
+                                  </motion.span>
+                                  
+                                  {/* Text with special styling */}
+                                  <motion.span 
+                                    className="text-lg font-bold font-inter relative z-10 text-white"
+                                    style={{
+                                      textShadow: '0 0 10px rgba(255,107,107,0.8), 0 0 20px rgba(167,139,250,0.6), 0 0 30px rgba(254,202,87,0.4)',
+                                      filter: 'drop-shadow(0 0 6px rgba(255,107,107,0.5))',
+                                    }}
+                                    animate={{
+                                      textShadow: [
+                                        '0 0 10px rgba(255,107,107,0.8), 0 0 20px rgba(167,139,250,0.6), 0 0 30px rgba(254,202,87,0.4)',
+                                        '0 0 10px rgba(255,142,83,0.8), 0 0 20px rgba(69,183,209,0.6), 0 0 30px rgba(255,107,107,0.4)',
+                                        '0 0 10px rgba(167,139,250,0.8), 0 0 20px rgba(254,202,87,0.6), 0 0 30px rgba(255,142,83,0.4)',
+                                        '0 0 10px rgba(255,107,107,0.8), 0 0 20px rgba(167,139,250,0.6), 0 0 30px rgba(254,202,87,0.4)',
+                                      ],
+                                    }}
+                                    transition={{
+                                      duration: 3,
+                                      repeat: Infinity,
+                                      ease: 'easeInOut',
+                                    }}
+                                    whileHover={{
+                                      scale: 1.05,
+                                      textShadow: '0 0 15px rgba(255,107,107,1), 0 0 25px rgba(167,139,250,0.8), 0 0 35px rgba(254,202,87,0.6)',
+                                    }}
+                                  >
+                                    {child.label}
+                                  </motion.span>
+                                  
+                                  {/* Special "Featured" badge for KALE Skins */}
+                                  <motion.span
+                                    className="ml-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold relative z-10"
+                                    style={{
+                                      background: `linear-gradient(
+                                        45deg,
+                                        #ff6b6b 0%,
+                                        #a78bfa 50%,
+                                        #feca57 100%
+                                      )`,
+                                      color: 'white',
+                                      textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                                    }}
+                                    animate={{
+                                      scale: [1, 1.1, 1],
+                                      rotate: [0, 2, -2, 0],
+                                    }}
+                                    transition={{
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      repeatDelay: 4,
+                                      ease: 'easeInOut',
+                                    }}
+                                    whileHover={{
+                                      scale: 1.2,
+                                      boxShadow: '0 0 15px rgba(255,107,107,0.5)',
+                                    }}
+                                  >
+                                    <motion.span
+                                      animate={{ rotate: 360 }}
+                                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                                    >
+                                      ✨
+                                    </motion.span>
+                                    FEATURED
+                                  </motion.span>
+                                </NavLink>
+                              </motion.div>
+                            );
                           }
-                        >
-                          <span className="text-brand-text dark:text-white">
-                            {child.icon}
-                          </span>
-                          <span className="text-lg font-medium font-inter text-brand-primary dark:text-white">
-                            {child.label}
-                          </span>
-                          {child.badge && (
-                            <span
-                              title="Coming soon (prototype)"
-                              className="ml-2 inline-flex items-center gap-1 px-1.5 py-[2px] rounded-md
-                                         text-[10px] text-sky-300 bg-gradient-to-r from-sky-500/20 to-emerald-500/20
-                                         ring-1 ring-sky-500/30"
+                          
+                          // Regular studio children
+                          return (
+                            <motion.div
+                              key={child.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ 
+                                delay: index * 0.1,
+                                type: 'spring',
+                                stiffness: 400,
+                                damping: 25
+                              }}
                             >
-                              <Sparkles className="h-3 w-3" /> {child.badge}
-                            </span>
-                          )}
-                        </NavLink>
-                      ))}
-                    </div>
-                  )}
+                              <NavLink
+                                to={child.path || '#'}
+                                className={({ isActive }) =>
+                                  clsx(
+                                    'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300',
+                                    'hover:bg-white/10 dark:hover:bg-gray-800/50',
+                                    isActive
+                                      ? 'bg-brand-primary/10 text-brand-text dark:bg-brand-primary/20'
+                                      : 'text-brand-text/70 dark:text-white'
+                                  )
+                                }
+                              >
+                                <span className="text-brand-text dark:text-white">
+                                  {child.icon}
+                                </span>
+                                <span className="text-lg font-medium font-inter text-brand-primary dark:text-white">
+                                  {child.label}
+                                </span>
+                                {child.badge && (
+                                  <span
+                                    title="Coming soon (prototype)"
+                                    className="ml-2 inline-flex items-center gap-1 px-1.5 py-[2px] rounded-md
+                                               text-[10px] text-sky-300 bg-gradient-to-r from-sky-500/20 to-emerald-500/20
+                                               ring-1 ring-sky-500/30"
+                                  >
+                                    <Sparkles className="h-3 w-3" /> {child.badge}
+                                  </span>
+                                )}
+                              </NavLink>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </li>
               );
             }
@@ -326,7 +484,7 @@ export const Sidebar = () => {
       </nav>
 
       {/* Theme Toggle */}
-      <div className="p-4 border-t border-surface-border">
+      <div className="p-4 flex justify-center">
         <ThemeToggle />
       </div>
     </aside>
