@@ -232,10 +232,10 @@ router.post('/claim', async (req, res) => {
 });
 
 // POST /api/envelope-mvp/submit
-// body: { xdr: string, signer: string(G...) }
+// body: { xdr: string, signer: string(G...), metadata?: { creator, recipient, asset, amount, denom, expiry_secs, decimals } }
 router.post('/submit', async (req, res) => {
   try {
-    const { xdr: xdrStr, signer } = req.body ?? {};
+    const { xdr: xdrStr, signer, metadata } = req.body ?? {};
     if (!xdrStr || typeof xdrStr !== 'string') {
       return res.status(400).json({ ok: false, error: 'Missing xdr' });
     }
@@ -300,43 +300,82 @@ router.post('/submit', async (req, res) => {
       (native as any)?.toString ? (native as any).toString() : native;
 
     // Store MVP envelope metadata in database for lookup (since contract lacks getter)
-    if (result && typeof result === 'string') {
+    if (result && typeof result === 'string' && metadata) {
       try {
-        // Extract envelope creation parameters from request body
-        const { creator, recipient, asset, amount, denom = 'USD', expiry_secs = 0 } = req.body ?? {};
-        const envelopeId = result;
-        
-        // Calculate expiry timestamp
-        const now = Math.floor(Date.now() / 1000);
-        const expiryTs = expiry_secs > 0 ? now + expiry_secs : null;
-        
-        // Get token decimals
-        const decimals = await getTokenDecimals(asset);
-        
-        console.log(`[envelope-mvp] Storing MVP envelope ${envelopeId} metadata in database`);
-        
-        await prisma.envelope.create({
-          data: {
-            id: envelopeId,
-            sender: creator,
-            recipient: recipient,
-            asset: 'WXLM', // Display name
-            contractId: asset, // Actual contract address
-            amount: amount,
-            decimals: decimals,
-            status: 'FUNDED', // MVP envelopes are created funded
-            expiryTs: expiryTs,
-            hash: '', // Not used for MVP
-            createdAt: new Date(),
-            message: `MVP Envelope: ${amount} ${denom}`,
-          }
-        });
-        
-        console.log(`[envelope-mvp] Successfully stored MVP envelope ${envelopeId} in database`);
+        const envelopeId = String(result);
+
+        // Extract metadata with validation
+        const { creator, recipient, asset, amount, denom = 'USD', expiry_secs = 0, decimals: providedDecimals } = metadata;
+
+        // Basic validation of metadata fields
+        if (!creator || !recipient || !asset || !amount) {
+          console.log(`[envelope-mvp] Skipping DB storage for envelope ${envelopeId} - incomplete metadata`);
+        } else {
+          // Calculate expiry timestamp
+          const now = Math.floor(Date.now() / 1000);
+          const expiryTs = expiry_secs && Number(expiry_secs) > 0 ? now + Number(expiry_secs) : null;
+
+          // Get token decimals (use provided or fetch)
+          const decimals = providedDecimals ?? await getTokenDecimals(asset);
+
+          // Redact addresses for logging
+          const redactedCreator = creator ? `${creator.slice(0, 4)}...${creator.slice(-4)}` : 'unknown';
+          const redactedRecipient = recipient ? `${recipient.slice(0, 4)}...${recipient.slice(-4)}` : 'unknown';
+
+          console.log(`[envelope-mvp] Storing MVP envelope ${envelopeId} metadata in database (creator: ${redactedCreator}, recipient: ${redactedRecipient})`);
+
+          await prisma.envelope.upsert({
+            where: { id: String(envelopeId) },
+            create: {
+              id: String(envelopeId),
+              sender: creator,
+              recipient: recipient,
+              asset: 'XLM', // Use valid Asset enum value
+              contractId: asset, // Actual contract address (C...)
+              amount: amount, // Pass as Decimal, not string
+              decimals: decimals,
+              status: 'FUNDED', // MVP envelopes are created funded
+              expiryTs: expiryTs || 0,
+              hash: hash || '', // tx hash from submit
+              createdAt: new Date(),
+              message: `MVP Envelope: ${amount} ${denom}`,
+            },
+            update: {
+              sender: creator,
+              recipient: recipient,
+              asset: 'XLM', // Use valid Asset enum value
+              contractId: asset,
+              amount: amount, // Pass as Decimal, not string
+              decimals: decimals,
+              status: 'FUNDED',
+              expiryTs: expiryTs || 0,
+              hash: hash || '',
+            }
+          });
+
+          console.log(`[envelope-mvp] Successfully stored MVP envelope ${envelopeId} in database (status: FUNDED)`);
+        }
       } catch (dbError: any) {
-        console.error(`[envelope-mvp] Failed to store envelope metadata:`, dbError.message);
-        // Don't fail the request, just log the error
+        console.error(`[envelope-mvp] Failed to store envelope metadata:`, dbError.message || dbError);
+        // Don't fail the request if metadata storage fails - just log the error
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[envelope-mvp] DB error details:', {
+            error: dbError,
+            data: {
+              envelopeId,
+              creator,
+              recipient,
+              asset,
+              amount,
+              decimals,
+              expiryTs,
+              hash
+            }
+          });
+        }
       }
+    } else if (result && !metadata) {
+      console.log(`[envelope-mvp] No metadata provided for envelope ${result} - skipping DB storage`);
     }
 
     return res.json({ ok: true, hash, result, ledger });
